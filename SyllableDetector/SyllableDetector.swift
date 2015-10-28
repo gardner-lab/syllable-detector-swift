@@ -10,6 +10,9 @@ import Foundation
 import Accelerate
 import AVFoundation
 
+// CONSTANT: trigger duration in seconds
+let kTriggerDuration = 0.001
+
 class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate, AudioInputInterfaceDelegate
 {
     let config: SyllableDetectorConfig
@@ -213,7 +216,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate, 
         // signal
         if let detected = aiDetected {
             if lastDetected {
-                detected.outputHighFor = 44
+                detected.outputHighFor = Int(detected.outputFormat.mSampleRate * kTriggerDuration)
                 DLog("play")
             }
         }

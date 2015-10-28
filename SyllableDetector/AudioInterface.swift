@@ -9,6 +9,7 @@
 import Foundation
 import AudioToolbox
 
+// CONSTANT: frame size when reading in audio, decrease to lower latency and jitter but at the cost of higher CPU usage
 let kFrameSize: UInt32 = 64
 
 func renderOutput(inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutablePointer<AudioUnitRenderActionFlags>, timeStamp: UnsafePointer<AudioTimeStamp>, busNumber: UInt32, frameCount: UInt32, data: UnsafeMutablePointer<AudioBufferList>) -> OSStatus {
