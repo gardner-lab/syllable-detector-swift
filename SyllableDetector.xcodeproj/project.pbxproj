@@ -11,6 +11,13 @@
 		D8625C7F1BE14922000922D8 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C7E1BE14922000922D8 /* ViewController.swift */; };
 		D8625C811BE14922000922D8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D8625C801BE14922000922D8 /* Assets.xcassets */; };
 		D8625C841BE14922000922D8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D8625C821BE14922000922D8 /* Main.storyboard */; };
+		D8625C941BE149FE000922D8 /* SyllableDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C8B1BE149FE000922D8 /* SyllableDetector.swift */; };
+		D8625C951BE149FE000922D8 /* AudioInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C8C1BE149FE000922D8 /* AudioInterface.swift */; };
+		D8625C971BE149FE000922D8 /* NeuralNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C8E1BE149FE000922D8 /* NeuralNet.swift */; };
+		D8625C981BE149FE000922D8 /* SyllableDetectorConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C8F1BE149FE000922D8 /* SyllableDetectorConfig.swift */; };
+		D8625C9A1BE149FE000922D8 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C911BE149FE000922D8 /* Common.swift */; };
+		D8625C9C1BE149FE000922D8 /* CircularShortTimeFourierTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C931BE149FE000922D8 /* CircularShortTimeFourierTransform.swift */; };
+		D8625CA41BE14A53000922D8 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = D8625CA21BE14A53000922D8 /* TPCircularBuffer.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +27,15 @@
 		D8625C801BE14922000922D8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D8625C831BE14922000922D8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D8625C851BE14922000922D8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D8625C8B1BE149FE000922D8 /* SyllableDetector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SyllableDetector.swift; sourceTree = "<group>"; };
+		D8625C8C1BE149FE000922D8 /* AudioInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioInterface.swift; sourceTree = "<group>"; };
+		D8625C8E1BE149FE000922D8 /* NeuralNet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NeuralNet.swift; sourceTree = "<group>"; };
+		D8625C8F1BE149FE000922D8 /* SyllableDetectorConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SyllableDetectorConfig.swift; sourceTree = "<group>"; };
+		D8625C911BE149FE000922D8 /* Common.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
+		D8625C931BE149FE000922D8 /* CircularShortTimeFourierTransform.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CircularShortTimeFourierTransform.swift; sourceTree = "<group>"; };
+		D8625CA21BE14A53000922D8 /* TPCircularBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TPCircularBuffer.c; sourceTree = "<group>"; };
+		D8625CA31BE14A53000922D8 /* TPCircularBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPCircularBuffer.h; sourceTree = "<group>"; };
+		D8625CA51BE14B8E000922D8 /* SyllableDetector-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SyllableDetector-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,13 +68,30 @@
 		D8625C7B1BE14922000922D8 /* SyllableDetector */ = {
 			isa = PBXGroup;
 			children = (
+				D8625CA11BE14A53000922D8 /* TPCircularBuffer */,
 				D8625C7C1BE14922000922D8 /* AppDelegate.swift */,
+				D8625C8C1BE149FE000922D8 /* AudioInterface.swift */,
+				D8625C931BE149FE000922D8 /* CircularShortTimeFourierTransform.swift */,
+				D8625C911BE149FE000922D8 /* Common.swift */,
+				D8625C8E1BE149FE000922D8 /* NeuralNet.swift */,
+				D8625C8B1BE149FE000922D8 /* SyllableDetector.swift */,
+				D8625C8F1BE149FE000922D8 /* SyllableDetectorConfig.swift */,
 				D8625C7E1BE14922000922D8 /* ViewController.swift */,
 				D8625C801BE14922000922D8 /* Assets.xcassets */,
 				D8625C821BE14922000922D8 /* Main.storyboard */,
 				D8625C851BE14922000922D8 /* Info.plist */,
+				D8625CA51BE14B8E000922D8 /* SyllableDetector-Bridging-Header.h */,
 			);
 			path = SyllableDetector;
+			sourceTree = "<group>";
+		};
+		D8625CA11BE14A53000922D8 /* TPCircularBuffer */ = {
+			isa = PBXGroup;
+			children = (
+				D8625CA21BE14A53000922D8 /* TPCircularBuffer.c */,
+				D8625CA31BE14A53000922D8 /* TPCircularBuffer.h */,
+			);
+			path = TPCircularBuffer;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -131,7 +164,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D8625CA41BE14A53000922D8 /* TPCircularBuffer.c in Sources */,
+				D8625C941BE149FE000922D8 /* SyllableDetector.swift in Sources */,
+				D8625C981BE149FE000922D8 /* SyllableDetectorConfig.swift in Sources */,
+				D8625C971BE149FE000922D8 /* NeuralNet.swift in Sources */,
+				D8625C9C1BE149FE000922D8 /* CircularShortTimeFourierTransform.swift in Sources */,
+				D8625C9A1BE149FE000922D8 /* Common.swift in Sources */,
 				D8625C7F1BE14922000922D8 /* ViewController.swift in Sources */,
+				D8625C951BE149FE000922D8 /* AudioInterface.swift in Sources */,
 				D8625C7D1BE14922000922D8 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -237,8 +277,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = SyllableDetector/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				OTHER_SWIFT_FLAGS = "-DDEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = edu.gardner.SyllableDetector;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "SyllableDetector/SyllableDetector-Bridging-Header.h";
 			};
 			name = Debug;
 		};
@@ -251,6 +293,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = edu.gardner.SyllableDetector;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "SyllableDetector/SyllableDetector-Bridging-Header.h";
 			};
 			name = Release;
 		};

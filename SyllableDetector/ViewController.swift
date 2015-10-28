@@ -9,19 +9,67 @@
 import Cocoa
 
 class ViewController: NSViewController {
-
+    @IBOutlet var buttonToggle: NSButton!
+    
+    var syllableDetector: SyllableDetector?
+    var aiInput: AudioInputInterface?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
     }
-
-    override var representedObject: AnyObject? {
-        didSet {
-        // Update the view, if already loaded.
+    
+    @IBAction func start(sender: NSButton) {
+        if nil == syllableDetector {
+            // set stop text
+            buttonToggle.stringValue = "Stop"
+        
+            // setup audio processor
+            setupAudioProcessorWithSyllableDetector()
+        }
+        else {
+            // set start text
+            buttonToggle.stringValue = "Start"
+            
+            // tear down audio processor
+            tearDownAudioProcessor()
         }
     }
-
-
+    
+    override func viewDidDisappear() {
+        // tear down
+        tearDownAudioProcessor()
+        
+        NSApp.terminate(nil)
+    }
+    
+    func setupAudioProcessorWithSyllableDetector() {
+        // create interface
+        aiInput = AudioInputInterface()
+        
+        // create syllabe detector
+        let sd = SyllableDetector(config: SyllableDetectorConfig())
+        syllableDetector = sd
+        
+        // set delegate
+        aiInput?.delegate = sd
+        
+        // start
+        do {
+            try aiInput?.initializeAudio()
+        }
+        catch {
+            DLog("ERROR WITH INPUT: \(error)")
+            return
+        }
+    }
+    
+    func tearDownAudioProcessor() {
+        // tear down input
+        aiInput?.tearDownAudio()
+        aiInput = nil
+        
+        // free processors
+        syllableDetector = nil
+    }
 }
 
