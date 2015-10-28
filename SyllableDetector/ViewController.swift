@@ -21,14 +21,14 @@ class ViewController: NSViewController {
     @IBAction func start(sender: NSButton) {
         if nil == syllableDetector {
             // set stop text
-            buttonToggle.stringValue = "Stop"
+            buttonToggle.title = "Stop"
         
             // setup audio processor
             setupAudioProcessorWithSyllableDetector()
         }
         else {
             // set start text
-            buttonToggle.stringValue = "Start"
+            buttonToggle.title = "Start"
             
             // tear down audio processor
             tearDownAudioProcessor()
