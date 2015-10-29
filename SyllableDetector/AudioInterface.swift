@@ -64,24 +64,101 @@ func processInput(inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutabl
     return 0
 }
 
+enum AudioInterfaceError: ErrorType {
+    case NoComponentFound
+    case UnsupportedFormat
+    case ErrorResponse(String, Int, Int32)
+}
+
+private func checkError(status: OSStatus, type: AudioInterfaceError? = nil, funct: String = __FUNCTION__, line: Int = __LINE__) throws {
+    if noErr != status {
+        if let errType = type {
+            throw errType
+        }
+        else {
+            throw AudioInterfaceError.ErrorResponse(funct, line, status)
+        }
+    }
+}
+
 class AudioInterface
 {
-    enum AudioInterfaceError: ErrorType {
-        case NoComponentFound
-        case UnsupportedFormat
-        case ErrorResponse(String, Int, Int32)
+    struct AudioDevice {
+        let deviceID: AudioDeviceID
+        let deviceUID: String
+        let deviceName: String
+        let deviceManufacturer: String
+        let streamsInput: Int
+        let streamsOutput: Int
+        
+        init?(deviceID: AudioDeviceID) {
+            self.deviceID = deviceID
+            
+            // property address
+            var propertyAddress = AudioObjectPropertyAddress(mSelector: kAudioDevicePropertyDeviceUID, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMaster)
+            
+            // size and status variables
+            var status: OSStatus
+            var size: UInt32 = UInt32(sizeof(CFStringRef))
+            
+            // get device UID
+            var deviceUID: CFStringRef = ""
+            propertyAddress.mSelector = kAudioDevicePropertyDeviceUID
+            status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, &deviceUID)
+            guard noErr == status else { return nil }
+            self.deviceUID = String(deviceUID)
+            
+            // get deivce name
+            var deviceName: CFStringRef = ""
+            propertyAddress.mSelector = kAudioDevicePropertyDeviceNameCFString
+            status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, &deviceName)
+            guard noErr == status else { return nil }
+            self.deviceName = String(deviceName)
+            
+            // get deivce manufacturer
+            var deviceManufacturer: CFStringRef = ""
+            propertyAddress.mSelector = kAudioDevicePropertyDeviceManufacturerCFString
+            status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, &deviceManufacturer)
+            guard noErr == status else { return nil }
+            self.deviceManufacturer = String(deviceManufacturer)
+            
+            // get number of streams
+            // LAST AS IT CHANGES THE SCOPE OF THE PROPERTY ADDRESS
+            propertyAddress.mSelector = kAudioDevicePropertyStreams
+            propertyAddress.mScope = kAudioDevicePropertyScopeInput
+            status = AudioObjectGetPropertyDataSize(deviceID, &propertyAddress, 0, nil, &size)
+            guard noErr == status else { return nil }
+            self.streamsInput = Int(size) / sizeof(AudioStreamID)
+            
+            propertyAddress.mSelector = kAudioDevicePropertyStreams
+            propertyAddress.mScope = kAudioDevicePropertyScopeOutput
+            status = AudioObjectGetPropertyDataSize(deviceID, &propertyAddress, 0, nil, &size)
+            guard noErr == status else { return nil }
+            self.streamsOutput = Int(size) / sizeof(AudioStreamID)
+        }
     }
     
     var audioUnit: AudioComponentInstance = nil
     
-    private func checkError(status: OSStatus, type: AudioInterfaceError? = nil, funct: String = __FUNCTION__, line: Int = __LINE__) throws {
-        if noErr != status {
-            if let errType = type {
-                throw errType
-            }
-            else {
-                throw AudioInterfaceError.ErrorResponse(funct, line, status)
-            }
+    func devices() throws -> [AudioDevice?] {
+        // property address
+        var propertyAddress = AudioObjectPropertyAddress(mSelector: kAudioHardwarePropertyDevices, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMaster)
+        var size: UInt32 = 0
+        
+        // get input size
+        try checkError(AudioObjectGetPropertyDataSize(AudioObjectID(kAudioObjectSystemObject), &propertyAddress, 0, nil, &size))
+        
+        // number of devices
+        let deviceCount = Int(size) / sizeof(AudioDeviceID)
+        var audioDevices = [AudioDeviceID](count: deviceCount, repeatedValue: AudioDeviceID(0))
+        
+        // get device ids
+        try checkError(AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &propertyAddress, 0, nil, &size, &audioDevices[0]))
+        
+        DLog("\(audioDevices)")
+        
+        return audioDevices.map {
+            return AudioDevice(deviceID: $0)
         }
     }
 }
