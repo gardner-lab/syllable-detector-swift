@@ -12,3 +12,13 @@ func DLog(message: String, function: String = __FUNCTION__ ) {
     print("\(function): \(message)")
     #endif
 }
+
+extension String {
+    func trim() -> String {
+        return self.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+    }
+    
+    func splitAtCharacter(char: Character) -> [String] {
+        return self.characters.split { $0 == char } .map(String.init)
+    }
+}

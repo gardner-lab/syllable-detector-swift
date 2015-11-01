@@ -43,11 +43,20 @@ class ViewController: NSViewController {
     }
     
     func setupAudioProcessorWithSyllableDetector() {
+        let config: SyllableDetectorConfig
+        do {
+            config = try SyllableDetectorConfig(fromTextFile: "sample.txt")
+        }
+        catch {
+            DLog("Unable to parse: \(error)")
+            return
+        }
+        
         // create interface
         aiInput = AudioInputInterface()
         
         // create syllabe detector
-        let sd = SyllableDetector(config: SyllableDetectorConfig())
+        let sd = SyllableDetector(config: config)
         syllableDetector = sd
         
         // set delegate

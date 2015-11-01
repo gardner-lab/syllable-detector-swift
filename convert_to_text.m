@@ -1,4 +1,4 @@
-function convert_to_swift(fn, mat)
+function convert_to_text(fn, mat)
 
 % open file for writing
 fh = fopen(fn, 'w');
@@ -6,21 +6,15 @@ fh = fopen(fn, 'w');
 % load network definition file
 f = load(mat);
 
-fprintf(fh, '// AUTOMATICALLY GENERATED SYLLABLE DETECTOR CONFIGURATION\n\n');
-fprintf(fh, 'import NeuralNet\n\n');
-fprintf(fh, 'struct SyllableDetectorConfig\n{\n');
-fprintf(fh, '    let samplingRate: Double = %.1f\n', f.samplerate);
-fprintf(fh, '    let fourierLength: Int = %d\n', f.FFT_SIZE);
-fprintf(fh, '    let fourierOverlap: Int = %d\n\n', f.FFT_SIZE - (floor(f.samplerate * f.FFT_TIME_SHIFT)));
+fprintf(fh, '# AUTOMATICALLY GENERATED SYLLABLE DETECTOR CONFIGURATION\n');
+fprintf(fh, 'samplingRate = %.1f\n', f.samplerate);
+fprintf(fh, 'fourierLength = %d\n', f.FFT_SIZE);
+fprintf(fh, 'fourierOverlap = %d\n', f.FFT_SIZE - (floor(f.samplerate * f.FFT_TIME_SHIFT)));
 
-fprintf(fh, '    let freqRange: (Double, Double) = (%.1f, %.1f)\n', round((f.freq_range_ds(1) - 1.5) * f.samplerate/f.FFT_SIZE), round((f.freq_range_ds(end) - 0.5) * f.samplerate/f.FFT_SIZE));
-fprintf(fh, '    let timeRange: Int = %d\n\n', f.time_window_steps);
+fprintf(fh, 'freqRange = %.1f, %.1f\n', round((f.freq_range_ds(1) - 1.5) * f.samplerate/f.FFT_SIZE), round((f.freq_range_ds(end) - 0.5) * f.samplerate/f.FFT_SIZE));
+fprintf(fh, 'timeRange = %d\n', f.time_window_steps);
 
-fprintf(fh, '    let threshold: Double = %.15g\n\n', f.trigger_thresholds);
-
-fprintf(fh, '    let net: NeuralNet\n\n');
-
-fprintf(fh, '    init() {\n');
+fprintf(fh, 'threshold = %.15g\n', f.trigger_thresholds);
 
 % build neural network
 
@@ -30,11 +24,13 @@ convert_processing_functions(fh, 'mapInputs', f.net.input);
 % output mapping
 convert_processing_functions(fh, 'mapOutputs', f.net.output);
 
+fprintf(fh, 'layers = %d\n', length(f.net.layers));
+
 % layers
 layers = {};
 for i = 1:length(f.net.layers)
     % add layer
-	name = sprintf('layer%d', i);
+	name = sprintf('layer%d', i - 1);
 	layers{i} = name;
 	
 	% get weights
@@ -55,10 +51,6 @@ for i = 1:length(f.net.layers)
 	convert_layer(fh, name, f.net.layers{i}, w, b);
 end
 
-fprintf(fh, '        net = NeuralNet(layers: [%s], inputMapping: mapInputs, outputMapping: mapOutputs)\n', strjoin(layers, ', '));
-fprintf(fh, '    }\n');
-fprintf(fh, '}\n');
-
 % close file handle
 fclose(fh);
 
@@ -72,7 +64,9 @@ function convert_processing_functions(fh, nm, put)
 	gains = sprintf('%.15g, ', put.processSettings{1}.gain);
     gains = gains(1:end - 2); % remove final comma
 	
-	fprintf(fh, '        let %s = MapMinMax(xOffsets: [%s], gains: [%s], yMin: %.15g))\n\n', nm, offsets, gains, put.processSettings{1}.ymin);
+    fprintf(fh, '%s.xOffsets = %s\n', nm, offsets);
+    fprintf(fh, '%s.gains = %s\n', nm, gains);
+    fprintf(fh, '%s.yMin = %.15g\n', nm, put.processSettings{1}.ymin);
 end
 
 function convert_layer(fh, nm, layer, w, b)
@@ -81,9 +75,9 @@ function convert_layer(fh, nm, layer, w, b)
 	end
     
     if strcmp(layer.transferFcn, 'tansig')
-        tf = 'TanSig()';
+        tf = 'TanSig';
     elseif strcmp(layer.transferFcn, 'purelin')
-        tf = 'PureLin()';
+        tf = 'PureLin';
     else
         error('Invalid transfer function: %s.', layer.transferFcn);
     end
@@ -94,9 +88,11 @@ function convert_layer(fh, nm, layer, w, b)
 	biases = sprintf('%.15g, ', b);
     biases = biases(1:end - 2); % remove final comma
 
-	fprintf(fh, '        let %s = NeuralNetLayer(inputs: %d, weights: [%s], biases: [%s], outputs: %d, transferFunction: %s)\n\n', nm, size(w, 2), weights, biases, size(w, 1), tf);
+	fprintf(fh, '%s.inputs = %d\n', nm, size(w, 2));
+    fprintf(fh, '%s.outputs = %d\n', nm, size(w, 1));
+    fprintf(fh, '%s.weights = %s\n', nm, weights);
+    fprintf(fh, '%s.biases = %s\n', nm, biases);
+    fprintf(fh, '%s.transferFunction = %s\n', nm, tf);
 end
 
 end
-
-
