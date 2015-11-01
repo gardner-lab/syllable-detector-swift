@@ -16,7 +16,8 @@ func renderOutput(inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutabl
     
     // get audio out interface
     let aoi = unsafeBitCast(inRefCon, AudioOutputInterface.self)
-    let buffer = UnsafeMutablePointer<Float>(data[0].mBuffers.mData)
+    let usableBufferList = UnsafeMutableAudioBufferListPointer(data)
+    let buffer = UnsafeMutablePointer<Float>(usableBufferList[0].mData)
     
     // high settings
     let highFor = aoi.outputHighFor
@@ -90,6 +91,8 @@ class AudioInterface
         let deviceManufacturer: String
         let streamsInput: Int
         let streamsOutput: Int
+        let buffersInput: [AudioBuffer]
+        let buffersOutput: [AudioBuffer]
         
         init?(deviceID: AudioDeviceID) {
             self.deviceID = deviceID
@@ -130,17 +133,75 @@ class AudioInterface
             guard noErr == status else { return nil }
             self.streamsInput = Int(size) / sizeof(AudioStreamID)
             
+            if 0 < self.streamsInput {
+                // get stream configuration
+                size = 0
+                propertyAddress.mSelector = kAudioDevicePropertyStreamConfiguration
+                status = AudioObjectGetPropertyDataSize(deviceID, &propertyAddress, 0, nil, &size)
+                guard noErr == status else { DLog("d \(status)"); return nil }
+                
+                // allocate
+                var bufferList = UnsafeMutablePointer<AudioBufferList>(malloc(Int(size)))
+                status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, bufferList)
+                defer {
+                    free(bufferList)
+                }
+                guard noErr == status else { DLog("e"); return nil }
+                
+                // turn into something swift usable
+                let usableBufferList = UnsafeMutableAudioBufferListPointer(bufferList)
+                
+                // add device buffers
+                var buffersInput = [AudioBuffer]()
+                for ab in usableBufferList {
+                    buffersInput.append(ab)
+                }
+                self.buffersInput = buffersInput
+            }
+            else {
+                self.buffersInput = []
+            }
+            
             propertyAddress.mSelector = kAudioDevicePropertyStreams
             propertyAddress.mScope = kAudioDevicePropertyScopeOutput
             status = AudioObjectGetPropertyDataSize(deviceID, &propertyAddress, 0, nil, &size)
             guard noErr == status else { return nil }
             self.streamsOutput = Int(size) / sizeof(AudioStreamID)
+            
+            if 0 < self.streamsInput {
+                // get stream configuration
+                size = 0
+                propertyAddress.mSelector = kAudioDevicePropertyStreamConfiguration
+                status = AudioObjectGetPropertyDataSize(deviceID, &propertyAddress, 0, nil, &size)
+                guard noErr == status else { DLog("d \(status)"); return nil }
+                
+                // allocate
+                var bufferList = UnsafeMutablePointer<AudioBufferList>(malloc(Int(size)))
+                status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, bufferList)
+                defer {
+                    free(bufferList)
+                }
+                guard noErr == status else { DLog("e"); return nil }
+                
+                // turn into something swift usable
+                let usableBufferList = UnsafeMutableAudioBufferListPointer(bufferList)
+                
+                // add device buffers
+                var buffersOutput = [AudioBuffer]()
+                for ab in usableBufferList {
+                    buffersOutput.append(ab)
+                }
+                self.buffersOutput = buffersOutput
+            }
+            else {
+                self.buffersOutput = []
+            }
         }
     }
     
     var audioUnit: AudioComponentInstance = nil
     
-    func devices() throws -> [AudioDevice?] {
+    func devices() throws -> [AudioDevice] {
         // property address
         var propertyAddress = AudioObjectPropertyAddress(mSelector: kAudioHardwarePropertyDevices, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMaster)
         var size: UInt32 = 0
@@ -155,9 +216,7 @@ class AudioInterface
         // get device ids
         try checkError(AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &propertyAddress, 0, nil, &size, &audioDevices[0]))
         
-        DLog("\(audioDevices)")
-        
-        return audioDevices.map {
+        return audioDevices.flatMap {
             return AudioDevice(deviceID: $0)
         }
     }
