@@ -38,8 +38,6 @@ class ViewControllerProcessor: NSViewController {
     override func viewDidDisappear() {
         // tear down
         tearDownAudioProcessor()
-        
-        NSApp.terminate(nil)
     }
     
     func setupAudioProcessorWithSyllableDetector() {
@@ -61,9 +59,6 @@ class ViewControllerProcessor: NSViewController {
         
         // set delegate
         aiInput?.delegate = sd
-        
-        let a = try! aiInput?.devices()
-        DLog("\(a)")
         
         // start
         do {

@@ -201,7 +201,7 @@ class AudioInterface
     
     var audioUnit: AudioComponentInstance = nil
     
-    func devices() throws -> [AudioDevice] {
+    static func devices() throws -> [AudioDevice] {
         // property address
         var propertyAddress = AudioObjectPropertyAddress(mSelector: kAudioHardwarePropertyDevices, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMaster)
         var size: UInt32 = 0

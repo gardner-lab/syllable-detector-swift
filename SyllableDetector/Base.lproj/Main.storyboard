@@ -676,17 +676,18 @@
                             <popUpButton verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7qK-Lv-fli">
                                 <rect key="frame" x="174" y="99" width="76" height="26"/>
                                 <animations/>
-                                <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="zon-vJ-D26" id="8qw-BF-tFf">
+                                <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="8qw-BF-tFf">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="menu"/>
                                     <menu key="menu" id="vl2-vW-has">
                                         <items>
-                                            <menuItem title="Item 1" state="on" id="zon-vJ-D26"/>
-                                            <menuItem title="Item 2" id="Jvq-YT-Xy6"/>
-                                            <menuItem title="Item 3" id="67T-Pd-DzF"/>
+                                            <menuItem id="zon-vJ-D26"/>
                                         </items>
                                     </menu>
                                 </popUpButtonCell>
+                                <connections>
+                                    <action selector="selectDevice:" target="XfG-lQ-9wD" id="N4m-py-sJ0"/>
+                                </connections>
                             </popUpButton>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QrV-iO-Lz1">
                                 <rect key="frame" x="18" y="104" width="91" height="17"/>
@@ -709,17 +710,18 @@
                             <popUpButton verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2u4-ec-z4S">
                                 <rect key="frame" x="172" y="58" width="78" height="26"/>
                                 <animations/>
-                                <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="YSr-DR-3Uc" id="sdi-EJ-fIQ">
+                                <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="sdi-EJ-fIQ">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="menu"/>
                                     <menu key="menu" id="3Q5-ju-t5s">
                                         <items>
-                                            <menuItem title="Item 1" state="on" id="YSr-DR-3Uc"/>
-                                            <menuItem title="Item 2" id="P1r-C0-f1G"/>
-                                            <menuItem title="Item 3" id="Coz-aW-ZLd"/>
+                                            <menuItem id="YSr-DR-3Uc"/>
                                         </items>
                                     </menu>
                                 </popUpButtonCell>
+                                <connections>
+                                    <action selector="selectDevice:" target="XfG-lQ-9wD" id="E4h-aS-ulZ"/>
+                                </connections>
                             </popUpButton>
                             <button verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Z0Z-gF-eNk">
                                 <rect key="frame" x="168" y="13" width="85" height="32"/>
@@ -731,6 +733,9 @@
 DQ
 </string>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="buttonLaunch:" target="XfG-lQ-9wD" id="6Lu-t5-5ca"/>
+                                </connections>
                             </button>
                         </subviews>
                         <constraints>
@@ -753,6 +758,11 @@ DQ
                         </constraints>
                         <animations/>
                     </view>
+                    <connections>
+                        <outlet property="buttonLaunch" destination="Z0Z-gF-eNk" id="g5Z-sk-EBb"/>
+                        <outlet property="selectInput" destination="7qK-Lv-fli" id="ypK-V8-ZBe"/>
+                        <outlet property="selectOutput" destination="2u4-ec-z4S" id="i7k-Z0-D6Z"/>
+                    </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
