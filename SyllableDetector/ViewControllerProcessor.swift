@@ -8,7 +8,7 @@
 
 import Cocoa
 
-class ViewController: NSViewController {
+class ViewControllerProcessor: NSViewController {
     @IBOutlet var buttonToggle: NSButton!
     
     var syllableDetector: SyllableDetector?
@@ -61,6 +61,9 @@ class ViewController: NSViewController {
         
         // set delegate
         aiInput?.delegate = sd
+        
+        let a = try! aiInput?.devices()
+        DLog("\(a)")
         
         // start
         do {

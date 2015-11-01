@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D8625C7D1BE14922000922D8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C7C1BE14922000922D8 /* AppDelegate.swift */; };
-		D8625C7F1BE14922000922D8 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C7E1BE14922000922D8 /* ViewController.swift */; };
+		D8625C7F1BE14922000922D8 /* ViewControllerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C7E1BE14922000922D8 /* ViewControllerProcessor.swift */; };
 		D8625C811BE14922000922D8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D8625C801BE14922000922D8 /* Assets.xcassets */; };
 		D8625C841BE14922000922D8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D8625C821BE14922000922D8 /* Main.storyboard */; };
 		D8625C941BE149FE000922D8 /* SyllableDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C8B1BE149FE000922D8 /* SyllableDetector.swift */; };
@@ -19,12 +19,13 @@
 		D8625C9C1BE149FE000922D8 /* CircularShortTimeFourierTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C931BE149FE000922D8 /* CircularShortTimeFourierTransform.swift */; };
 		D8625CA41BE14A53000922D8 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = D8625CA21BE14A53000922D8 /* TPCircularBuffer.c */; };
 		D8B59D161BE6B77F0099CB4B /* StreamReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8B59D151BE6B77F0099CB4B /* StreamReader.swift */; };
+		D8D1BD481BE6D61B00059974 /* ViewControllerMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D1BD471BE6D61B00059974 /* ViewControllerMenu.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		D8625C791BE14922000922D8 /* SyllableDetector.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SyllableDetector.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D8625C7C1BE14922000922D8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		D8625C7E1BE14922000922D8 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		D8625C7E1BE14922000922D8 /* ViewControllerProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerProcessor.swift; sourceTree = "<group>"; };
 		D8625C801BE14922000922D8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D8625C831BE14922000922D8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D8625C851BE14922000922D8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -38,6 +39,7 @@
 		D8625CA31BE14A53000922D8 /* TPCircularBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPCircularBuffer.h; sourceTree = "<group>"; };
 		D8625CA51BE14B8E000922D8 /* SyllableDetector-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SyllableDetector-Bridging-Header.h"; sourceTree = "<group>"; };
 		D8B59D151BE6B77F0099CB4B /* StreamReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamReader.swift; sourceTree = "<group>"; };
+		D8D1BD471BE6D61B00059974 /* ViewControllerMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewControllerMenu.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,7 +81,8 @@
 				D8B59D151BE6B77F0099CB4B /* StreamReader.swift */,
 				D8625C8B1BE149FE000922D8 /* SyllableDetector.swift */,
 				D8625C8F1BE149FE000922D8 /* SyllableDetectorConfig.swift */,
-				D8625C7E1BE14922000922D8 /* ViewController.swift */,
+				D8D1BD471BE6D61B00059974 /* ViewControllerMenu.swift */,
+				D8625C7E1BE14922000922D8 /* ViewControllerProcessor.swift */,
 				D8625C801BE14922000922D8 /* Assets.xcassets */,
 				D8625C821BE14922000922D8 /* Main.storyboard */,
 				D8625C851BE14922000922D8 /* Info.plist */,
@@ -171,10 +174,11 @@
 				D8625CA41BE14A53000922D8 /* TPCircularBuffer.c in Sources */,
 				D8625C941BE149FE000922D8 /* SyllableDetector.swift in Sources */,
 				D8625C981BE149FE000922D8 /* SyllableDetectorConfig.swift in Sources */,
+				D8D1BD481BE6D61B00059974 /* ViewControllerMenu.swift in Sources */,
 				D8625C971BE149FE000922D8 /* NeuralNet.swift in Sources */,
 				D8625C9C1BE149FE000922D8 /* CircularShortTimeFourierTransform.swift in Sources */,
 				D8625C9A1BE149FE000922D8 /* Common.swift in Sources */,
-				D8625C7F1BE14922000922D8 /* ViewController.swift in Sources */,
+				D8625C7F1BE14922000922D8 /* ViewControllerProcessor.swift in Sources */,
 				D8625C951BE149FE000922D8 /* AudioInterface.swift in Sources */,
 				D8625C7D1BE14922000922D8 /* AppDelegate.swift in Sources */,
 			);
