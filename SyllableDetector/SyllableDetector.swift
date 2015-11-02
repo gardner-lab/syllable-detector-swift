@@ -10,10 +10,7 @@ import Foundation
 import Accelerate
 import AVFoundation
 
-// CONSTANT: trigger duration in seconds
-let kTriggerDuration = 0.001
-
-class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate, AudioInputInterfaceDelegate
+class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
 {
     let config: SyllableDetectorConfig
     
@@ -25,7 +22,6 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate, 
     }
     
     // last values
-    var lastTime: Int = 0
     var lastOutput: Float
     var lastDetected: Bool {
         get {
@@ -36,8 +32,6 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate, 
     private let shortTimeFourierTransform: CircularShortTimeFourierTransform
     private let freqIndices: (Int, Int) // default: (26, 90)
     private var buffer: TPCircularBuffer
-    
-    private var aiDetected: AudioOutputInterface?
     
     init(config: SyllableDetectorConfig) {
         // set configuration
@@ -62,16 +56,6 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate, 
         
         // no last output
         lastOutput = 0.0
-        
-        // detection audio
-        do {
-            aiDetected = AudioOutputInterface()
-            try aiDetected?.initializeAudio()
-        }
-        catch {
-            DLog("Unable to setup audio output: \(error)")
-            aiDetected = nil
-        }
         
         // call super
         super.init()
@@ -125,36 +109,9 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate, 
         while processNewValue() {}
     }
     
-    func receiveAudioFrom(interface: AudioInputInterface, inBufferList bufferList: AudioBufferList, withNumberOfSamples numSamples: Int) {
-        // is interleaved
-        let isInterleaved = 1 < interface.inputFormat.mChannelsPerFrame && 0 == (interface.inputFormat.mFormatFlags & kAudioFormatFlagIsNonInterleaved)
-        let isFloat = 0 < (interface.inputFormat.mFormatFlags & kAudioFormatFlagIsFloat)
-        
-        // checks
-        guard interface.inputFormat.mFormatID == kAudioFormatLinearPCM && isFloat && interface.inputFormat.mBitsPerChannel == 32 && abs(interface.inputFormat.mSampleRate - config.samplingRate) < 1 else {
-            fatalError("Invalid audio format.")
-        }
-        
-        // if is interleaved
-        if isInterleaved {
-            // seems dumb, can't find a copy operation
-            var samples = UnsafeMutablePointer<Float>.alloc(numSamples)
-            defer {
-                samples.destroy()
-                samples.dealloc(numSamples)
-            }
-            
-            // double: convert
-            var zero: Float = 0.0
-            vDSP_vsadd(UnsafeMutablePointer<Float>(bufferList.mBuffers.mData), vDSP_Stride(interface.inputFormat.mChannelsPerFrame), &zero, samples, 1, vDSP_Length(numSamples))
-            shortTimeFourierTransform.appendData(samples, withSamples: numSamples)
-        }
-        else {
-            // float: add directly
-            shortTimeFourierTransform.appendData(UnsafeMutablePointer<Float>(bufferList.mBuffers.mData), withSamples: numSamples)
-        }
-        
-        while processNewValue() {}
+    func appendAudioData(data: UnsafeMutablePointer<Float>, withSamples numSamples: Int) {
+        // add to short-time fourier transform
+        shortTimeFourierTransform.appendData(data, withSamples: numSamples)
     }
     
     private func processFourierData() -> Bool {
@@ -180,14 +137,6 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate, 
         // append all new fourier data
         while processFourierData() {}
         
-        // increment last time
-        if 0 == lastTime {
-            lastTime = config.fourierLength + ((config.fourierLength - config.fourierOverlap) * (config.timeRange - 1))
-        }
-        else {
-            lastTime += (config.fourierLength - config.fourierOverlap)
-        }
-        
         // get data counts
         let lengthPerTime = freqIndices.1 - freqIndices.0
         let lengthTotal = lengthPerTime * config.timeRange
@@ -212,14 +161,6 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate, 
         
         let ret = config.net.apply(samples)
         lastOutput = ret[0]
-        
-        // signal
-        if let detected = aiDetected {
-            if lastDetected {
-                detected.outputHighFor = Int(detected.outputFormat.mSampleRate * kTriggerDuration)
-                DLog("play")
-            }
-        }
         
         return true
     }
