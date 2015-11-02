@@ -9,12 +9,11 @@
 import Cocoa
 import AudioToolbox
 
-class ProcessorEntry {
+struct ProcessorEntry {
     let inputBuffer: Int
     let inputChannel: Int
     var network: String = ""
     var config: SyllableDetectorConfig?
-    var detector: SyllableDetector?
     let outputBuffer: Int
     let outputChannel: Int
     
@@ -27,7 +26,29 @@ class ProcessorEntry {
 }
 
 class Processor {
+    // input and output interfaces
+    let interfaceInput: AudioInputInterface
+    let interfaceOutput: AudioOutputInterface
     
+    // processor entries
+    let entries: [ProcessorEntry]
+    let detectors: [SyllableDetector]
+    
+    init(deviceInput: AudioInterface.AudioDevice, deviceOutput: AudioInterface.AudioDevice, entries: [ProcessorEntry]) {
+        // setup processor entries
+        self.entries = entries.filter {
+            return $0.config != nil
+        }
+        
+        // setup processor detectors
+        self.detectors = self.entries.map {
+            return SyllableDetector(config: $0.config!)
+        }
+        
+        // setup input and output devices
+        interfaceInput = AudioInputInterface(deviceID: deviceInput.deviceID)
+        interfaceOutput = AudioOutputInterface(deviceID: deviceOutput.deviceID)
+    }
 }
 
 class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableViewDataSource {
@@ -212,9 +233,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
     }
     
     @IBAction func loadNetwork(sender: NSButton) {
-        // default to using selected row
-        
-        if 0 > tableChannels.selectedRow {
+        if 0 > tableChannels.selectedRow { // no row selected...
             // find next row needing a network
             for (i, p) in processorEntries.enumerate() {
                 if nil == p.config {
