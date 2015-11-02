@@ -7,11 +7,14 @@
 //
 
 import Cocoa
+import AudioToolbox
 
-class ViewControllerMenu: NSViewController {
+class ViewControllerMenu: NSViewController, WindowControllerProcessorDelegate {
     @IBOutlet weak var selectInput: NSPopUpButton!
     @IBOutlet weak var selectOutput: NSPopUpButton!
     @IBOutlet weak var buttonLaunch: NSButton!
+    
+    var openProcessors = [NSWindowController]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -57,7 +60,7 @@ class ViewControllerMenu: NSViewController {
         
         // rebuild outputs
         selectOutput.removeAllItems()
-        selectOutput.addItemWithTitle("Input")
+        selectOutput.addItemWithTitle("Output")
         for d in devices {
             if 0 < d.streamsOutput {
                 let item = NSMenuItem()
@@ -75,7 +78,42 @@ class ViewControllerMenu: NSViewController {
     }
     
     @IBAction func buttonLaunch(sender: NSButton) {
+        guard let sb = storyboard, let controller = sb.instantiateControllerWithIdentifier("Processor") as? WindowControllerProcessor else { return }
         
+        // get input device
+        guard let deviceInput = AudioInterface.AudioDevice(deviceID: AudioDeviceID(selectInput.selectedTag())) else {
+            DLog("input device no longer valid")
+            reloadDevices()
+            return
+        }
+        
+        // get output device
+        guard let deviceOutput = AudioInterface.AudioDevice(deviceID: AudioDeviceID(selectOutput.selectedTag())) else {
+            DLog("output device no longer valid")
+            reloadDevices()
+            return
+        }
+        
+        // setup controller
+        if let vc = controller.contentViewController, let vcp = vc as? ViewControllerProcessor {
+            vcp.deviceInput = deviceInput
+            vcp.deviceOutput = deviceOutput
+        }
+        else {
+            DLog("unknown error")
+            return
+        }
+        
+        controller.delegate = self // custom delegate used to clean up open processor list when windows are closed
+        controller.showWindow(sender)
+        openProcessors.append(controller)
+    }
+    
+    func windowControllerDone(controller: WindowControllerProcessor) {
+        // window controller closed, clean from open processor list
+        openProcessors = openProcessors.filter {
+            return $0 !== controller
+        }
     }
 }
 

@@ -771,8 +771,8 @@ DQ
         <!--Window Controller-->
         <scene sceneID="1bY-zE-a8U">
             <objects>
-                <windowController id="XM4-Yq-dFr" sceneMemberID="viewController">
-                    <window key="window" identifier="Processor" title="Processor" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="rpZ-KI-rnl">
+                <windowController storyboardIdentifier="Processor" id="XM4-Yq-dFr" customClass="WindowControllerProcessor" customModule="SyllableDetector" customModuleProvider="target" sceneMemberID="viewController">
+                    <window key="window" title="Processor" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="rpZ-KI-rnl">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="425" y="461" width="480" height="270"/>
@@ -795,17 +795,20 @@ DQ
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="gnI-rr-k78">
-                                <rect key="frame" x="385" y="13" width="81" height="32"/>
+                                <rect key="frame" x="396" y="13" width="70" height="32"/>
                                 <animations/>
-                                <buttonCell key="cell" type="push" title="Button" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="pe0-ZU-TtC">
+                                <buttonCell key="cell" type="push" title="Start" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="pe0-ZU-TtC">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="toggle:" target="ml7-B9-A6H" id="pR8-QA-tav"/>
+                                </connections>
                             </button>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TK5-kU-dJM">
                                 <rect key="frame" x="20" y="61" width="440" height="310"/>
                                 <clipView key="contentView" id="RyK-rj-581">
-                                    <rect key="frame" x="1" y="23" width="438" height="286"/>
+                                    <rect key="frame" x="1" y="0.0" width="438" height="309"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" headerView="BSO-2L-IkA" id="hSn-ax-pc6">
@@ -816,7 +819,7 @@ DQ
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                             <tableColumns>
-                                                <tableColumn editable="NO" width="79" minWidth="40" maxWidth="1000" id="63y-z6-tY7">
+                                                <tableColumn identifier="ColumnInput" editable="NO" width="91" minWidth="40" maxWidth="1000" id="63y-z6-tY7">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="Input">
                                                         <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -829,7 +832,7 @@ DQ
                                                     </textFieldCell>
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES"/>
                                                 </tableColumn>
-                                                <tableColumn editable="NO" width="52" minWidth="40" maxWidth="1000" id="NDQ-rU-cgs">
+                                                <tableColumn identifier="ColumnInLevel" editable="NO" width="40" minWidth="40" maxWidth="40" id="NDQ-rU-cgs">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="Level">
                                                         <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -839,7 +842,7 @@ DQ
                                                         <font key="font" metaFont="system"/>
                                                     </levelIndicatorCell>
                                                 </tableColumn>
-                                                <tableColumn identifier="" width="160" minWidth="10" maxWidth="3.4028234663852886e+38" id="0ZF-2t-rye">
+                                                <tableColumn identifier="ColumnNetwork" editable="NO" width="160" minWidth="40" maxWidth="1000" id="0ZF-2t-rye">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Neural Network">
                                                         <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -852,7 +855,7 @@ DQ
                                                     </textFieldCell>
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES"/>
                                                 </tableColumn>
-                                                <tableColumn identifier="" editable="NO" width="92" minWidth="10" maxWidth="3.4028234663852886e+38" id="KJj-w1-YTd">
+                                                <tableColumn identifier="ColumnOutput" editable="NO" width="92" minWidth="40" maxWidth="1000" id="KJj-w1-YTd">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Output">
                                                         <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -865,7 +868,7 @@ DQ
                                                     </textFieldCell>
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES"/>
                                                 </tableColumn>
-                                                <tableColumn identifier="" editable="NO" width="40" minWidth="10" maxWidth="3.4028234663852886e+38" id="qRK-SS-iDg">
+                                                <tableColumn identifier="ColumnOutLevel" editable="NO" width="40" minWidth="40" maxWidth="40" id="qRK-SS-iDg">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="TTL">
                                                         <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -876,6 +879,10 @@ DQ
                                                     </levelIndicatorCell>
                                                 </tableColumn>
                                             </tableColumns>
+                                            <connections>
+                                                <outlet property="dataSource" destination="ml7-B9-A6H" id="upk-1p-dAz"/>
+                                                <outlet property="delegate" destination="ml7-B9-A6H" id="Ucd-3i-oiu"/>
+                                            </connections>
                                         </tableView>
                                     </subviews>
                                     <animations/>
@@ -898,19 +905,38 @@ DQ
                                     <animations/>
                                 </tableHeaderView>
                             </scrollView>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dDV-mj-Q5j">
+                                <rect key="frame" x="14" y="13" width="124" height="32"/>
+                                <animations/>
+                                <buttonCell key="cell" type="push" title="Load Network" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Dl5-Im-p2y">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="loadNetwork:" target="ml7-B9-A6H" id="TlW-0S-OWs"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
+                            <constraint firstAttribute="bottom" secondItem="dDV-mj-Q5j" secondAttribute="bottom" constant="20" id="BlP-pD-50c"/>
                             <constraint firstItem="TK5-kU-dJM" firstAttribute="top" secondItem="6lm-yd-nKg" secondAttribute="top" constant="20" id="KIr-c3-KdK"/>
                             <constraint firstItem="gnI-rr-k78" firstAttribute="top" secondItem="TK5-kU-dJM" secondAttribute="bottom" constant="20" id="SOC-ya-yom"/>
                             <constraint firstAttribute="trailing" secondItem="gnI-rr-k78" secondAttribute="trailing" constant="20" id="ajX-wn-Ijw"/>
                             <constraint firstAttribute="bottom" secondItem="gnI-rr-k78" secondAttribute="bottom" constant="20" id="cDz-V2-MVD"/>
                             <constraint firstAttribute="trailing" secondItem="TK5-kU-dJM" secondAttribute="trailing" constant="20" id="m7g-j8-ClU"/>
+                            <constraint firstItem="dDV-mj-Q5j" firstAttribute="leading" secondItem="6lm-yd-nKg" secondAttribute="leading" constant="20" id="oP5-FL-x1W"/>
                             <constraint firstItem="TK5-kU-dJM" firstAttribute="leading" secondItem="6lm-yd-nKg" secondAttribute="leading" constant="20" id="v4C-K4-031"/>
                         </constraints>
                         <animations/>
                     </view>
+                    <connections>
+                        <outlet property="buttonLoad" destination="dDV-mj-Q5j" id="Wzj-IX-jbf"/>
+                        <outlet property="buttonToggle" destination="gnI-rr-k78" id="hrH-ZR-3gK"/>
+                        <outlet property="tableChannels" destination="hSn-ax-pc6" id="hTw-SQ-GWG"/>
+                    </connections>
                 </viewController>
                 <customObject id="0Gu-ZN-3qp" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+                <userDefaultsController representsSharedInstance="YES" id="yLo-Bj-yep"/>
             </objects>
             <point key="canvasLocation" x="638" y="715.5"/>
         </scene>

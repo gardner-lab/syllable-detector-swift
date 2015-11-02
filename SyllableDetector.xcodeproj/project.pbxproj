@@ -20,6 +20,7 @@
 		D8625CA41BE14A53000922D8 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = D8625CA21BE14A53000922D8 /* TPCircularBuffer.c */; };
 		D8B59D161BE6B77F0099CB4B /* StreamReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8B59D151BE6B77F0099CB4B /* StreamReader.swift */; };
 		D8D1BD481BE6D61B00059974 /* ViewControllerMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D1BD471BE6D61B00059974 /* ViewControllerMenu.swift */; };
+		D8D1BD4D1BE6E53C00059974 /* WindowControllerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D1BD4C1BE6E53C00059974 /* WindowControllerProcessor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +41,7 @@
 		D8625CA51BE14B8E000922D8 /* SyllableDetector-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SyllableDetector-Bridging-Header.h"; sourceTree = "<group>"; };
 		D8B59D151BE6B77F0099CB4B /* StreamReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamReader.swift; sourceTree = "<group>"; };
 		D8D1BD471BE6D61B00059974 /* ViewControllerMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewControllerMenu.swift; sourceTree = "<group>"; };
+		D8D1BD4C1BE6E53C00059974 /* WindowControllerProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WindowControllerProcessor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +85,7 @@
 				D8625C8F1BE149FE000922D8 /* SyllableDetectorConfig.swift */,
 				D8D1BD471BE6D61B00059974 /* ViewControllerMenu.swift */,
 				D8625C7E1BE14922000922D8 /* ViewControllerProcessor.swift */,
+				D8D1BD4C1BE6E53C00059974 /* WindowControllerProcessor.swift */,
 				D8625C801BE14922000922D8 /* Assets.xcassets */,
 				D8625C821BE14922000922D8 /* Main.storyboard */,
 				D8625C851BE14922000922D8 /* Info.plist */,
@@ -172,6 +175,7 @@
 			files = (
 				D8B59D161BE6B77F0099CB4B /* StreamReader.swift in Sources */,
 				D8625CA41BE14A53000922D8 /* TPCircularBuffer.c in Sources */,
+				D8D1BD4D1BE6E53C00059974 /* WindowControllerProcessor.swift in Sources */,
 				D8625C941BE149FE000922D8 /* SyllableDetector.swift in Sources */,
 				D8625C981BE149FE000922D8 /* SyllableDetectorConfig.swift in Sources */,
 				D8D1BD481BE6D61B00059974 /* ViewControllerMenu.swift in Sources */,
