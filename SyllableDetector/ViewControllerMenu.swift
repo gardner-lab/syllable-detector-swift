@@ -96,8 +96,7 @@ class ViewControllerMenu: NSViewController, WindowControllerProcessorDelegate {
         
         // setup controller
         if let vc = controller.contentViewController, let vcp = vc as? ViewControllerProcessor {
-            vcp.deviceInput = deviceInput
-            vcp.deviceOutput = deviceOutput
+            vcp.setupEntries(input: deviceInput, output: deviceOutput)
         }
         else {
             DLog("unknown error")

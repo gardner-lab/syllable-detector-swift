@@ -791,7 +791,7 @@ DQ
             <objects>
                 <viewController id="ml7-B9-A6H" customClass="ViewControllerProcessor" customModule="SyllableDetector" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="6lm-yd-nKg">
-                        <rect key="frame" x="0.0" y="0.0" width="480" height="391"/>
+                        <rect key="frame" x="0.0" y="0.0" width="480" height="170"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="gnI-rr-k78">
@@ -806,13 +806,13 @@ DQ
                                 </connections>
                             </button>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TK5-kU-dJM">
-                                <rect key="frame" x="20" y="61" width="440" height="310"/>
+                                <rect key="frame" x="20" y="61" width="440" height="89"/>
                                 <clipView key="contentView" id="RyK-rj-581">
-                                    <rect key="frame" x="1" y="0.0" width="438" height="309"/>
+                                    <rect key="frame" x="1" y="0.0" width="438" height="88"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" headerView="BSO-2L-IkA" id="hSn-ax-pc6">
-                                            <rect key="frame" x="0.0" y="0.0" width="438" height="286"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="438" height="65"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <animations/>
                                             <size key="intercellSpacing" width="3" height="2"/>
@@ -938,7 +938,7 @@ DQ
                 <customObject id="0Gu-ZN-3qp" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
                 <userDefaultsController representsSharedInstance="YES" id="yLo-Bj-yep"/>
             </objects>
-            <point key="canvasLocation" x="638" y="715.5"/>
+            <point key="canvasLocation" x="638" y="605"/>
         </scene>
     </scenes>
 </document>

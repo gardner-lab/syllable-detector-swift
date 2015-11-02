@@ -7,6 +7,28 @@
 //
 
 import Cocoa
+import AudioToolbox
+
+class ProcessorEntry {
+    let inputBuffer: Int
+    let inputChannel: Int
+    var network: String = ""
+    var config: SyllableDetectorConfig?
+    var detector: SyllableDetector?
+    let outputBuffer: Int
+    let outputChannel: Int
+    
+    init(inputBuffer: Int, inputChannel: Int, outputBuffer: Int, outputChannel: Int) {
+        self.inputBuffer = inputBuffer
+        self.inputChannel = inputChannel
+        self.outputBuffer = outputBuffer
+        self.outputChannel = outputChannel
+    }
+}
+
+class Processor {
+    
+}
 
 class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableViewDataSource {
     @IBOutlet weak var buttonLoad: NSButton!
@@ -16,6 +38,8 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
     // devices
     var deviceInput: AudioInterface.AudioDevice!
     var deviceOutput: AudioInterface.AudioDevice!
+    
+    var processorEntries = [ProcessorEntry]()
     
     var syllableDetector: SyllableDetector?
     var aiInput: AudioInputInterface?
@@ -38,8 +62,36 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
     override func viewDidAppear() {
         super.viewDidAppear()
         
+        if nil == deviceInput || nil == deviceOutput {
+            fatalError("Input and output devices must be already defined.")
+        }
+        
         // reload table
         tableChannels.reloadData()
+    }
+    
+    func setupEntries(input deviceInput: AudioInterface.AudioDevice, output deviceOutput: AudioInterface.AudioDevice) {
+        // store input and output
+        self.deviceInput = deviceInput
+        self.deviceOutput = deviceOutput
+        
+        // get input pairs
+        let inputPairs = deviceInput.buffersInput.enumerate().flatMap {
+            (b: Int, buffer: AudioBuffer) -> [(Int, Int)] in
+            return (0..<Int(buffer.mNumberChannels)).map { return (b, $0) }
+        }
+        
+        // get output pairs
+        let outputPairs = deviceOutput.buffersOutput.enumerate().flatMap {
+            (b: Int, buffer: AudioBuffer) -> [(Int, Int)] in
+            return (0..<Int(buffer.mNumberChannels)).map { return (b, $0) }
+        }
+        
+        // for each pair, create an entry
+        let numEntries = min(inputPairs.count, outputPairs.count)
+        processorEntries = (0..<numEntries).map {
+            return ProcessorEntry(inputBuffer: inputPairs[$0].0, inputChannel: inputPairs[$0].1, outputBuffer: outputPairs[$0].0, outputChannel: outputPairs[$0].1)
+        }
     }
     
     @IBAction func toggle(sender: NSButton) {
@@ -107,14 +159,18 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         let inputChannels: Int, outputChannels: Int
         
         if nil != deviceInput && 0 < deviceInput.buffersInput.count {
-            inputChannels = Int(deviceInput.buffersInput[0].mNumberChannels)
+            inputChannels = deviceInput.buffersInput.reduce(0) {
+                return $0 + Int($1.mNumberChannels)
+            }
         }
         else {
             inputChannels = 0
         }
         
         if nil != deviceOutput && 0 < deviceOutput.buffersOutput.count {
-            outputChannels = Int(deviceOutput.buffersOutput[0].mNumberChannels)
+            outputChannels = deviceOutput.buffersOutput.reduce(0) {
+                return $0 + Int($1.mNumberChannels)
+            }
         }
         else {
             outputChannels = 0
@@ -125,11 +181,23 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
     
     func tableView(tableView: NSTableView, objectValueForTableColumn tableColumn: NSTableColumn?, row: Int) -> AnyObject? {
         guard let identifier = tableColumn?.identifier else { return nil }
+        guard row < processorEntries.count else { return nil }
         
         switch identifier {
-        case "ColumnInput", "ColumnOutput": return "Channel \(row + 1)"
+        case "ColumnInput":
+            // support multiple buffers (will this ever happen?)
+            if 1 < deviceInput.buffersInput.count {
+                return "B \(1 + processorEntries[row].inputBuffer) Ch \(1 + processorEntries[row].inputChannel)"
+            }
+            return "Channel \(1 + processorEntries[row].inputChannel)"
+        case "ColumnOutput":
+            // support multiple buffers (will this ever happen?)
+            if 1 < deviceOutput.buffersOutput.count {
+                return "B \(1 + processorEntries[row].outputBuffer) Ch \(1 + processorEntries[row].outputChannel)"
+            }
+            return "Channel \(1 + processorEntries[row].outputChannel)"
         case "ColumnInLevel", "ColumnOutLevel": return NSNumber(float: 0.0)
-        case "ColumnNetwork": return "Not Selected"
+        case "ColumnNetwork": return nil == processorEntries[row].config ? "Not Selected" : processorEntries[row].network
         default: return nil
         }
     }
@@ -145,11 +213,68 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
     
     @IBAction func loadNetwork(sender: NSButton) {
         // default to using selected row
-        // TODO: write me
+        
+        if 0 > tableChannels.selectedRow {
+            // find next row needing a network
+            for (i, p) in processorEntries.enumerate() {
+                if nil == p.config {
+                    loadNetworkForRow(i)
+                    break
+                }
+            }
+        }
+        else {
+            // load network for row
+            loadNetworkForRow(tableChannels.selectedRow)
+        }
     }
     
     func loadNetworkForRow(row: Int) {
+        guard !isRunning else { return } // can not select when running
+        guard row < processorEntries.count else { return }
         
+        let panel = NSOpenPanel()
+        panel.title = "Select Network Definition"
+        panel.allowedFileTypes = ["txt"]
+        panel.allowsOtherFileTypes = false
+        
+        // callback for handling response
+        let cb = {
+            (result: Int) -> Void in
+            // check again, just in case
+            guard !self.isRunning else { return } // can not select when running
+            guard row < self.processorEntries.count else { return }
+            
+            // make sure ok was pressed
+            if NSFileHandlingPanelOKButton == result {
+                if let url = panel.URL, let path = url.path {
+                    do {
+                        // load file
+                        let config = try SyllableDetectorConfig(fromTextFile: path)
+                        self.processorEntries[row].config = config
+                        self.processorEntries[row].network = url.lastPathComponent ?? "Unknown Network"
+                    }
+                    catch {
+                        // unable to load
+                        let alert = NSAlert()
+                        alert.messageText = "Unable to load"
+                        alert.informativeText = "The text file could not be successfully loaded: \(error)."
+                        alert.addButtonWithTitle("Ok")
+                        alert.beginSheetModalForWindow(self.view.window!, completionHandler:nil)
+                        
+                        // clear selected
+                        self.processorEntries[row].network = ""
+                        self.processorEntries[row].config = nil
+                    }
+                    
+                    // reload table
+                    self.tableChannels.reloadData()
+                }
+            }
+        }
+        
+        // show
+        panel.beginSheetModalForWindow(self.view.window!, completionHandler: cb)
     }
 }
 
