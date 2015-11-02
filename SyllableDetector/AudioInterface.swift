@@ -168,7 +168,7 @@ class AudioInterface
             guard noErr == status else { return nil }
             self.streamsOutput = Int(size) / sizeof(AudioStreamID)
             
-            if 0 < self.streamsInput {
+            if 0 < self.streamsOutput {
                 // get stream configuration
                 size = 0
                 propertyAddress.mSelector = kAudioDevicePropertyStreamConfiguration
