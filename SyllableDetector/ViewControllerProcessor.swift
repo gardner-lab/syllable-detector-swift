@@ -10,22 +10,18 @@ import Cocoa
 import AudioToolbox
 
 struct ProcessorEntry {
-    let inputBuffer: Int
     let inputChannel: Int
     var network: String = ""
     var config: SyllableDetectorConfig?
-    let outputBuffer: Int
     let outputChannel: Int
     
-    init(inputBuffer: Int, inputChannel: Int, outputBuffer: Int, outputChannel: Int) {
-        self.inputBuffer = inputBuffer
+    init(inputChannel: Int, outputChannel: Int) {
         self.inputChannel = inputChannel
-        self.outputBuffer = outputBuffer
         self.outputChannel = outputChannel
     }
 }
 
-class Processor {
+class Processor: AudioInputInterfaceDelegate {
     // input and output interfaces
     let interfaceInput: AudioInputInterface
     let interfaceOutput: AudioOutputInterface
@@ -33,6 +29,9 @@ class Processor {
     // processor entries
     let entries: [ProcessorEntry]
     let detectors: [SyllableDetector]
+    
+    // high duration
+    let highDuration = 0.001 // 1ms
     
     init(deviceInput: AudioInterface.AudioDevice, deviceOutput: AudioInterface.AudioDevice, entries: [ProcessorEntry]) {
         // setup processor entries
@@ -49,6 +48,18 @@ class Processor {
         interfaceInput = AudioInputInterface(deviceID: deviceInput.deviceID)
         interfaceOutput = AudioOutputInterface(deviceID: deviceOutput.deviceID)
     }
+    
+    func receiveAudioFrom(interface: AudioInputInterface, fromChannel channel: Int, withData data: UnsafeMutablePointer<Float>, ofLength length: Int) {
+        // valid channel
+        guard channel < detectors.count else { return }
+        
+        // append audio samples
+        detectors[channel].appendAudioData(data, withSamples: length)
+        
+        if detectors[channel].seenSyllable() {
+            interfaceOutput.createHighOutput(channel, forDuration: highDuration)
+        }
+    }
 }
 
 class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableViewDataSource {
@@ -61,9 +72,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
     var deviceOutput: AudioInterface.AudioDevice!
     
     var processorEntries = [ProcessorEntry]()
-    
-    var syllableDetector: SyllableDetector?
-    var aiInput: AudioInputInterface?
+    var processor: Processor?
     
     var isRunning = false {
         didSet {
@@ -97,21 +106,26 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         self.deviceOutput = deviceOutput
         
         // get input pairs
-        let inputPairs = deviceInput.buffersInput.enumerate().flatMap {
-            (b: Int, buffer: AudioBuffer) -> [(Int, Int)] in
-            return (0..<Int(buffer.mNumberChannels)).map { return (b, $0) }
+        let inputChannels: Int
+        if 0 < deviceInput.buffersInput.count {
+            inputChannels = Int(deviceInput.buffersInput[0].mNumberChannels)
+        }
+        else {
+            inputChannels = 0
         }
         
-        // get output pairs
-        let outputPairs = deviceOutput.buffersOutput.enumerate().flatMap {
-            (b: Int, buffer: AudioBuffer) -> [(Int, Int)] in
-            return (0..<Int(buffer.mNumberChannels)).map { return (b, $0) }
+        let outputChannels: Int
+        if 0 < deviceOutput.buffersOutput.count {
+            outputChannels = Int(deviceOutput.buffersOutput[0].mNumberChannels)
+        }
+        else {
+            outputChannels = 0
         }
         
         // for each pair, create an entry
-        let numEntries = min(inputPairs.count, outputPairs.count)
+        let numEntries = min(inputChannels, outputChannels)
         processorEntries = (0..<numEntries).map {
-            return ProcessorEntry(inputBuffer: inputPairs[$0].0, inputChannel: inputPairs[$0].1, outputBuffer: outputPairs[$0].0, outputChannel: outputPairs[$0].1)
+            return ProcessorEntry(inputChannel: $0, outputChannel: $0)
         }
     }
     
@@ -205,18 +219,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         guard row < processorEntries.count else { return nil }
         
         switch identifier {
-        case "ColumnInput":
-            // support multiple buffers (will this ever happen?)
-            if 1 < deviceInput.buffersInput.count {
-                return "B \(1 + processorEntries[row].inputBuffer) Ch \(1 + processorEntries[row].inputChannel)"
-            }
-            return "Channel \(1 + processorEntries[row].inputChannel)"
-        case "ColumnOutput":
-            // support multiple buffers (will this ever happen?)
-            if 1 < deviceOutput.buffersOutput.count {
-                return "B \(1 + processorEntries[row].outputBuffer) Ch \(1 + processorEntries[row].outputChannel)"
-            }
-            return "Channel \(1 + processorEntries[row].outputChannel)"
+        case "ColumnInput", "ColumnOutput": return "Channel \(row + 1)"
         case "ColumnInLevel", "ColumnOutLevel": return NSNumber(float: 0.0)
         case "ColumnNetwork": return nil == processorEntries[row].config ? "Not Selected" : processorEntries[row].network
         default: return nil

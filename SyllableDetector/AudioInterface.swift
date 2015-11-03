@@ -17,7 +17,6 @@ func renderOutput(inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutabl
     let buffer = UnsafeMutablePointer<Float>(usableBufferList[0].mData)
     
     // high settings
-    let highForLength = aoi.outputHighFor.count
     let channelCountAsInt = Int(aoi.outputFormat.mChannelsPerFrame)
     let frameCountAsInt = Int(frameCount)
     
@@ -28,12 +27,7 @@ func renderOutput(inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutabl
         
         // create high
         for var i = 0; i < frameCountAsInt; ++i {
-            if channel < highForLength {
-                buffer[j] = (i < aoi.outputHighFor[channel] ? 1.0 : 0.0)
-            }
-            else {
-                buffer[j] = 0.0
-            }
+            buffer[j] = (i < aoi.outputHighFor[channel] ? 1.0 : 0.0)
             ++j
         }
         
@@ -76,7 +70,7 @@ func processInput(inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutabl
     let maxi = Int(aii.inputFormat.mChannelsPerFrame)
     for var i = 0; i < maxi; ++i {
         // for each channel
-        aii.delegate?.receiveAudioFrom(aii, fromBuffer: 0, fromChannel: i, withData: data + (i * frameLength), ofLength: frameLength)
+        aii.delegate?.receiveAudioFrom(aii, fromChannel: i, withData: data + (i * frameLength), ofLength: frameLength)
     }
     
     return 0
@@ -291,6 +285,9 @@ class AudioOutputInterface: AudioInterface
         assert(2 == outputFormat.mChannelsPerFrame)
         assert(8 == outputFormat.mBytesPerFrame)
         
+        // initiate output array
+        outputHighFor = [Int](count: Int(outputFormat.mChannelsPerFrame), repeatedValue: 0)
+        
         // set frame size
         var frameSize = UInt32(self.frameSize)
         try checkError(AudioUnitSetProperty(audioUnit, kAudioDevicePropertyBufferFrameSize, kAudioUnitScope_Global, outputBus, &frameSize, UInt32(sizeof(UInt32))))
@@ -323,6 +320,11 @@ class AudioOutputInterface: AudioInterface
         audioUnit = nil
     }
     
+    func createHighOutput(channel: Int, forDuration duration: Double) {
+        guard channel < Int(outputFormat.mChannelsPerFrame) else { return }
+        outputHighFor[channel] = Int(duration * outputFormat.mSampleRate)
+    }
+    
     static func defaultOutputDevice() throws -> AudioDeviceID {
         var size: UInt32
         size = UInt32(sizeof(AudioDeviceID))
@@ -335,7 +337,7 @@ class AudioOutputInterface: AudioInterface
 
 protocol AudioInputInterfaceDelegate: class
 {
-    func receiveAudioFrom(interface: AudioInputInterface, fromBuffer buffer: Int, fromChannel: Int, withData data: UnsafeMutablePointer<Float>, ofLength: Int)
+    func receiveAudioFrom(interface: AudioInputInterface, fromChannel: Int, withData data: UnsafeMutablePointer<Float>, ofLength: Int)
 }
 
 class AudioInputInterface: AudioInterface
