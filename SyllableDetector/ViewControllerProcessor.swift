@@ -29,11 +29,12 @@ class Processor: AudioInputInterfaceDelegate {
     // processor entries
     let entries: [ProcessorEntry]
     let detectors: [SyllableDetector]
+    let channels: [Int]
     
     // high duration
     let highDuration = 0.001 // 1ms
     
-    init(deviceInput: AudioInterface.AudioDevice, deviceOutput: AudioInterface.AudioDevice, entries: [ProcessorEntry]) {
+    init(deviceInput: AudioInterface.AudioDevice, deviceOutput: AudioInterface.AudioDevice, entries: [ProcessorEntry]) throws {
         // setup processor entries
         self.entries = entries.filter {
             return $0.config != nil
@@ -44,20 +45,48 @@ class Processor: AudioInputInterfaceDelegate {
             return SyllableDetector(config: $0.config!)
         }
         
+        // setup channels
+        var channels = [Int](count: 1 + (self.entries.map { return max($0.inputChannel, $0.outputChannel) }.maxElement() ?? -1), repeatedValue: -1)
+        for (i, p) in self.entries.enumerate() {
+            channels[p.inputChannel] = i
+        }
+        self.channels = channels
+        
         // setup input and output devices
         interfaceInput = AudioInputInterface(deviceID: deviceInput.deviceID)
         interfaceOutput = AudioOutputInterface(deviceID: deviceOutput.deviceID)
+        
+        // set self as delegate
+        interfaceInput.delegate = self
+        
+        try interfaceOutput.initializeAudio()
+        try interfaceInput.initializeAudio()
+    }
+    
+    deinit {
+        DLog("stop")
+        interfaceInput.tearDownAudio()
+        interfaceOutput.tearDownAudio()
     }
     
     func receiveAudioFrom(interface: AudioInputInterface, fromChannel channel: Int, withData data: UnsafeMutablePointer<Float>, ofLength length: Int) {
+        DLog("\(channel) \(data[0])")
+        
         // valid channel
-        guard channel < detectors.count else { return }
+        guard channel < channels.count else { return }
+        
+        // get index
+        let index = channels[channel]
+        guard index >= 0 else { return }
         
         // append audio samples
-        detectors[channel].appendAudioData(data, withSamples: length)
+        detectors[index].appendAudioData(data, withSamples: length)
         
         if detectors[channel].seenSyllable() {
-            interfaceOutput.createHighOutput(channel, forDuration: highDuration)
+            DLog("play") // for debugging
+            
+            // play high
+            interfaceOutput.createHighOutput(entries[index].outputChannel, forDuration: highDuration)
         }
     }
 }
@@ -130,64 +159,39 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
     }
     
     @IBAction func toggle(sender: NSButton) {
-        if nil == syllableDetector {
-            // set stop text
-            buttonToggle.title = "Stop"
-        
-            // setup audio processor
-            setupAudioProcessorWithSyllableDetector()
+        if isRunning {
+            // stop everything
+            processor = nil
+            
+            // clear is running
+            isRunning = false
         }
         else {
-            // set start text
-            buttonToggle.title = "Start"
+            // create process
+            do {
+                processor = try Processor(deviceInput: deviceInput, deviceOutput: deviceOutput, entries: processorEntries)
+            }
+            catch {
+                // show an error message
+                let alert = NSAlert()
+                alert.messageText = "Unable to initialize audio"
+                alert.informativeText = "There was an error initializing the audio interfaces: \(error)."
+                alert.addButtonWithTitle("Ok")
+                alert.beginSheetModalForWindow(self.view.window!, completionHandler:nil)
+                return
+            }
             
-            // tear down audio processor
-            tearDownAudioProcessor()
+            // set as running
+            isRunning = true
         }
     }
     
-    override func viewDidDisappear() {
-        // tear down
-        tearDownAudioProcessor()
-    }
-    
-    func setupAudioProcessorWithSyllableDetector() {
-        let config: SyllableDetectorConfig
-        do {
-            config = try SyllableDetectorConfig(fromTextFile: "sample.txt")
-        }
-        catch {
-            DLog("Unable to parse: \(error)")
-            return
-        }
+    override func viewWillDisappear() {
+        // clear processor
+        processor = nil
+        isRunning = false
         
-        // create interface
-        aiInput = AudioInputInterface()
-        
-        // create syllabe detector
-        let sd = SyllableDetector(config: config)
-        syllableDetector = sd
-        
-        // set delegate
-        aiInput?.delegate = sd
-        
-        // start
-        do {
-            try aiInput?.initializeAudio()
-        }
-        catch {
-            DLog("ERROR WITH INPUT: \(error)")
-            return
-        }
-    }
-    
-    func tearDownAudioProcessor() {
-        // tear down input
-        aiInput?.tearDownAudio()
-        aiInput = nil
-        
-        // free processors
-        syllableDetector = nil
+        super.viewWillDisappear()
     }
     
     func numberOfRowsInTableView(tableView: NSTableView) -> Int {

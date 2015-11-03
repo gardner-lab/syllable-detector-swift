@@ -105,7 +105,10 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
     }
     
     func captureOutput(captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, fromConnection connection: AVCaptureConnection!) {
+        // append sample data
         processSampleBuffer(sampleBuffer)
+        
+        // process immediately
         while processNewValue() {}
     }
     
