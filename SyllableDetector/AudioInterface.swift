@@ -8,6 +8,7 @@
 
 import Foundation
 import AudioToolbox
+import Accelerate
 
 func renderOutput(inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutablePointer<AudioUnitRenderActionFlags>, timeStamp: UnsafePointer<AudioTimeStamp>, busNumber: UInt32, frameCount: UInt32, data: UnsafeMutablePointer<AudioBufferList>) -> OSStatus {
     
@@ -65,12 +66,27 @@ func processInput(inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutabl
     // data
     let data = UnsafeMutablePointer<Float>(buffer.mData)
     
-    // receive audio
-    let frameLength = Int(frameCount) // number of floats
+    // number of channels
     let maxi = Int(aii.inputFormat.mChannelsPerFrame)
+    
+    // number of floats per channel
+    let frameLength = Int(frameCount)
+    
+    // single channel? no interleaving
+    if maxi == 1 {
+        aii.delegate?.receiveAudioFrom(aii, fromChannel: 0, withData: data, ofLength: frameLength)
+        return 0
+    }
+    
+    // multiple channels? de-interleave
+    var zero: Float = 0.0
     for var i = 0; i < maxi; ++i {
-        // for each channel
-        aii.delegate?.receiveAudioFrom(aii, fromChannel: i, withData: data + (i * frameLength), ofLength: frameLength)
+        // use vDSP to deinterleave
+        vDSP_vsadd(data + i, vDSP_Stride(maxi), &zero, aii.buffer2, 1, vDSP_Length(frameLength))
+        
+        
+        // call delegate
+        aii.delegate?.receiveAudioFrom(aii, fromChannel: i, withData: aii.buffer2, ofLength: frameLength)
     }
     
     return 0
@@ -238,7 +254,7 @@ class AudioOutputInterface: AudioInterface
     let deviceID: AudioDeviceID
     let frameSize: Int
     
-    var outputFormat: AudioStreamBasicDescription = AudioStreamBasicDescription()
+    var outputFormat: AudioStreamBasicDescription = AudioStreamBasicDescription() // format of the actual audio hardware
     
     var outputHighFor = [Int]()
     
@@ -278,12 +294,16 @@ class AudioOutputInterface: AudioInterface
         try checkError(AudioUnitGetProperty(audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, outputBus, &outputFormat, &size))
         
         // print format information for debugging
-        assert(outputFormat.mFormatID == kAudioFormatLinearPCM)
-        assert(0 < (outputFormat.mFormatFlags & kAudioFormatFlagsNativeFloatPacked))
-        assert(0 == (outputFormat.mFormatFlags & kAudioFormatFlagIsNonInterleaved))
-        assert(1 == outputFormat.mFramesPerPacket)
-        assert(2 == outputFormat.mChannelsPerFrame)
-        assert(8 == outputFormat.mBytesPerFrame)
+        DLog("OUT \(outputFormat)")
+        
+        // check for expected format
+        guard outputFormat.mFormatID == kAudioFormatLinearPCM && outputFormat.mFramesPerPacket == 1 && outputFormat.mFormatFlags == kAudioFormatFlagsNativeFloatPacked else {
+            throw AudioInterfaceError.UnsupportedFormat
+        }
+        
+        // set the audio format
+        //size = UInt32(sizeof(AudioStreamBasicDescription))
+        //try checkError(AudioUnitSetProperty(audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, outputBus, &outputFormat, size))
         
         // initiate output array
         outputHighFor = [Int](count: Int(outputFormat.mChannelsPerFrame), repeatedValue: 0)
@@ -349,6 +369,7 @@ class AudioInputInterface: AudioInterface
     
     var inputFormat: AudioStreamBasicDescription = AudioStreamBasicDescription()
     var buffer = UnsafeMutablePointer<Float>()
+    var buffer2 = UnsafeMutablePointer<Float>() // used for de-interleaving data
     var bufferLen: Int = 0
     
     init(deviceID: AudioDeviceID, frameSize: Int = 64) {
@@ -398,9 +419,12 @@ class AudioInputInterface: AudioInterface
         try checkError(AudioUnitGetProperty(audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, inputBus, &inputFormat, &size))
         
         // print format information for debugging
-        assert(inputFormat.mFormatID == kAudioFormatLinearPCM)
-        assert(0 < (inputFormat.mFormatFlags & kAudioFormatFlagsNativeFloatPacked))
-        assert(1 == inputFormat.mFramesPerPacket)
+        DLog("IN \(inputFormat)")
+        
+        // check for expected format
+        guard inputFormat.mFormatID == kAudioFormatLinearPCM && inputFormat.mFramesPerPacket == 1 && inputFormat.mFormatFlags == kAudioFormatFlagsNativeFloatPacked else {
+            throw AudioInterfaceError.UnsupportedFormat
+        }
         
         // set the audio format
         size = UInt32(sizeof(AudioStreamBasicDescription))
@@ -411,9 +435,10 @@ class AudioInputInterface: AudioInterface
         size = UInt32(sizeof(UInt32))
         try checkError(AudioUnitGetProperty(audioUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFrameSize, &size))
         
-        // create buffer
+        // create buffers
         bufferLen = Int(maxFrameSize * inputFormat.mBytesPerPacket)
         buffer = UnsafeMutablePointer<Float>.alloc(bufferLen)
+        buffer2 = UnsafeMutablePointer<Float>.alloc(bufferLen)
         
         // set frame size
         var frameSize: UInt32 = UInt32(self.frameSize)

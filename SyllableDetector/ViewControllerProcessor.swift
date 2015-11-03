@@ -34,6 +34,9 @@ class Processor: AudioInputInterfaceDelegate {
     // high duration
     let highDuration = 0.001 // 1ms
     
+    // dispatch queue
+    let queueProcessing: dispatch_queue_t
+    
     init(deviceInput: AudioInterface.AudioDevice, deviceOutput: AudioInterface.AudioDevice, entries: [ProcessorEntry]) throws {
         // setup processor entries
         self.entries = entries.filter {
@@ -56,22 +59,29 @@ class Processor: AudioInputInterfaceDelegate {
         interfaceInput = AudioInputInterface(deviceID: deviceInput.deviceID)
         interfaceOutput = AudioOutputInterface(deviceID: deviceOutput.deviceID)
         
+        // create queue
+        queueProcessing = dispatch_queue_create("ProcessorQueue", DISPATCH_QUEUE_SERIAL)
+        
         // set self as delegate
         interfaceInput.delegate = self
         
         try interfaceOutput.initializeAudio()
         try interfaceInput.initializeAudio()
+        
+        // check sampling rates
+        for d in self.detectors {
+            if (1 < abs(d.config.samplingRate - interfaceInput.inputFormat.mSampleRate)) {
+                DLog("Mismatched sampling rates.")
+            }
+        }
     }
     
     deinit {
-        DLog("stop")
         interfaceInput.tearDownAudio()
         interfaceOutput.tearDownAudio()
     }
     
     func receiveAudioFrom(interface: AudioInputInterface, fromChannel channel: Int, withData data: UnsafeMutablePointer<Float>, ofLength length: Int) {
-        DLog("\(channel) \(data[0])")
-        
         // valid channel
         guard channel < channels.count else { return }
         
@@ -82,12 +92,28 @@ class Processor: AudioInputInterfaceDelegate {
         // append audio samples
         detectors[index].appendAudioData(data, withSamples: length)
         
-        if detectors[channel].seenSyllable() {
-            DLog("play") // for debugging
-            
-            // play high
-            interfaceOutput.createHighOutput(entries[index].outputChannel, forDuration: highDuration)
+        // process
+        dispatch_async(queueProcessing) {
+            if self.detectors[index].seenSyllable() {
+                // record playing
+                DLog("\(channel) play")
+                
+                // play high
+                self.interfaceOutput.createHighOutput(self.entries[index].outputChannel, forDuration: self.highDuration)
+            }
         }
+    }
+    
+    func getOutputForChannel(channel: Int) -> Float? {
+        // valid channel
+        guard channel < channels.count else { return nil }
+        
+        // get index
+        let index = channels[channel]
+        guard index >= 0 else { return nil }
+        
+        // TODO: replace with maximum value since last call
+        return detectors[index].lastOutput
     }
 }
 
@@ -103,11 +129,26 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
     var processorEntries = [ProcessorEntry]()
     var processor: Processor?
     
+    // timer to redraw interface (saves time)
+    var timerRedraw: NSTimer?
+    
     var isRunning = false {
         didSet {
+            if oldValue == isRunning { return }
+            
+            // update interface
             tableChannels.enabled = !isRunning
             buttonLoad.enabled = !isRunning
             buttonToggle.title = (isRunning ? "Stop" : "Start")
+            
+            // start or stop timer
+            if isRunning {
+                timerRedraw = NSTimer.scheduledTimerWithTimeInterval(0.1, target: self, selector: "timerUpdateValues:", userInfo: nil, repeats: true)
+            }
+            else {
+                timerRedraw?.invalidate()
+                timerRedraw = nil
+            }
         }
     }
     
@@ -127,6 +168,14 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         
         // reload table
         tableChannels.reloadData()
+    }
+    
+    override func viewWillDisappear() {
+        // clear processor
+        processor = nil
+        isRunning = false
+        
+        super.viewWillDisappear()
     }
     
     func setupEntries(input deviceInput: AudioInterface.AudioDevice, output deviceOutput: AudioInterface.AudioDevice) {
@@ -186,14 +235,6 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         }
     }
     
-    override func viewWillDisappear() {
-        // clear processor
-        processor = nil
-        isRunning = false
-        
-        super.viewWillDisappear()
-    }
-    
     func numberOfRowsInTableView(tableView: NSTableView) -> Int {
         let inputChannels: Int, outputChannels: Int
         
@@ -224,7 +265,12 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         
         switch identifier {
         case "ColumnInput", "ColumnOutput": return "Channel \(row + 1)"
-        case "ColumnInLevel", "ColumnOutLevel": return NSNumber(float: 0.0)
+        case "ColumnInLevel": return NSNumber(float: 0.0)
+        case "ColumnOutLevel":
+            if let p = processor {
+                return NSNumber(float: 100.0 * (p.getOutputForChannel(row) ?? 0.0))
+            }
+            return NSNumber(float: 0.00)
         case "ColumnNetwork": return nil == processorEntries[row].config ? "Not Selected" : processorEntries[row].network
         default: return nil
         }
@@ -301,6 +347,15 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         
         // show
         panel.beginSheetModalForWindow(self.view.window!, completionHandler: cb)
+    }
+    
+    func timerUpdateValues(timer: NSTimer!) {
+        // create column indices
+        let indexes = NSMutableIndexSet(index: 1)
+        indexes.addIndex(4)
+        
+        // reload data
+        tableChannels.reloadDataForRowIndexes(NSIndexSet(indexesInRange: NSRange(location: 0, length: processorEntries.count)), columnIndexes: indexes)
     }
 }
 

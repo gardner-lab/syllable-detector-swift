@@ -819,7 +819,7 @@ DQ
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                             <tableColumns>
-                                                <tableColumn identifier="ColumnInput" editable="NO" width="91" minWidth="40" maxWidth="1000" id="63y-z6-tY7">
+                                                <tableColumn identifier="ColumnInput" editable="NO" width="40" minWidth="40" maxWidth="1000" id="63y-z6-tY7">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="Input">
                                                         <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -838,11 +838,11 @@ DQ
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                         <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                                     </tableHeaderCell>
-                                                    <levelIndicatorCell key="dataCell" state="on" alignment="left" doubleValue="3" maxValue="3" warningValue="3" criticalValue="3" id="Y9G-T6-pfa">
+                                                    <levelIndicatorCell key="dataCell" state="on" alignment="left" maxValue="100" warningValue="80" criticalValue="90" levelIndicatorStyle="continuousCapacity" id="Y9G-T6-pfa">
                                                         <font key="font" metaFont="system"/>
                                                     </levelIndicatorCell>
                                                 </tableColumn>
-                                                <tableColumn identifier="ColumnNetwork" editable="NO" width="160" minWidth="40" maxWidth="1000" id="0ZF-2t-rye">
+                                                <tableColumn identifier="ColumnNetwork" editable="NO" width="90" minWidth="40" maxWidth="1000" id="0ZF-2t-rye">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Neural Network">
                                                         <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -855,7 +855,7 @@ DQ
                                                     </textFieldCell>
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES"/>
                                                 </tableColumn>
-                                                <tableColumn identifier="ColumnOutput" editable="NO" width="92" minWidth="40" maxWidth="1000" id="KJj-w1-YTd">
+                                                <tableColumn identifier="ColumnOutput" editable="NO" width="45" minWidth="40" maxWidth="1000" id="KJj-w1-YTd">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Output">
                                                         <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -874,7 +874,7 @@ DQ
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                                     </tableHeaderCell>
-                                                    <levelIndicatorCell key="dataCell" state="on" alignment="left" doubleValue="3" maxValue="3" warningValue="3" criticalValue="3" id="5OQ-nD-jPx">
+                                                    <levelIndicatorCell key="dataCell" state="on" alignment="left" maxValue="100" warningValue="50" criticalValue="50" levelIndicatorStyle="continuousCapacity" id="5OQ-nD-jPx">
                                                         <font key="font" metaFont="system"/>
                                                     </levelIndicatorCell>
                                                 </tableColumn>

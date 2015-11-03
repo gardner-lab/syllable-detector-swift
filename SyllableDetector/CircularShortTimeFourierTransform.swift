@@ -161,6 +161,22 @@ class CircularShortTimeFourierTransform
         }
     }
     
+    func appendInterleavedData(data: UnsafeMutablePointer<Float>, withSamples numSamples: Int, fromChannel channel: Int, ofTotalChannels totalChannels: Int) {
+        // get head of circular buffer
+        var space: Int32 = 0
+        let head = TPCircularBufferHead(&self.buffer, &space)
+        if Int(space) < numSamples {
+            fatalError("Insufficient space on buffer.")
+        }
+        
+        // use vDSP to perform copy with stride
+        var zero: Float = 0.0
+        vDSP_vsadd(data + channel, vDSP_Stride(totalChannels), &zero, UnsafeMutablePointer<Float>(head), 1, vDSP_Length(numSamples))
+        
+        // move head forward
+        TPCircularBufferProduce(&self.buffer, Int32(numSamples))
+    }
+    
     // TODO: write better functions that can help avoid double copying
     
     func extractMagnitude() -> [Float]? {
