@@ -13,7 +13,7 @@ import AVFoundation
 class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
 {
     // should be constant, but sampling rate can be changed when initializing
-    var config: SyllableDetectorConfig
+    let config: SyllableDetectorConfig
     
     // very specific audio settings required, since down sampling signal
     var audioSettings: [String: AnyObject] {

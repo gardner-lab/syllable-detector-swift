@@ -65,14 +65,6 @@ class Processor: AudioInputInterfaceDelegate {
         try interfaceOutput.initializeAudio()
         try interfaceInput.initializeAudio()
         
-        // check sampling rates
-        for d in self.detectors {
-            if (1 < abs(d.config.samplingRate - interfaceInput.inputFormat.mSampleRate)) {
-                DLog("Mismatched sampling rates. Expecting: \(d.config.samplingRate). Device: \(interfaceInput.inputFormat.mSampleRate).")
-                d.config.modifySamplingRate(interfaceInput.inputFormat.mSampleRate)
-            }
-        }
-        
         // set self as delegate
         interfaceInput.delegate = self
     }
@@ -96,9 +88,6 @@ class Processor: AudioInputInterfaceDelegate {
         // process
         dispatch_async(queueProcessing) {
             if self.detectors[index].seenSyllable() {
-                // record playing
-                DLog("\(channel) play")
-                
                 // play high
                 self.interfaceOutput.createHighOutput(self.entries[index].outputChannel, forDuration: self.highDuration)
             }
@@ -323,7 +312,14 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
                 if let url = panel.URL, let path = url.path {
                     do {
                         // load file
-                        let config = try SyllableDetectorConfig(fromTextFile: path)
+                        var config = try SyllableDetectorConfig(fromTextFile: path)
+                        
+                        // check sampling rate
+                        if (1 < abs(config.samplingRate - self.deviceInput.sampleRateInput)) {
+                            DLog("Mismatched sampling rates. Expecting: \(config.samplingRate). Device: \(self.deviceInput.sampleRateInput).")
+                            config.modifySamplingRate(self.deviceInput.sampleRateInput)
+                        }
+                        
                         self.processorEntries[row].config = config
                         self.processorEntries[row].network = url.lastPathComponent ?? "Unknown Network"
                     }

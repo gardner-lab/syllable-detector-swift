@@ -15,27 +15,26 @@ func renderOutput(inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutabl
     // get audio out interface
     let aoi = unsafeBitCast(inRefCon, AudioOutputInterface.self)
     let usableBufferList = UnsafeMutableAudioBufferListPointer(data)
-    let buffer = UnsafeMutablePointer<Float>(usableBufferList[0].mData)
     
-    // high settings
-    let channelCountAsInt = Int(aoi.outputFormat.mChannelsPerFrame)
+    // number of frames
     let frameCountAsInt = Int(frameCount)
     
     // fill output
-    var j = 0
-    for var channel = 0; channel < channelCountAsInt; ++channel {
-        // TODO: must be faster way to fill vectors using vDSP
-        
-        // create high
-        for var i = 0; i < frameCountAsInt; ++i {
-            buffer[j] = (i < aoi.outputHighFor[channel] ? 1.0 : 0.0)
-            ++j
-        }
+    for (channel, buffer) in usableBufferList.enumerate() {
+        let data = UnsafeMutablePointer<Float>(buffer.mData)
+        let high = aoi.outputHighFor[channel]
         
         // decrement high for
-        if 0 < aoi.outputHighFor[channel] {
-            aoi.outputHighFor[channel] = aoi.outputHighFor[channel] - min(aoi.outputHighFor[channel], frameCountAsInt)
+        if 0 < high {
+            aoi.outputHighFor[channel] = high - min(high, frameCountAsInt)
+            DLog("write high")
         }
+        
+        // write data out
+        for var i = 0; i < frameCountAsInt; ++i {
+            data[i] = (i < high ? 1.0 : 0.0)
+        }
+        
     }
     
     return 0
@@ -65,7 +64,7 @@ func processInput(inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutabl
     // number of floats per channel
     let frameCountAsInteger = Int(frameCount)
     
-    // multiple channels? de-interleave
+    // multiple channels
     for var channel = 0; channel < numberOfChannels; ++channel {
         // call delegate
         aii.delegate?.receiveAudioFrom(aii, fromChannel: channel, withData: UnsafeMutablePointer<Float>(aii.bufferList[channel].mData), ofLength: frameCountAsInteger)
@@ -100,6 +99,8 @@ class AudioInterface
         let deviceManufacturer: String
         let streamsInput: Int
         let streamsOutput: Int
+        let sampleRateInput: Float64
+        let sampleRateOutput: Float64
         let buffersInput: [AudioBuffer]
         let buffersOutput: [AudioBuffer]
         
@@ -143,6 +144,14 @@ class AudioInterface
             self.streamsInput = Int(size) / sizeof(AudioStreamID)
             
             if 0 < self.streamsInput {
+                // get sample rate
+                size = UInt32(sizeof(Float64))
+                var sampleRateInput: Float64 = 0.0
+                propertyAddress.mSelector = kAudioDevicePropertyNominalSampleRate
+                status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, &sampleRateInput)
+                guard noErr == status else { return nil }
+                self.sampleRateInput = sampleRateInput
+                
                 // get stream configuration
                 size = 0
                 propertyAddress.mSelector = kAudioDevicePropertyStreamConfiguration
@@ -169,6 +178,7 @@ class AudioInterface
             }
             else {
                 self.buffersInput = []
+                self.sampleRateInput = 0.0
             }
             
             propertyAddress.mSelector = kAudioDevicePropertyStreams
@@ -178,6 +188,14 @@ class AudioInterface
             self.streamsOutput = Int(size) / sizeof(AudioStreamID)
             
             if 0 < self.streamsOutput {
+                // get sample rate
+                size = UInt32(sizeof(Float64))
+                var sampleRateOutput: Float64 = 0.0
+                propertyAddress.mSelector = kAudioDevicePropertyNominalSampleRate
+                status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, &sampleRateOutput)
+                guard noErr == status else { return nil }
+                self.sampleRateOutput = sampleRateOutput
+                
                 // get stream configuration
                 size = 0
                 propertyAddress.mSelector = kAudioDevicePropertyStreamConfiguration
@@ -204,6 +222,7 @@ class AudioInterface
             }
             else {
                 self.buffersOutput = []
+                self.sampleRateOutput = 0.0
             }
         }
     }
