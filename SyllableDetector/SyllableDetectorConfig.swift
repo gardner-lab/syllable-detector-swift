@@ -10,9 +10,9 @@ import Foundation
 
 struct SyllableDetectorConfig
 {
-    let samplingRate: Double // eqv: samplerate
-    let fourierLength: Int // eqv: FFT_SIZE
-    let fourierOverlap: Int // eqv: NOVERLAP = FFT_SIZE - (floor(samplerate * FFT_TIME_SHIFT))
+    var samplingRate: Double // eqv: samplerate
+    var fourierLength: Int // eqv: FFT_SIZE
+    var fourierOverlap: Int // eqv: NOVERLAP = FFT_SIZE - (floor(samplerate * FFT_TIME_SHIFT))
     
     let freqRange: (Double, Double) // eqv: freq_range
     let timeRange: Int // eqv: time_window_steps = double(floor(time_window / timestep))
@@ -20,6 +20,33 @@ struct SyllableDetectorConfig
     let threshold: Double // eqv: trigger threshold
     
     let net: NeuralNet
+    
+    mutating func modifySamplingRate(newSamplingRate: Double) {
+        // store old things
+        let oldSamplingRate = samplingRate
+        let oldFourierLength = fourierLength
+        let oldFourierOverlap = fourierOverlap
+        
+        if oldSamplingRate == newSamplingRate { return }
+        
+        
+        // get new approximate fourier length
+        let newApproximateFourierLength = newSamplingRate * Double(oldFourierLength) / oldSamplingRate
+        
+        // convert to closest power of 2
+        let newFourierLength = 1 << Int(round(log2(newApproximateFourierLength)))
+        
+        // get new fourier overlap
+        let newFourierOverlap = newFourierLength - Int(round(newSamplingRate * Double(oldFourierLength - oldFourierOverlap) / oldSamplingRate))
+        
+        // change the to new things
+        samplingRate = newSamplingRate
+        fourierLength = newFourierLength
+        fourierOverlap = newFourierOverlap
+        
+        DLog("New fourier length: \(newFourierLength)")
+        DLog("New fourier overlap: \(newFourierOverlap)")
+    }
 }
 
 // make parsable

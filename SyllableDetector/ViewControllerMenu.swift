@@ -24,10 +24,10 @@ class ViewControllerMenu: NSViewController, WindowControllerProcessorDelegate {
         reloadDevices()
     }
     
-    override func viewDidDisappear() {
-        // terminate
-        NSApp.terminate(nil)
-    }
+//    override func viewDidDisappear() {
+//        // terminate
+//        NSApp.terminate(nil)
+//    }
     
     func reloadDevices() {
         // fetch list of devices
@@ -106,6 +106,11 @@ class ViewControllerMenu: NSViewController, WindowControllerProcessorDelegate {
         controller.delegate = self // custom delegate used to clean up open processor list when windows are closed
         controller.showWindow(sender)
         openProcessors.append(controller)
+        
+        // reset selector
+        selectInput.selectItemAtIndex(0)
+        selectOutput.selectItemAtIndex(0)
+        buttonLaunch.enabled = false
     }
     
     func windowControllerDone(controller: WindowControllerProcessor) {

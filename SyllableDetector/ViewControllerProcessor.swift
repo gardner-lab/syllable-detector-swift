@@ -62,18 +62,19 @@ class Processor: AudioInputInterfaceDelegate {
         // create queue
         queueProcessing = dispatch_queue_create("ProcessorQueue", DISPATCH_QUEUE_SERIAL)
         
-        // set self as delegate
-        interfaceInput.delegate = self
-        
         try interfaceOutput.initializeAudio()
         try interfaceInput.initializeAudio()
         
         // check sampling rates
         for d in self.detectors {
             if (1 < abs(d.config.samplingRate - interfaceInput.inputFormat.mSampleRate)) {
-                DLog("Mismatched sampling rates.")
+                DLog("Mismatched sampling rates. Expecting: \(d.config.samplingRate). Device: \(interfaceInput.inputFormat.mSampleRate).")
+                d.config.modifySamplingRate(interfaceInput.inputFormat.mSampleRate)
             }
         }
+        
+        // set self as delegate
+        interfaceInput.delegate = self
     }
     
     deinit {
