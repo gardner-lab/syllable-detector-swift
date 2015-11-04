@@ -27,7 +27,6 @@ func renderOutput(inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutabl
         // decrement high for
         if 0 < high {
             aoi.outputHighFor[channel] = high - min(high, frameCountAsInt)
-            DLog("write high")
         }
         
         // write data out

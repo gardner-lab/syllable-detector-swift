@@ -88,6 +88,9 @@ class Processor: AudioInputInterfaceDelegate {
         // process
         dispatch_async(queueProcessing) {
             if self.detectors[index].seenSyllable() {
+                // log
+                DLog("\(channel) play")
+                
                 // play high
                 self.interfaceOutput.createHighOutput(self.entries[index].outputChannel, forDuration: self.highDuration)
             }
