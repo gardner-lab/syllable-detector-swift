@@ -22,12 +22,28 @@ class ViewControllerMenu: NSViewController, WindowControllerProcessorDelegate {
         // reload devices
         buttonLaunch.enabled = false
         reloadDevices()
+        
+        // listen
+        do {
+            try AudioInterface.createListenerForDeviceChange({
+                DLog("refreshing device")
+                self.reloadDevices()
+                }, withIdentifier: self)
+        }
+        catch {
+            DLog("Unable to add device change listener: \(error)")
+        }
     }
     
-//    override func viewDidDisappear() {
-//        // terminate
-//        NSApp.terminate(nil)
-//    }
+    override func viewDidDisappear() {
+        // remove listener
+        AudioInterface.destroyListenerForDeviceChange(withIdentifier: self)
+        
+        // terminate
+        if 0 == openProcessors.count {
+            NSApp.terminate(nil)
+        }
+    }
     
     func reloadDevices() {
         // fetch list of devices

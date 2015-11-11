@@ -91,6 +91,9 @@ private func checkError(status: OSStatus, type: AudioInterfaceError? = nil, func
 
 class AudioInterface
 {
+    // event listeners
+    static var listeners = [AudioObjectPropertySelector: Array<(Int, (() -> Void))>]()
+    
     struct AudioDevice {
         let deviceID: AudioDeviceID
         let deviceUID: String
@@ -245,6 +248,81 @@ class AudioInterface
         
         return audioDevices.flatMap {
             return AudioDevice(deviceID: $0)
+        }
+    }
+    
+    static func createListenerForDeviceChange<T: Hashable>(cb: (Void) -> Void, withIdentifier unique: T) throws {
+        let selector = kAudioHardwarePropertyDevices
+        
+        // alread has listener
+        if var cur = listeners[selector] {
+            // add callback
+            cur.append((unique.hashValue, cb))
+            
+            // update listeners
+            listeners[selector] = cur
+            
+            return
+        }
+        
+        // property address
+        var propertyAddress = AudioObjectPropertyAddress(mSelector: selector, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMaster)
+        let onAudioObject = AudioObjectID(bitPattern: kAudioObjectSystemObject)
+        
+        // create listener
+        try checkError(AudioObjectAddPropertyListenerBlock(onAudioObject, &propertyAddress, nil, dispatchEvent))
+        
+        // create callbacks array
+        let cbs: Array<(Int, (() -> Void))> = [(unique.hashValue, cb)]
+        listeners[selector] = cbs
+    }
+    
+    static func destroyListenerForDeviceChange<T: Hashable>(withIdentifier unique: T) {
+        let selector = kAudioHardwarePropertyDevices
+        
+        guard var cur = listeners[selector] else {
+            // nothing to remove
+            return
+        }
+        
+        // hash to remove
+        let hashToRemove = unique.hashValue
+        
+        // remove from listeners
+        cur = cur.filter() {
+            return $0.0 != hashToRemove
+        }
+        
+        // if empty
+        if cur.isEmpty {
+            // remove listener
+            listeners.removeValueForKey(selector)
+            
+            // property address
+            var propertyAddress = AudioObjectPropertyAddress(mSelector: selector, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMaster)
+            let onAudioObject = AudioObjectID(bitPattern: kAudioObjectSystemObject)
+            
+            do {
+                try checkError(AudioObjectRemovePropertyListenerBlock(onAudioObject, &propertyAddress, nil, dispatchEvent))
+            }
+            catch {
+                DLog("unable to remove listener")
+            }
+        }
+        else {
+            // update listeners
+            listeners[selector] = cur
+        }
+    }
+    
+    static func dispatchEvent(numAddresses: UInt32, addresses: UnsafePointer<AudioObjectPropertyAddress>) {
+        for var i: UInt32 = 0; i < numAddresses; ++i {
+            let selector = addresses[Int(i)].mSelector
+            if let listenersForSelector = listeners[selector] {
+                for entry in listenersForSelector {
+                    dispatch_async(dispatch_get_main_queue(), entry.1)
+                }
+            }
         }
     }
 }
