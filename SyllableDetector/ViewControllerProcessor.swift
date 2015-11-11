@@ -7,6 +7,7 @@
 //
 
 import Cocoa
+import Accelerate
 import AudioToolbox
 
 struct ProcessorEntry {
@@ -31,6 +32,10 @@ class Processor: AudioInputInterfaceDelegate {
     let detectors: [SyllableDetector]
     let channels: [Int]
     
+    // stats
+    let statInput: [SummaryStat]
+    let statOutput: [SummaryStat]
+    
     // high duration
     let highDuration = 0.001 // 1ms
     
@@ -54,6 +59,16 @@ class Processor: AudioInputInterfaceDelegate {
             channels[p.inputChannel] = i
         }
         self.channels = channels
+        
+        // setup stats
+        var statInput = [SummaryStat]()
+        var statOutput = [SummaryStat]()
+        for var i = 0; i < self.detectors.count; ++i {
+            statInput.append(SummaryStat(withStat: StatMax()))
+            statOutput.append(SummaryStat(withStat: StatMax()))
+        }
+        self.statInput = statInput
+        self.statOutput = statOutput
         
         // setup input and output devices
         interfaceInput = AudioInputInterface(deviceID: deviceInput.deviceID)
@@ -82,12 +97,35 @@ class Processor: AudioInputInterfaceDelegate {
         let index = channels[channel]
         guard index >= 0 else { return }
         
+        // get audio data
+        var sum: Float = 0.0
+        vDSP_svesq(data, 1, &sum, vDSP_Length(length))
+        statInput[index].writeValue(Double(sum) / Double(length))
+        
         // append audio samples
         detectors[index].appendAudioData(data, withSamples: length)
         
         // process
         dispatch_async(queueProcessing) {
-            if self.detectors[index].seenSyllable() {
+            // detector
+            let d = self.detectors[index]
+            
+            // seen syllable
+            var seen = false
+            
+            // while there are new values
+            while self.detectors[index].processNewValue() {
+                // send to output
+                self.statOutput[index].writeValue(Double(d.lastOutput))
+                
+                // update detected
+                if !seen && d.lastDetected {
+                    seen = true
+                }
+            }
+            
+            // if seen, send output
+            if seen {
                 // log
                 DLog("\(channel) play")
                 
@@ -97,7 +135,7 @@ class Processor: AudioInputInterfaceDelegate {
         }
     }
     
-    func getOutputForChannel(channel: Int) -> Float? {
+    func getInputForChannel(channel: Int) -> Double? {
         // valid channel
         guard channel < channels.count else { return nil }
         
@@ -105,8 +143,24 @@ class Processor: AudioInputInterfaceDelegate {
         let index = channels[channel]
         guard index >= 0 else { return nil }
         
-        // TODO: replace with maximum value since last call
-        return detectors[index].lastOutput
+        // output stat
+        if let meanSquareLevel = statInput[index].readStatAndReset() {
+            return sqrt(meanSquareLevel) // RMS
+        }
+        
+        return nil
+    }
+    
+    func getOutputForChannel(channel: Int) -> Double? {
+        // valid channel
+        guard channel < channels.count else { return nil }
+        
+        // get index
+        let index = channels[channel]
+        guard index >= 0 else { return nil }
+        
+        // output stat
+        return statOutput[index].readStatAndReset()
     }
 }
 
@@ -258,12 +312,16 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         
         switch identifier {
         case "ColumnInput", "ColumnOutput": return "Channel \(row + 1)"
-        case "ColumnInLevel": return NSNumber(float: 0.0)
+        case "ColumnInLevel":
+            if let p = processor {
+                return NSNumber(double: 100.0 * (p.getInputForChannel(row) ?? 0.0))
+            }
+            return NSNumber(double: 0.00)
         case "ColumnOutLevel":
             if let p = processor {
-                return NSNumber(float: 100.0 * (p.getOutputForChannel(row) ?? 0.0))
+                return NSNumber(double: 100.0 * (p.getOutputForChannel(row) ?? 0.0))
             }
-            return NSNumber(float: 0.00)
+            return NSNumber(double: 0.00)
         case "ColumnNetwork": return nil == processorEntries[row].config ? "Not Selected" : processorEntries[row].network
         default: return nil
         }
