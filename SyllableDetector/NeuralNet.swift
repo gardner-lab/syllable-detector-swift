@@ -10,13 +10,47 @@ import Foundation
 import Accelerate
 
 // mapping function protocol
-protocol MappingFunction {
+protocol InputMappingFunction {
 //    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int)
     func applyAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>)
+}
+
+protocol OutputMappingFunction {
     func reverseAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>)
 }
 
-class MapMinMax: MappingFunction {
+class NormalizeRow: InputMappingFunction {
+    func applyAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
+        let len = vDSP_Length(count)
+        
+        // max and min values
+        var mx: Float = 0.0, mn: Float = 0.0
+        var slope: Float, intercept: Float
+        
+        // calculate min and max
+        vDSP_minv(values, 1, &mn, len)
+        vDSP_maxv(values, 1, &mx, len)
+        
+        // calculate range
+        let range = mx - mn
+        
+        // no range? fill with -1
+        if 0 == range {
+            var val: Float = -1.0
+            vDSP_vfill(&val, destination, 1, len)
+            return
+        }
+        
+        // calculate slope
+        slope = 2.0 / range
+        intercept = (0 - mn - mx) / range;
+        
+        // scalar multiply and add
+        vDSP_vsmsa(values, 1, &slope, &intercept, destination, 1, len)
+    }
+}
+
+class MapMinMax: InputMappingFunction, OutputMappingFunction {
     var gains: [Float]
     var xOffsets: [Float]
     var yMin: Float
@@ -66,13 +100,13 @@ class NeuralNet
 {
     let inputs: Int
     let outputs: Int
-    let inputMapping: MappingFunction
-    let outputMapping: MappingFunction
+    let inputMapping: InputMappingFunction
+    let outputMapping: OutputMappingFunction
     let layers: [NeuralNetLayer]
     
     private var bufferInput: UnsafeMutablePointer<Float>
     
-    init(layers: [NeuralNetLayer], inputMapping: MappingFunction, outputMapping: MappingFunction) {
+    init(layers: [NeuralNetLayer], inputMapping: InputMappingFunction, outputMapping: OutputMappingFunction) {
         guard 0 < layers.count else {
             fatalError("Neural network must have 1 or more layers.")
         }
