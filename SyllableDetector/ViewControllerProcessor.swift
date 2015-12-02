@@ -85,6 +85,8 @@ class Processor: AudioInputInterfaceDelegate {
     }
     
     deinit {
+        DLog("deinit processor")
+        
         interfaceInput.tearDownAudio()
         interfaceOutput.tearDownAudio()
     }
@@ -161,6 +163,11 @@ class Processor: AudioInputInterfaceDelegate {
         
         // output stat
         return statOutput[index].readStatAndReset()
+    }
+    
+    func tearDown() {
+        interfaceInput.tearDownAudio()
+        interfaceOutput.tearDownAudio()
     }
 }
 
@@ -256,6 +263,9 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
     
     @IBAction func toggle(sender: NSButton) {
         if isRunning {
+            // tear down
+            processor?.tearDown()
+            
             // stop everything
             processor = nil
             
