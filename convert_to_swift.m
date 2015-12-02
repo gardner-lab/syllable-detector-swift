@@ -10,10 +10,10 @@ fprintf(fh, '// AUTOMATICALLY GENERATED SYLLABLE DETECTOR CONFIGURATION\n\n');
 fprintf(fh, 'import NeuralNet\n\n');
 fprintf(fh, 'struct SyllableDetectorConfig\n{\n');
 fprintf(fh, '    let samplingRate: Double = %.1f\n', f.samplerate);
-fprintf(fh, '    let fourierLength: Int = %d\n', f.FFT_SIZE);
-fprintf(fh, '    let fourierOverlap: Int = %d\n\n', f.FFT_SIZE - (floor(f.samplerate * f.FFT_TIME_SHIFT)));
+fprintf(fh, '    let fourierLength: Int = %d\n', f.fft_size);
+fprintf(fh, '    let fourierOverlap: Int = %d\n\n', f.fft_size - (floor(f.samplerate * f.fft_time_shift)));
 
-fprintf(fh, '    let freqRange: (Double, Double) = (%.1f, %.1f)\n', round((f.freq_range_ds(1) - 1.5) * f.samplerate/f.FFT_SIZE), round((f.freq_range_ds(end) - 0.5) * f.samplerate/f.FFT_SIZE));
+fprintf(fh, '    let freqRange: (Double, Double) = (%.1f, %.1f)\n', round((f.freq_range_ds(1) - 1.5) * f.samplerate/f.fft_size), round((f.freq_range_ds(end) - 0.5) * f.samplerate/f.fft_size));
 fprintf(fh, '    let timeRange: Int = %d\n\n', f.time_window_steps);
 
 fprintf(fh, '    let threshold: Double = %.15g\n\n', f.trigger_thresholds);
@@ -25,10 +25,10 @@ fprintf(fh, '    init() {\n');
 % build neural network
 
 % input mapping
-convert_processing_functions(fh, 'mapInputs', f.net.input);
+convert_processing_functions(fh, 'processInputs', f.net.input);
 
 % output mapping
-convert_processing_functions(fh, 'mapOutputs', f.net.output);
+convert_processing_functions(fh, 'processOutputs', f.net.output);
 
 % layers
 layers = {};
@@ -55,7 +55,7 @@ for i = 1:length(f.net.layers)
 	convert_layer(fh, name, f.net.layers{i}, w, b);
 end
 
-fprintf(fh, '        net = NeuralNet(layers: [%s], inputMapping: mapInputs, outputMapping: mapOutputs)\n', strjoin(layers, ', '));
+fprintf(fh, '        net = NeuralNet(layers: [%s], inputMapping: processInputs, outputMapping: processOutputs)\n', strjoin(layers, ', '));
 fprintf(fh, '    }\n');
 fprintf(fh, '}\n');
 
@@ -63,16 +63,26 @@ fprintf(fh, '}\n');
 fclose(fh);
 
 function convert_processing_functions(fh, nm, put)
-	if 1 ~= length(put.processFcns) || ~strcmp(put.processFcns{1}, 'mapminmax')
-		error('Invalid processing function: %s. Expected mapminmax.', put.processFcns{1});
-	end
-	
-	offsets = sprintf('%.15g, ', put.processSettings{1}.xoffset);
-    offsets = offsets(1:end - 2); % remove final comma
-	gains = sprintf('%.15g, ', put.processSettings{1}.gain);
-    gains = gains(1:end - 2); % remove final comma
-	
-	fprintf(fh, '        let %s = MapMinMax(xOffsets: [%s], gains: [%s], yMin: %.15g))\n\n', nm, offsets, gains, put.processSettings{1}.ymin);
+    switch length(put.processFcns)
+        case 0
+            % default to normalizing row (DOES NOT MATCH MATLAB, SPECIFIC FOR THIS PROJECT)
+            fprintf(fh, '        let %s = Normalize()\n\n', nm);
+            
+        case 1
+            if ~strcmp(put.processFcns{1}, 'mapminmax')
+                error('Invalid processing function: %s. Expected mapminmax.', put.processFcns{1});
+            end
+            
+            offsets = sprintf('%.15g, ', put.processSettings{1}.xoffset);
+            offsets = offsets(1:end - 2); % remove final comma
+            gains = sprintf('%.15g, ', put.processSettings{1}.gain);
+            gains = gains(1:end - 2); % remove final comma
+
+            fprintf(fh, '        let %s = MapMinMax(xOffsets: [%s], gains: [%s], yMin: %.15g))\n\n', nm, offsets, gains, put.processSettings{1}.ymin);
+            
+        otherwise
+            error('Invalid processing functions. Only one processing function is supported.');
+    end
 end
 
 function convert_layer(fh, nm, layer, w, b)

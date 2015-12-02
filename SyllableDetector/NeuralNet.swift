@@ -10,16 +10,26 @@ import Foundation
 import Accelerate
 
 // mapping function protocol
-protocol InputMappingFunction {
+protocol InputProcessingFunction {
 //    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int)
     func applyAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>)
 }
 
-protocol OutputMappingFunction {
+protocol OutputProcessingFunction {
     func reverseAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>)
 }
 
-class NormalizeRow: InputMappingFunction {
+class PassThrough: InputProcessingFunction, OutputProcessingFunction {
+    func applyAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
+        memcpy(destination, values, count * sizeof(Float))
+    }
+    
+    func reverseAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
+        memcpy(destination, values, count * sizeof(Float))
+    }
+}
+
+class Normalize: InputProcessingFunction {
     func applyAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
         let len = vDSP_Length(count)
         
@@ -50,7 +60,7 @@ class NormalizeRow: InputMappingFunction {
     }
 }
 
-class MapMinMax: InputMappingFunction, OutputMappingFunction {
+class MapMinMax: InputProcessingFunction, OutputProcessingFunction {
     var gains: [Float]
     var xOffsets: [Float]
     var yMin: Float
@@ -100,13 +110,13 @@ class NeuralNet
 {
     let inputs: Int
     let outputs: Int
-    let inputMapping: InputMappingFunction
-    let outputMapping: OutputMappingFunction
+    let inputProcessing: InputProcessingFunction
+    let outputProcessing: OutputProcessingFunction
     let layers: [NeuralNetLayer]
     
     private var bufferInput: UnsafeMutablePointer<Float>
     
-    init(layers: [NeuralNetLayer], inputMapping: InputMappingFunction, outputMapping: OutputMappingFunction) {
+    init(layers: [NeuralNetLayer], inputProcessing: InputProcessingFunction, outputProcessing: OutputProcessingFunction) {
         guard 0 < layers.count else {
             fatalError("Neural network must have 1 or more layers.")
         }
@@ -121,8 +131,8 @@ class NeuralNet
         
         self.inputs = layers[0].inputs
         self.outputs = layers[layers.count - 1].outputs
-        self.inputMapping = inputMapping
-        self.outputMapping = outputMapping
+        self.inputProcessing = inputProcessing
+        self.outputProcessing = outputProcessing
         self.layers = layers
         
         // memory for input layer
@@ -141,7 +151,7 @@ class NeuralNet
         var curOutput = [Float](count: outputs, repeatedValue: 0.0)
 
         // create input
-        inputMapping.applyAndCopy(input, count: inputs, to: currentBuffer)
+        inputProcessing.applyAndCopy(input, count: inputs, to: currentBuffer)
         
         for layer in layers {
             // apply the layer and move the content buffer
@@ -149,7 +159,7 @@ class NeuralNet
         }
         
         // create output
-        outputMapping.reverseAndCopy(currentBuffer, count: outputs, to: &curOutput)
+        outputProcessing.reverseAndCopy(currentBuffer, count: outputs, to: &curOutput)
         
         return curOutput
     }
