@@ -29,7 +29,10 @@ class CircularShortTimeFourierTransform
     private var buffer: TPCircularBuffer
     
     let length: Int
-    let overlap: Int
+    
+    // only one can be non-zero
+    let gap: Int // gaps between samples
+    let overlap: Int // overlap between samples
     
     private let fftLength: vDSP_Length
     private let fftSetup: FFTSetup
@@ -56,8 +59,23 @@ class CircularShortTimeFourierTransform
     private var complexBufferT: DSPSplitComplex
     
     init(length: Int = 1024, overlap: Int = 0, buffer: Int = 409600) {
+        // length of the fourier transform (must be a power of 2)
         self.length = length
-        self.overlap = overlap
+        
+        // if negative overlap, interpret that as a gap
+        if overlap < 0 {
+            self.gap = 0 - overlap
+            self.overlap = 0
+        }
+        else {
+            self.overlap = overlap
+            self.gap = 0
+        }
+        
+        // sanity check
+        if overlap >= length {
+            fatalError("Invalid overlap value.")
+        }
         
         // maybe use lazy instantion?
         
@@ -180,19 +198,24 @@ class CircularShortTimeFourierTransform
     // TODO: write better functions that can help avoid double copying
     
     func extractMagnitude() -> [Float]? {
-        //        let UnsafeMutablePointer<Float>: samples
+        // get buffer read point and available bytes
         var availableBytes: Int32 = 0
-        let samples: UnsafeMutablePointer<Float> = UnsafeMutablePointer<Float>(TPCircularBufferTail(&buffer, &availableBytes))
+        var samples: UnsafeMutablePointer<Float> = UnsafeMutablePointer<Float>(TPCircularBufferTail(&buffer, &availableBytes))
         
         // not enough available bytes
-        if Int(availableBytes) < (length * sizeof(Float)) {
+        if Int(availableBytes) < ((gap + length) * sizeof(Float)) {
             return nil
+        }
+        
+        // skip gap
+        if 0 < gap {
+            samples = samples + gap
         }
         
         // mark circular buffer as consumed at END of excution
         defer {
             // mark as consumed
-            TPCircularBufferConsume(&buffer, Int32((length - overlap) * sizeof(Float)))
+            TPCircularBufferConsume(&buffer, Int32((gap + length - overlap) * sizeof(Float)))
         }
         
         // get half length
@@ -235,19 +258,24 @@ class CircularShortTimeFourierTransform
     }
     
     func extractPower() -> [Float]? {
-        //        let UnsafeMutablePointer<Float>: samples
+        // get buffer read point and available bytes
         var availableBytes: Int32 = 0
-        let samples: UnsafeMutablePointer<Float> = UnsafeMutablePointer<Float>(TPCircularBufferTail(&buffer, &availableBytes))
+        var samples: UnsafeMutablePointer<Float> = UnsafeMutablePointer<Float>(TPCircularBufferTail(&buffer, &availableBytes))
         
         // not enough available bytes
-        if Int(availableBytes) < (length * sizeof(Float)) {
+        if Int(availableBytes) < ((gap + length) * sizeof(Float)) {
             return nil
+        }
+        
+        // skip gap
+        if 0 < gap {
+            samples = samples + gap
         }
         
         // mark circular buffer as consumed at END of excution
         defer {
             // mark as consumed
-            TPCircularBufferConsume(&buffer, Int32((length - overlap) * sizeof(Float)))
+            TPCircularBufferConsume(&buffer, Int32((gap + length - overlap) * sizeof(Float)))
         }
         
         // get half length
