@@ -10,12 +10,33 @@ import Foundation
 
 struct SyllableDetectorConfig
 {
+    enum Scaling {
+        case Linear
+        case Log
+        case Db
+        
+        init?(fromName name: String) {
+            switch name {
+            case "linear":
+                self = .Linear
+            case "log":
+                self = .Log
+            case "db":
+                self = .Db
+            default:
+                return nil
+            }
+        }
+    }
+    
     var samplingRate: Double // eqv: samplerate
     var fourierLength: Int // eqv: FFT_SIZE
     var fourierOverlap: Int // eqv: NOVERLAP = FFT_SIZE - (floor(samplerate * FFT_TIME_SHIFT))
     
     let freqRange: (Double, Double) // eqv: freq_range
     let timeRange: Int // eqv: time_window_steps = double(floor(time_window / timestep))
+    
+    let spectrogramScaling: Scaling
     
     let threshold: Double // eqv: trigger threshold
     
@@ -193,6 +214,14 @@ extension SyllableDetectorConfig
         
         // threshold: double
         threshold = try SyllableDetectorConfig.parseDouble("threshold", from: data)
+        
+        // read scaling
+        if let scaling = Scaling(fromName: try SyllableDetectorConfig.parseString("scaling", from: data)) {
+            spectrogramScaling = scaling
+        }
+        else {
+            throw ParseError.InvalidValue("scaling")
+        }
         
         // get layers
         let layerCount = try SyllableDetectorConfig.parseInt("layers", from: data)

@@ -163,7 +163,38 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         /// samples now points to a vector of `lengthTotal` bytes of power data for the last `timeRange` outputs of the short-timer fourier transform
         /// view as a column vector
         
-        let ret = config.net.apply(samples)
+        let scaledSamples: UnsafeMutablePointer<Float>
+        switch config.spectrogramScaling {
+        case .Db:
+            // temporary memory
+            scaledSamples = UnsafeMutablePointer<Float>.alloc(lengthTotal)
+            defer {
+                scaledSamples.destroy()
+                scaledSamples.dealloc(lengthTotal)
+            }
+            
+            // convert to db with amplitude flag
+            var one: Float = 1.0
+            vDSP_vdbcon(samples, 1, &one, scaledSamples, 1, vDSP_Length(lengthTotal), 1)
+            
+        case .Log:
+            // temporary memory
+            scaledSamples = UnsafeMutablePointer<Float>.alloc(lengthTotal)
+            defer {
+                scaledSamples.destroy()
+                scaledSamples.dealloc(lengthTotal)
+            }
+            
+            // natural log
+            var c = Int32(lengthTotal)
+            vvlogf(samples, scaledSamples, &c)
+            
+        case .Linear:
+            // no copy needed
+            scaledSamples = samples
+        }
+        
+        let ret = config.net.apply(scaledSamples)
         lastOutput = ret[0]
         
         return true
