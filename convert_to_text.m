@@ -9,9 +9,10 @@ f = load(mat);
 fprintf(fh, '# AUTOMATICALLY GENERATED SYLLABLE DETECTOR CONFIGURATION\n');
 fprintf(fh, 'samplingRate = %.1f\n', f.samplerate);
 fprintf(fh, 'fourierLength = %d\n', f.fft_size);
-fprintf(fh, 'fourierOverlap = %d\n', f.fft_size - (floor(f.samplerate * f.fft_time_shift)));
+fprintf(fh, 'fourierOverlap = %d\n', f.fft_size - f.fft_time_shift);
 
-fprintf(fh, 'freqRange = %.1f, %.1f\n', round((f.freq_range_ds(1) - 1.5) * f.samplerate/f.fft_size), round((f.freq_range_ds(end) - 0.5) * f.samplerate/f.fft_size));
+%fprintf(fh, 'freqRange = %.1f, %.1f\n', round((f.freq_range_ds(1) - 1.5) * f.samplerate/f.fft_size), round((f.freq_range_ds(end) - 0.5) * f.samplerate/f.fft_size));
+fprintf(fh, 'freqRange = %.1f, %.1f\n', round((f.freq_range_ds(1) - 1) * (f.samplerate/2)/f.fft_size), round((f.freq_range_ds(end) - 1) * (f.samplerate/2)/f.fft_size));
 fprintf(fh, 'timeRange = %d\n', f.time_window_steps);
 
 fprintf(fh, 'threshold = %.15g\n', f.trigger_thresholds);
@@ -34,7 +35,7 @@ for i = 1:length(f.net.layers)
     % add layer
 	name = sprintf('layer%d', i - 1);
 	layers{i} = name;
-	
+
 	% get weights
 	if 1 == i
 		w = f.net.IW{i};
@@ -48,7 +49,7 @@ for i = 1:length(f.net.layers)
 		end
 	end
 	b = f.net.b{i};
-	
+
 	% add layer
 	convert_layer(fh, name, f.net.layers{i}, w, b);
 end
@@ -61,12 +62,12 @@ function convert_processing_functions(fh, nm, put)
         case 0
             % default to normalizing row (DOES NOT MATCH MATLAB, SPECIFIC FOR THIS PROJECT)
             fprintf(fh, '%s.function = normalize\n', nm);
-            
+
         case 1
             if ~strcmp(put.processFcns{1}, 'mapminmax')
                 error('Invalid processing function: %s. Expected mapminmax.', put.processFcns{1});
             end
-	
+
             offsets = sprintf('%.15g, ', put.processSettings{1}.xoffset);
             offsets = offsets(1:end - 2); % remove final comma
             gains = sprintf('%.15g, ', put.processSettings{1}.gain);
@@ -76,8 +77,8 @@ function convert_processing_functions(fh, nm, put)
             fprintf(fh, '%s.xOffsets = %s\n', nm, offsets);
             fprintf(fh, '%s.gains = %s\n', nm, gains);
             fprintf(fh, '%s.yMin = %.15g\n', nm, put.processSettings{1}.ymin);
-            
-            
+
+
         otherwise
             error('Invalid processing functions. Only one processing function is supported.');
     end
@@ -87,7 +88,7 @@ function convert_layer(fh, nm, layer, w, b)
 	if ~strcmp(layer.netInputFcn, 'netsum')
         error('Invalid input function: %s. Expected netsum.', layer.netInputFcn);
 	end
-    
+
     if strcmp(layer.transferFcn, 'tansig')
         tf = 'TanSig';
     elseif strcmp(layer.transferFcn, 'purelin')
@@ -95,7 +96,7 @@ function convert_layer(fh, nm, layer, w, b)
     else
         error('Invalid transfer function: %s.', layer.transferFcn);
     end
-	
+
     % have to flip weights before resizing to print row by row
 	weights = sprintf('%.15g, ', reshape(w', [], 1));
     weights = weights(1:end - 2); % remove final comma
