@@ -15,6 +15,7 @@ class ViewControllerMenu: NSViewController, WindowControllerProcessorDelegate {
     @IBOutlet weak var buttonLaunch: NSButton!
     
     var openProcessors = [NSWindowController]()
+    var openSimulators = [NSWindowController]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,7 +41,7 @@ class ViewControllerMenu: NSViewController, WindowControllerProcessorDelegate {
         AudioInterface.destroyListenerForDeviceChange(withIdentifier: self)
         
         // terminate
-        if 0 == openProcessors.count {
+        if 0 == openProcessors.count && 0 == openSimulators.count {
             NSApp.terminate(nil)
         }
     }
@@ -91,6 +92,14 @@ class ViewControllerMenu: NSViewController, WindowControllerProcessorDelegate {
     
     @IBAction func selectDevice(sender: NSPopUpButton) {
         buttonLaunch.enabled = (0 < selectInput.selectedTag() && 0 < selectOutput.selectedTag())
+    }
+    
+    @IBAction func buttonSimulate(sender: NSButton) {
+        guard let sb = storyboard, let controller = sb.instantiateControllerWithIdentifier("Simulator") as? NSWindowController else { return }
+        
+        // launch
+        controller.showWindow(sender)
+        openSimulators.append(controller)
     }
     
     @IBAction func buttonLaunch(sender: NSButton) {

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D82E7F7B1C10B629004759F7 /* ViewControllerSimulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D82E7F7A1C10B629004759F7 /* ViewControllerSimulator.swift */; };
 		D8625C7D1BE14922000922D8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C7C1BE14922000922D8 /* AppDelegate.swift */; };
 		D8625C7F1BE14922000922D8 /* ViewControllerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C7E1BE14922000922D8 /* ViewControllerProcessor.swift */; };
 		D8625C811BE14922000922D8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D8625C801BE14922000922D8 /* Assets.xcassets */; };
@@ -25,6 +26,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D82E7F7A1C10B629004759F7 /* ViewControllerSimulator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewControllerSimulator.swift; sourceTree = "<group>"; };
 		D8625C791BE14922000922D8 /* SyllableDetector.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SyllableDetector.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D8625C7C1BE14922000922D8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D8625C7E1BE14922000922D8 /* ViewControllerProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerProcessor.swift; sourceTree = "<group>"; };
@@ -88,6 +90,7 @@
 				D8625C8F1BE149FE000922D8 /* SyllableDetectorConfig.swift */,
 				D8D1BD471BE6D61B00059974 /* ViewControllerMenu.swift */,
 				D8625C7E1BE14922000922D8 /* ViewControllerProcessor.swift */,
+				D82E7F7A1C10B629004759F7 /* ViewControllerSimulator.swift */,
 				D8D1BD4C1BE6E53C00059974 /* WindowControllerProcessor.swift */,
 				D8625C801BE14922000922D8 /* Assets.xcassets */,
 				D8625C821BE14922000922D8 /* Main.storyboard */,
@@ -186,6 +189,7 @@
 				D8625C971BE149FE000922D8 /* NeuralNet.swift in Sources */,
 				D8625C9C1BE149FE000922D8 /* CircularShortTimeFourierTransform.swift in Sources */,
 				D8625C9A1BE149FE000922D8 /* Common.swift in Sources */,
+				D82E7F7B1C10B629004759F7 /* ViewControllerSimulator.swift in Sources */,
 				D8625C7F1BE14922000922D8 /* ViewControllerProcessor.swift in Sources */,
 				D8625C951BE149FE000922D8 /* AudioInterface.swift in Sources */,
 				D89269891BF3AEDE009482C2 /* SummaryStat.swift in Sources */,

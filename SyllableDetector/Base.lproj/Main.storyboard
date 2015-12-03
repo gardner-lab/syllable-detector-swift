@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="9059" systemVersion="15B42" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="9060" systemVersion="15B42" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9059"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9060"/>
     </dependencies>
     <scenes>
         <!--Application-->
@@ -737,6 +737,17 @@ DQ
                                     <action selector="buttonLaunch:" target="XfG-lQ-9wD" id="6Lu-t5-5ca"/>
                                 </connections>
                             </button>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yAr-Do-U8B">
+                                <rect key="frame" x="14" y="13" width="93" height="32"/>
+                                <animations/>
+                                <buttonCell key="cell" type="push" title="Simulate" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="zfg-wk-kgq">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="buttonSimulate:" target="XfG-lQ-9wD" id="war-Y4-hem"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="7qK-Lv-fli" firstAttribute="leading" secondItem="QrV-iO-Lz1" secondAttribute="trailing" constant="70" id="2Ko-WN-OHl"/>
@@ -749,10 +760,12 @@ DQ
                             <constraint firstItem="2u4-ec-z4S" firstAttribute="leading" secondItem="YSk-tX-LKo" secondAttribute="trailing" constant="70" id="O5V-tg-w1w"/>
                             <constraint firstItem="7qK-Lv-fli" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="20" id="OAF-Vy-Cdy"/>
                             <constraint firstItem="YSk-tX-LKo" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" id="OQy-Cl-dip"/>
+                            <constraint firstAttribute="bottom" secondItem="yAr-Do-U8B" secondAttribute="bottom" constant="20" id="Ua1-dK-6Tc"/>
                             <constraint firstItem="QrV-iO-Lz1" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" id="WF1-01-H8c"/>
                             <constraint firstItem="2u4-ec-z4S" firstAttribute="centerY" secondItem="YSk-tX-LKo" secondAttribute="centerY" id="WPN-Qq-wyM"/>
                             <constraint firstItem="7qK-Lv-fli" firstAttribute="centerY" secondItem="QrV-iO-Lz1" secondAttribute="centerY" id="jPt-bf-VcF"/>
                             <constraint firstItem="2u4-ec-z4S" firstAttribute="width" secondItem="7qK-Lv-fli" secondAttribute="width" id="mxz-os-CGF"/>
+                            <constraint firstItem="yAr-Do-U8B" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" id="pBN-uK-d1l"/>
                             <constraint firstAttribute="trailing" secondItem="Z0Z-gF-eNk" secondAttribute="trailing" constant="20" id="pbK-qF-2bH"/>
                             <constraint firstItem="Z0Z-gF-eNk" firstAttribute="width" secondItem="2u4-ec-z4S" secondAttribute="width" id="vce-PO-qR0"/>
                         </constraints>
@@ -766,7 +779,7 @@ DQ
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="75.5" y="611.5"/>
+            <point key="canvasLocation" x="75" y="611.5"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="1bY-zE-a8U">
@@ -785,6 +798,144 @@ DQ
                 <customObject id="vhm-uE-bcB" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="638" y="250"/>
+        </scene>
+        <!--Window Controller-->
+        <scene sceneID="2bx-Ab-IES">
+            <objects>
+                <windowController storyboardIdentifier="Simulator" id="SlO-gH-rsI" sceneMemberID="viewController">
+                    <window key="window" title="Simulator" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="Kbn-Ar-PeJ">
+                        <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
+                        <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+                        <rect key="contentRect" x="425" y="461" width="480" height="270"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
+                    </window>
+                    <connections>
+                        <segue destination="6Wr-VY-Oqg" kind="relationship" relationship="window.shadowedContentViewController" id="LUz-mj-VO0"/>
+                    </connections>
+                </windowController>
+                <customObject id="er8-zK-QcZ" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1204" y="250"/>
+        </scene>
+        <!--View Controller Simulator-->
+        <scene sceneID="6W9-5C-cEs">
+            <objects>
+                <viewController id="6Wr-VY-Oqg" customClass="ViewControllerSimulator" customModule="SyllableDetector" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" misplaced="YES" id="X9b-eY-60o">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="134"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <pathControl horizontalHuggingPriority="249" verticalHuggingPriority="750" misplaced="YES" allowsExpansionToolTips="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LXn-Ou-857">
+                                <rect key="frame" x="121" y="97" width="190" height="17"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="240" id="ydV-eo-znO"/>
+                                </constraints>
+                                <animations/>
+                                <pathCell key="cell" controlSize="small" selectable="YES" alignment="left" placeholderString="Network" id="1hz-az-ebx">
+                                    <font key="font" metaFont="system"/>
+                                </pathCell>
+                            </pathControl>
+                            <pathControl horizontalHuggingPriority="249" verticalHuggingPriority="750" misplaced="YES" allowsExpansionToolTips="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sX7-LT-7ym">
+                                <rect key="frame" x="121" y="59" width="190" height="17"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="240" id="FCT-as-9XA"/>
+                                </constraints>
+                                <animations/>
+                                <pathCell key="cell" controlSize="small" selectable="YES" alignment="left" placeholderString="Audio" id="3Yn-HU-Gg9">
+                                    <font key="font" metaFont="system"/>
+                                </pathCell>
+                            </pathControl>
+                            <button verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Bc7-G7-qpr">
+                                <rect key="frame" x="308" y="14" width="70" height="28"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="60" id="90U-UK-z9V"/>
+                                </constraints>
+                                <animations/>
+                                <buttonCell key="cell" type="push" title="Run" bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="xLi-LY-HPb">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                    <string key="keyEquivalent" base64-UTF8="YES">
+DQ
+</string>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="run:" target="6Wr-VY-Oqg" id="XTF-Vs-3R4"/>
+                                </connections>
+                            </button>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="3e5-Ht-BRX">
+                                <rect key="frame" x="18" y="97" width="55" height="17"/>
+                                <animations/>
+                                <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Network" id="TRe-Ts-920">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Bdn-dG-wWZ">
+                                <rect key="frame" x="18" y="59" width="55" height="17"/>
+                                <animations/>
+                                <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Audio" id="Uj8-xr-48L">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <button verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HkF-29-0ki">
+                                <rect key="frame" x="316" y="90" width="62" height="28"/>
+                                <animations/>
+                                <buttonCell key="cell" type="push" title="Load..." bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5BT-YI-9Ca">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="smallSystem"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="loadNetwork:" target="6Wr-VY-Oqg" id="BYt-pE-Nrv"/>
+                                </connections>
+                            </button>
+                            <button verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="46w-Zs-6jJ">
+                                <rect key="frame" x="316" y="52" width="62" height="28"/>
+                                <animations/>
+                                <buttonCell key="cell" type="push" title="Load..." bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="hvS-fz-XbF">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="smallSystem"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="loadAudio:" target="6Wr-VY-Oqg" id="tAw-HQ-OCq"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="sX7-LT-7ym" firstAttribute="leading" secondItem="Bdn-dG-wWZ" secondAttribute="trailing" constant="50" id="5ZF-mh-G2U"/>
+                            <constraint firstItem="46w-Zs-6jJ" firstAttribute="leading" secondItem="sX7-LT-7ym" secondAttribute="trailing" constant="10" id="GZf-Wj-PZX"/>
+                            <constraint firstItem="HkF-29-0ki" firstAttribute="top" secondItem="X9b-eY-60o" secondAttribute="top" constant="20" id="KB8-Xd-2Yd"/>
+                            <constraint firstItem="HkF-29-0ki" firstAttribute="leading" secondItem="LXn-Ou-857" secondAttribute="trailing" constant="10" id="KNz-Jy-y0v"/>
+                            <constraint firstItem="46w-Zs-6jJ" firstAttribute="top" secondItem="HkF-29-0ki" secondAttribute="bottom" constant="20" id="a2w-sZ-kCq"/>
+                            <constraint firstItem="3e5-Ht-BRX" firstAttribute="leading" secondItem="X9b-eY-60o" secondAttribute="leading" constant="20" id="cVQ-Lt-TUI"/>
+                            <constraint firstItem="LXn-Ou-857" firstAttribute="centerY" secondItem="3e5-Ht-BRX" secondAttribute="centerY" id="gpj-D1-tmZ"/>
+                            <constraint firstAttribute="trailing" secondItem="HkF-29-0ki" secondAttribute="trailing" constant="20" id="gtH-Rf-hxv"/>
+                            <constraint firstAttribute="trailing" secondItem="Bc7-G7-qpr" secondAttribute="trailing" constant="20" id="kFl-Zm-Eyx"/>
+                            <constraint firstItem="Bc7-G7-qpr" firstAttribute="top" secondItem="46w-Zs-6jJ" secondAttribute="bottom" constant="20" id="kc2-jj-l0a"/>
+                            <constraint firstAttribute="bottom" secondItem="Bc7-G7-qpr" secondAttribute="bottom" constant="20" id="nnn-MG-u91"/>
+                            <constraint firstItem="HkF-29-0ki" firstAttribute="centerY" secondItem="3e5-Ht-BRX" secondAttribute="centerY" id="orm-OF-hOh"/>
+                            <constraint firstItem="46w-Zs-6jJ" firstAttribute="centerY" secondItem="Bdn-dG-wWZ" secondAttribute="centerY" id="pga-pR-xNi"/>
+                            <constraint firstItem="Bdn-dG-wWZ" firstAttribute="leading" secondItem="X9b-eY-60o" secondAttribute="leading" constant="20" id="rdW-JU-eYv"/>
+                            <constraint firstAttribute="trailing" secondItem="46w-Zs-6jJ" secondAttribute="trailing" constant="20" id="s6c-NP-mb8"/>
+                            <constraint firstItem="LXn-Ou-857" firstAttribute="leading" secondItem="3e5-Ht-BRX" secondAttribute="trailing" constant="50" id="u1S-iX-Ozv"/>
+                            <constraint firstItem="sX7-LT-7ym" firstAttribute="centerY" secondItem="Bdn-dG-wWZ" secondAttribute="centerY" id="w7w-yu-mfK"/>
+                            <constraint firstItem="Bdn-dG-wWZ" firstAttribute="width" secondItem="3e5-Ht-BRX" secondAttribute="width" id="x9w-08-Ga5"/>
+                        </constraints>
+                        <animations/>
+                    </view>
+                    <connections>
+                        <outlet property="buttonLoadAudio" destination="46w-Zs-6jJ" id="y2L-1e-VrI"/>
+                        <outlet property="buttonLoadNetwork" destination="HkF-29-0ki" id="gWR-kY-Wkg"/>
+                        <outlet property="buttonRun" destination="Bc7-G7-qpr" id="2mH-MU-xE1"/>
+                        <outlet property="pathAudio" destination="sX7-LT-7ym" id="bJJ-It-0h2"/>
+                        <outlet property="pathNetwork" destination="LXn-Ou-857" id="hyP-Fm-ivg"/>
+                    </connections>
+                </viewController>
+                <customObject id="gqd-JL-WcF" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1204.5" y="601.5"/>
         </scene>
         <!--View Controller Processor-->
         <scene sceneID="SUV-wx-lJe">
