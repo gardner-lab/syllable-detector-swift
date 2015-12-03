@@ -11,8 +11,7 @@ fprintf(fh, 'samplingRate = %.1f\n', f.samplerate);
 fprintf(fh, 'fourierLength = %d\n', f.fft_size);
 fprintf(fh, 'fourierOverlap = %d\n', f.fft_size - f.fft_time_shift);
 
-%fprintf(fh, 'freqRange = %.1f, %.1f\n', round((f.freq_range_ds(1) - 1.5) * f.samplerate/f.fft_size), round((f.freq_range_ds(end) - 0.5) * f.samplerate/f.fft_size));
-fprintf(fh, 'freqRange = %.1f, %.1f\n', round((f.freq_range_ds(1) - 1) * (f.samplerate/2)/f.fft_size), round((f.freq_range_ds(end) - 1) * (f.samplerate/2)/f.fft_size));
+fprintf(fh, 'freqRange = %.1f, %.1f\n', f.freq_range(1), f.freq_range_ds(end));
 fprintf(fh, 'timeRange = %d\n', f.time_window_steps);
 
 fprintf(fh, 'threshold = %.15g\n', f.trigger_thresholds);
