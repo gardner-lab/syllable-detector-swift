@@ -11,12 +11,16 @@ import Accelerate
 
 enum WindowType
 {
+    case None
     case Hamming
     case Hanning
     case Blackman
     
     func createWindow(pointer: UnsafeMutablePointer<Float>, len: Int) {
         switch self {
+        case None:
+            var one: Float = 1.0
+            vDSP_vfill(&one, pointer, 1, vDSP_Length(len))
         case Hamming: vDSP_hamm_window(pointer, vDSP_Length(len), 0)
         case Hanning: vDSP_hann_window(pointer, vDSP_Length(len), 0)
         case Blackman: vDSP_blkman_window(pointer, vDSP_Length(len), 0)

@@ -48,6 +48,12 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         }
         freqIndices = idx
         
+        // check that matches input size
+        let expectedInputs = (freqIndices.1 - freqIndices.0) * config.timeRange
+        guard expectedInputs == config.net.inputs else {
+            fatalError("The neural network has \(config.net.inputs), but the configuration settings suggest there should be \(expectedInputs).")
+        }
+        
         // create the circular buffer
         let bufferCapacity = 512 // hold several full sets of data (could be 2 easily, maybe even 1, for live processing)
         buffer = TPCircularBuffer()
