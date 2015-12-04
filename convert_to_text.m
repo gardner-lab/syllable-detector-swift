@@ -22,7 +22,7 @@ fprintf(fh, 'samplingRate = %.1f\n', f.samplerate);
 fprintf(fh, 'fourierLength = %d\n', f.fft_size);
 fprintf(fh, 'fourierOverlap = %d\n', f.fft_size - f.fft_time_shift);
 
-fprintf(fh, 'freqRange = %.1f, %.1f\n', f.freq_range(1), f.freq_range_ds(end));
+fprintf(fh, 'freqRange = %.1f, %.1f\n', f.freq_range(1), f.freq_range(end));
 fprintf(fh, 'timeRange = %d\n', f.time_window_steps);
 
 fprintf(fh, 'threshold = %.15g\n', f.trigger_thresholds);
@@ -45,15 +45,17 @@ for i = 1:length(f.net.layers)
     % add layer
 	name = sprintf('layer%d', i - 1);
 	layers{i} = name;
+    
+    % check for non-consecutive weights
+    if any(cellfun(@numel, f.net.LW(i, 1:length(f.net.layers) ~= i - 1)))
+        error('Networks with only connections between consecutive layers supported.');
+    end
 
 	% get weights
 	if 1 == i
 		w = f.net.IW{i};
-		if 0 < length(f.net.LW{i})
-			error('Found unexpected layer weights for layer 1.');
-		end
 	else
-		w = f.net.LW{i};
+		w = f.net.LW{i, i - 1};
 		if 0 < length(f.net.IW{i})
 			error('Found unexpected input weights for layer 1.');
 		end
