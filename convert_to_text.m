@@ -1,10 +1,17 @@
 function convert_to_text(fn, mat)
 
-% open file for writing
-fh = fopen(fn, 'w');
-
 % load network definition file
 f = load(mat);
+
+% matlab uses a FFT window of 256 for anything smaller than 256
+% once there is separate support for windowing and fft size, we can re-add
+% this functionality
+if f.fft_size < 256
+    error('FFT size of %d is currently unsupported.', f.fft_size);
+end
+
+% open file for writing
+fh = fopen(fn, 'w');
 
 fprintf(fh, '# AUTOMATICALLY GENERATED SYLLABLE DETECTOR CONFIGURATION\n');
 fprintf(fh, 'samplingRate = %.1f\n', f.samplerate);
