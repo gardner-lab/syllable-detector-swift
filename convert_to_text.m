@@ -10,6 +10,10 @@ if f.fft_size < 256
     error('FFT size of %d is currently unsupported.', f.fft_size);
 end
 
+if f.fft_size ~= 2^nextpow2(f.fft_size)
+    error('Only FFT sizes that are a power of two are supported.');
+end
+
 % open file for writing
 fh = fopen(fn, 'w');
 
