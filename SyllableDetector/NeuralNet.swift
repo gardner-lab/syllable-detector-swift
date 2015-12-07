@@ -97,9 +97,37 @@ struct TanSig: TransferFunction {
     }
 }
 
+struct LogSig: TransferFunction {
+    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+        let len = vDSP_Length(count)
+        
+        // invert sign
+        var negOne: Float = -1.0
+        vDSP_vsmul(values, 1, &negOne, values, 1, len)
+        
+        // exponent
+        var c = Int32(count)
+        vvexpf(values, values, &c)
+        
+        // add one
+        var one: Float = 1.0
+        vDSP_vsadd(values, 1, &one, values, 1, len)
+        
+        // invert
+        vDSP_svdiv(&one, values, 1, values, 1, len)
+    }
+}
+
 struct PureLin: TransferFunction {
     func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
         // dp nothing
+    }
+}
+
+struct SatLin: TransferFunction {
+    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+        var zero: Float = 0.0, one: Float = 1.0
+        vDSP_vclip(values, 1, &zero, &one, values, 1, vDSP_Length(count))
     }
 }
 

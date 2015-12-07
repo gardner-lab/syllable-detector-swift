@@ -103,8 +103,12 @@ function convert_layer(fh, nm, layer, w, b)
 
     if strcmp(layer.transferFcn, 'tansig')
         tf = 'TanSig';
+    elseif strcmp(layer.transferFcn, 'logsig')
+        tf = 'LogSig';
     elseif strcmp(layer.transferFcn, 'purelin')
         tf = 'PureLin';
+    elseif strcmp(layer.transferFcn, 'satlin')
+        tf = 'SatLin';
     else
         error('Invalid transfer function: %s.', layer.transferFcn);
     end

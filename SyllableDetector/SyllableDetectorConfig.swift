@@ -236,7 +236,9 @@ extension SyllableDetectorConfig
             let transferFunction: TransferFunction
             switch try SyllableDetectorConfig.parseString("layer\(i).transferFunction", from: data) {
             case "TanSig": transferFunction = TanSig()
+            case "LogSig": transferFunction = LogSig()
             case "PureLin": transferFunction = PureLin()
+            case "SatLin": transferFunction = SatLin()
             default: throw ParseError.InvalidValue("layer\(i).transferFunction")
             }
             
