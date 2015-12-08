@@ -1,8 +1,9 @@
 # AUTOMATICALLY GENERATED SYLLABLE DETECTOR CONFIGURATION
 samplingRate = 44100.0
-fourierLength = 128
+fourierLength = 256
+windowLength = 128
 fourierOverlap = -313
-freqRange = 1895.0, 11886.0
+freqRange = 1000.0, 6000.0
 timeRange = 14
 threshold = 0.277277277277277
 scaling = db
