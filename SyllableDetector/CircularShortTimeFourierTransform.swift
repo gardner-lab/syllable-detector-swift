@@ -41,22 +41,17 @@ class CircularShortTimeFourierTransform
     private let fftLength: vDSP_Length
     private let fftSetup: FFTSetup
     
-    // kind of hacky, but nice for normalizing audio depending on the format
-    // if changed, should reset window for better accuracy
-    var scaleInputBy: Double = 1.0 {
-        didSet {
-            var s = Float(scaleInputBy / oldValue)
-            vDSP_vsmul(window, 1, &s, window, 1, vDSP_Length(length))
-        }
-    }
-    
     var windowType = WindowType.Hanning {
         didSet {
             resetWindow()
         }
     }
     
+    // store actual window
     private let window: UnsafeMutablePointer<Float>
+    
+    // store windowed values
+    private let samplesWindowed: UnsafeMutablePointer<Float>
     
     // reusable memory
     private var complexBufferA: DSPSplitComplex
@@ -90,6 +85,10 @@ class CircularShortTimeFourierTransform
         // setup window
         window = UnsafeMutablePointer<Float>.alloc(length)
         windowType.createWindow(window, len: length)
+        
+        // setup windowed samples
+        samplesWindowed = UnsafeMutablePointer<Float>.alloc(length)
+        vDSP_vclr(samplesWindowed, 1, vDSP_Length(length))
         
         // half length (for buffer allocation)
         let halfLength = length / 2
@@ -128,6 +127,10 @@ class CircularShortTimeFourierTransform
         
         // free the FFT setup
         vDSP_destroy_fftsetup(fftSetup)
+        
+        // free the memory used to store the samples
+        samplesWindowed.destroy()
+        samplesWindowed.dealloc(length)
         
         // free the window
         window.destroy()
@@ -172,9 +175,6 @@ class CircularShortTimeFourierTransform
     
     func resetWindow() {
         windowType.createWindow(window, len: length)
-        
-        var s = Float(scaleInputBy)
-        vDSP_vsmul(window, 1, &s, window, 1, vDSP_Length(length))
     }
     
     func appendData(data: UnsafeMutablePointer<Float>, withSamples numSamples: Int) {
@@ -225,21 +225,14 @@ class CircularShortTimeFourierTransform
         // get half length
         let halfLength = length / 2
         
-        // temporary holding (for windowing)
-        let samplesCur = UnsafeMutablePointer<Float>.alloc(length)
-        defer {
-            samplesCur.destroy()
-            samplesCur.dealloc(length)
-        }
-        
         // prepare output
         var output = [Float](count: halfLength, repeatedValue: 0.0)
         
         // window the samples
-        vDSP_vmul(samples, 1, window, 1, samplesCur, 1, UInt(length))
+        vDSP_vmul(samples, 1, window, 1, samplesWindowed, 1, UInt(length))
             
         // pack samples into complex values (use stride 2 to fill just reals
-        vDSP_ctoz(UnsafePointer<DSPComplex>(samplesCur), 2, &complexBufferA, 1, UInt(halfLength))
+        vDSP_ctoz(UnsafePointer<DSPComplex>(samplesWindowed), 2, &complexBufferA, 1, UInt(halfLength))
             
         // perform FFT
         // TODO: potentially use vDSP_fftm_zrip
@@ -255,8 +248,6 @@ class CircularShortTimeFourierTransform
         // THE LENGTH MAKES THE FFT SYMMETRIC
         var scale: Float = 4.0 // 4.0 * Float(length)
         vDSP_vsdiv(&output, 1, &scale, &output, 1, UInt(halfLength))
-        
-        // TODO: add appropriate scaling based on window
         
         return output
     }
@@ -285,21 +276,14 @@ class CircularShortTimeFourierTransform
         // get half length
         let halfLength = length / 2
         
-        // temporary holding (for windowing)
-        let samplesCur = UnsafeMutablePointer<Float>.alloc(length)
-        defer {
-            samplesCur.destroy()
-            samplesCur.dealloc(length)
-        }
-        
         // prepare output
         var output = [Float](count: halfLength, repeatedValue: 0.0)
         
         // window the samples
-        vDSP_vmul(samples, 1, window, 1, samplesCur, 1, UInt(length))
+        vDSP_vmul(samples, 1, window, 1, samplesWindowed, 1, UInt(length))
         
         // pack samples into complex values (use stride 2 to fill just reals
-        vDSP_ctoz(UnsafePointer<DSPComplex>(samplesCur), 2, &complexBufferA, 1, UInt(halfLength))
+        vDSP_ctoz(UnsafePointer<DSPComplex>(samplesWindowed), 2, &complexBufferA, 1, UInt(halfLength))
         
         // perform FFT
         // TODO: potentially use vDSP_fftm_zrip
@@ -315,8 +299,6 @@ class CircularShortTimeFourierTransform
         // THE SQRT MAKES THE FFT SYMMETRIC
         var scale: Float = 2.0 // 2.0 * sqrt(Float(length))
         vDSP_vsdiv(&output, 1, &scale, &output, 1, UInt(halfLength))
-        
-        // TODO: add appropriate scaling based on window
         
         return output
     }
