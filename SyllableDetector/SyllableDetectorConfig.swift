@@ -155,6 +155,9 @@ extension SyllableDetectorConfig
         case "normalize":
             return Normalize()
             
+        case "normalizestd":
+            return NormalizeStd()
+            
         default:
             throw ParseError.InvalidValue("\(nm).function")
         }
@@ -167,6 +170,7 @@ extension SyllableDetectorConfig
         switch functionName {
         case "mapminmax":
             return try SyllableDetectorConfig.parseMapMinMax(nm, withCount: cnt, from: data)
+            
         default:
             throw ParseError.InvalidValue("\(nm).function")
         }

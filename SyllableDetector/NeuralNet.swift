@@ -74,6 +74,18 @@ class Normalize: InputProcessingFunction {
     }
 }
 
+class NormalizeStd: InputProcessingFunction {
+    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+        // vDSP functions in the copy version support in place operations
+        applyAndCopy(values, count: count, to: values)
+    }
+    
+    func applyAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
+        var mean: Float = 0.0, stddev: Float = 0.0
+        vDSP_normalize(values, 1, destination, 1, &mean, &stddev, vDSP_Length(count))
+    }
+}
+
 class MapMinMax: InputProcessingFunction, OutputProcessingFunction {
     var gains: [Float]
     var xOffsets: [Float]
