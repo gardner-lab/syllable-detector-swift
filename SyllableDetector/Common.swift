@@ -22,3 +22,9 @@ extension String {
         return self.characters.split { $0 == char } .map(String.init)
     }
 }
+
+extension Int {
+    func isPowerOfTwo() -> Bool {
+        return (self != 0) && (self & (self - 1)) == 0
+    }
+}

@@ -3,15 +3,25 @@ function convert_to_text(fn, mat)
 % load network definition file
 f = load(mat);
 
-% matlab uses a FFT window of 256 for anything smaller than 256
-% once there is separate support for windowing and fft size, we can re-add
-% this functionality
-if f.fft_size < 256
-    error('FFT size of %d is currently unsupported.', f.fft_size);
+% default to same window size
+if ~isfield(f, 'win_size')
+    f.win_size = f.fft_size;
 end
 
+% FFT msut be a power of 2
 if f.fft_size ~= 2^nextpow2(f.fft_size)
     error('Only FFT sizes that are a power of two are supported.');
+end
+
+% FFT must be longer than or equal to the window size
+if f.win_size > f.fft_size
+    error('The window size must be less than or equal to the FFT size.');
+end
+
+% handle weird spectrogram behavior
+if 256 > f.fft_size
+    warn('The spectrogram defaults to using an FFT size of 256. As a result, the provided FFT size will be ignored.');
+    f.fft_size = 256;
 end
 
 % open file for writing
@@ -19,6 +29,7 @@ fh = fopen(fn, 'w');
 
 fprintf(fh, '# AUTOMATICALLY GENERATED SYLLABLE DETECTOR CONFIGURATION\n');
 fprintf(fh, 'samplingRate = %.1f\n', f.samplerate);
+fprintf(fh, 'windowLength = %d\n', f.win_size);
 fprintf(fh, 'fourierLength = %d\n', f.fft_size);
 fprintf(fh, 'fourierOverlap = %d\n', f.fft_size - f.fft_time_shift);
 

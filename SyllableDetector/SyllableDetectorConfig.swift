@@ -30,6 +30,7 @@ struct SyllableDetectorConfig
     }
     
     var samplingRate: Double // eqv: samplerate
+    var windowLength: Int
     var fourierLength: Int // eqv: FFT_SIZE
     var fourierOverlap: Int // eqv: NOVERLAP = FFT_SIZE - (floor(samplerate * FFT_TIME_SHIFT))
     
@@ -200,6 +201,17 @@ extension SyllableDetectorConfig
         
         // fourier length: int
         fourierLength = try SyllableDetectorConfig.parseInt("fourierLength", from: data)
+        if !fourierLength.isPowerOfTwo() {
+            throw SyllableDetectorConfig.ParseError.InvalidValue("fourierLength")
+        }
+        
+        // window length: int, defaults to fourierLength
+        if nil == data["windowLength"] {
+            windowLength = fourierLength
+        }
+        else {
+            windowLength = try SyllableDetectorConfig.parseInt("windowLength", from: data)
+        }
         
         // fourier length: int
         fourierOverlap = try SyllableDetectorConfig.parseInt("fourierOverlap", from: data)
