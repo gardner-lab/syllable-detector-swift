@@ -258,8 +258,18 @@ extension SyllableDetectorConfig
         }
         
         // get input mapping
-        let processInputs = try SyllableDetectorConfig.parseInputProcessingFunction("processInputs", withCount: layers[0].inputs, from: data)
-        let processOutputs = try SyllableDetectorConfig.parseOutputProcessingFunction("processOutputs", withCount: layers[layerCount - 1].outputs, from: data)
+        let processInputCount = try SyllableDetectorConfig.parseInt("processInputsCount", from: data)
+        let processInputs = try (0..<processInputCount).map {
+            (i: Int) -> InputProcessingFunction in
+            return try SyllableDetectorConfig.parseInputProcessingFunction("processInputs\(i)", withCount: layers[0].inputs, from: data)
+        }
+        
+        // get output mapping
+        let processOutputCount = try SyllableDetectorConfig.parseInt("processOutputsCount", from: data)
+        let processOutputs = try (0..<processOutputCount).map {
+            (i: Int) -> OutputProcessingFunction in
+            return try SyllableDetectorConfig.parseOutputProcessingFunction("processOutputs\(i)", withCount: layers[layerCount - 1].outputs, from: data)
+        }
         
         // create network
         net = NeuralNet(layers: layers, inputProcessing: processInputs, outputProcessing: processOutputs)
