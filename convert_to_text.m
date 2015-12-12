@@ -20,7 +20,7 @@ end
 
 % handle weird spectrogram behavior
 if 256 > f.fft_size
-    warn('The spectrogram defaults to using an FFT size of 256. As a result, the provided FFT size will be ignored.');
+    warning('The spectrogram defaults to using an FFT size of 256. As a result, the provided FFT size will be ignored.');
     f.fft_size = 256;
 end
 
@@ -81,29 +81,40 @@ end
 fclose(fh);
 
 function convert_processing_functions(fh, nm, put)
-    switch length(put.processFcns)
-        case 0
-            % default to normalizing row (DOES NOT MATCH MATLAB, SPECIFIC FOR THIS PROJECT)
-            fprintf(fh, '%s.function = normalize\n', nm);
+    l = length(put.processFcns);
+    
+    if l == 0
+        warning('Zero processing functions no longer results in linear normalization of input vectors.');
+    end
+    
+    fprintf(fh, '%sCount = %d\n', nm, l);
+    for j = 1:l
+        switch put.processFcns{j}
+            case 'mapminmax'
+                offsets = sprintf('%.15g, ', put.processSettings{j}.xoffset);
+                offsets = offsets(1:end - 2); % remove final comma
+                gains = sprintf('%.15g, ', put.processSettings{j}.gain);
+                gains = gains(1:end - 2); % remove final comma
 
-        case 1
-            if ~strcmp(put.processFcns{1}, 'mapminmax')
-                error('Invalid processing function: %s. Expected mapminmax.', put.processFcns{1});
-            end
+                fprintf(fh, '%s%d.function = mapminmax\n', nm, j - 1);
+                fprintf(fh, '%s%d.xOffsets = %s\n', nm, j - 1, offsets);
+                fprintf(fh, '%s%d.gains = %s\n', nm, j - 1, gains);
+                fprintf(fh, '%s%d.yMin = %.15g\n', nm, j - 1, put.processSettings{j}.ymin);
+                
+            case 'mapstd'
+                offsets = sprintf('%.15g, ', put.processSettings{j}.xoffset);
+                offsets = offsets(1:end - 2); % remove final comma
+                gains = sprintf('%.15g, ', put.processSettings{j}.gain);
+                gains = gains(1:end - 2); % remove final comma
 
-            offsets = sprintf('%.15g, ', put.processSettings{1}.xoffset);
-            offsets = offsets(1:end - 2); % remove final comma
-            gains = sprintf('%.15g, ', put.processSettings{1}.gain);
-            gains = gains(1:end - 2); % remove final comma
-
-            fprintf(fh, '%s.function = mapminmax\n', nm);
-            fprintf(fh, '%s.xOffsets = %s\n', nm, offsets);
-            fprintf(fh, '%s.gains = %s\n', nm, gains);
-            fprintf(fh, '%s.yMin = %.15g\n', nm, put.processSettings{1}.ymin);
-
-
-        otherwise
-            error('Invalid processing functions. Only one processing function is supported.');
+                fprintf(fh, '%s%d.function = mapstd\n', nm, j - 1);
+                fprintf(fh, '%s%d.xOffsets = %s\n', nm, j - 1, offsets);
+                fprintf(fh, '%s%d.gains = %s\n', nm, j - 1, gains);
+                fprintf(fh, '%s%d.yMean = %.15g\n', nm, j - 1, put.processSettings{j}.ymean);
+                
+            otherwise
+                error('Invalid processing function: %s.', put.processFcns{j});
+        end
     end
 end
 

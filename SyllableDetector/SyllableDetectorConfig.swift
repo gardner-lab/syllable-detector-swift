@@ -143,6 +143,13 @@ extension SyllableDetectorConfig
         return MapMinMax(xOffsets: xOffsets, gains: gains, yMin: yMin)
     }
     
+    private static func parseMapStd(nm: String, withCount cnt: Int, from data: [String: String]) throws -> MapStd {
+        let xOffsets = try SyllableDetectorConfig.parseFloatArray("\(nm).xOffsets", withCount: cnt, from: data)
+        let gains = try SyllableDetectorConfig.parseFloatArray("\(nm).gains", withCount: cnt, from: data)
+        let yMean = try SyllableDetectorConfig.parseFloat("\(nm).yMean", from: data)
+        return MapStd(xOffsets: xOffsets, gains: gains, yMean: yMean)
+    }
+    
     private static func parseInputProcessingFunction(nm: String, withCount cnt: Int, from data: [String: String]) throws -> InputProcessingFunction {
         // get processing function
         // TODO: add a default processing function that passes through values
@@ -152,8 +159,14 @@ extension SyllableDetectorConfig
         case "mapminmax":
             return try SyllableDetectorConfig.parseMapMinMax(nm, withCount: cnt, from: data)
             
+        case "mapstd":
+            return try SyllableDetectorConfig.parseMapStd(nm, withCount: cnt, from: data)
+            
         case "normalize":
             return Normalize()
+            
+        case "normalizestd":
+            return NormalizeStd()
             
         default:
             throw ParseError.InvalidValue("\(nm).function")
@@ -167,6 +180,10 @@ extension SyllableDetectorConfig
         switch functionName {
         case "mapminmax":
             return try SyllableDetectorConfig.parseMapMinMax(nm, withCount: cnt, from: data)
+            
+        case "mapstd":
+            return try SyllableDetectorConfig.parseMapStd(nm, withCount: cnt, from: data)
+            
         default:
             throw ParseError.InvalidValue("\(nm).function")
         }
@@ -258,8 +275,18 @@ extension SyllableDetectorConfig
         }
         
         // get input mapping
-        let processInputs = try SyllableDetectorConfig.parseInputProcessingFunction("processInputs", withCount: layers[0].inputs, from: data)
-        let processOutputs = try SyllableDetectorConfig.parseOutputProcessingFunction("processOutputs", withCount: layers[layerCount - 1].outputs, from: data)
+        let processInputCount = try SyllableDetectorConfig.parseInt("processInputsCount", from: data)
+        let processInputs = try (0..<processInputCount).map {
+            (i: Int) -> InputProcessingFunction in
+            return try SyllableDetectorConfig.parseInputProcessingFunction("processInputs\(i)", withCount: layers[0].inputs, from: data)
+        }
+        
+        // get output mapping
+        let processOutputCount = try SyllableDetectorConfig.parseInt("processOutputsCount", from: data)
+        let processOutputs = try (0..<processOutputCount).map {
+            (i: Int) -> OutputProcessingFunction in
+            return try SyllableDetectorConfig.parseOutputProcessingFunction("processOutputs\(i)", withCount: layers[layerCount - 1].outputs, from: data)
+        }
         
         // create network
         net = NeuralNet(layers: layers, inputProcessing: processInputs, outputProcessing: processOutputs)
