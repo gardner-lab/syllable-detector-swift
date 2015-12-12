@@ -121,6 +121,44 @@ class MapMinMax: InputProcessingFunction, OutputProcessingFunction {
     }
 }
 
+class MapStd: InputProcessingFunction, OutputProcessingFunction {
+    var gains: [Float]
+    var xOffsets: [Float]
+    var yMean: Float
+    
+    init(xOffsets: [Float], gains: [Float], yMean: Float) {
+        self.xOffsets = xOffsets
+        self.gains = gains
+        self.yMean = yMean
+    }
+    
+    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+        // vDSP functions in the copy version support in place operations
+        applyAndCopy(values, count: count, to: values)
+    }
+    
+    func applyAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
+        // (values - xOffsets) * gain + yMean
+        vDSP_vsbm(values, 1, &xOffsets, 1, &gains, 1, destination, 1, vDSP_Length(count))
+        
+        if 0 != yMean {
+            vDSP_vsadd(destination, 1, &yMean, destination, 1, vDSP_Length(count))
+        }
+    }
+    
+    func reverseInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+        // vDSP functions in the copy version support in place operations
+        reverseAndCopy(values, count: count, to: values)
+    }
+    
+    func reverseAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
+        var negYMean = 0 - yMean
+        vDSP_vsadd(values, 1, &negYMean, destination, 1, vDSP_Length(count))
+        vDSP_vdiv(&gains, 1, destination, 1, destination, 1, vDSP_Length(count))
+        vDSP_vadd(destination, 1, &xOffsets, 1, destination, 1, vDSP_Length(count))
+    }
+}
+
 // transfer function protocol
 protocol TransferFunction {
     func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int)

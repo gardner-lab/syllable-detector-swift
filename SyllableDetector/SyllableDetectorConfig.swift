@@ -143,6 +143,13 @@ extension SyllableDetectorConfig
         return MapMinMax(xOffsets: xOffsets, gains: gains, yMin: yMin)
     }
     
+    private static func parseMapStd(nm: String, withCount cnt: Int, from data: [String: String]) throws -> MapStd {
+        let xOffsets = try SyllableDetectorConfig.parseFloatArray("\(nm).xOffsets", withCount: cnt, from: data)
+        let gains = try SyllableDetectorConfig.parseFloatArray("\(nm).gains", withCount: cnt, from: data)
+        let yMean = try SyllableDetectorConfig.parseFloat("\(nm).yMean", from: data)
+        return MapStd(xOffsets: xOffsets, gains: gains, yMean: yMean)
+    }
+    
     private static func parseInputProcessingFunction(nm: String, withCount cnt: Int, from data: [String: String]) throws -> InputProcessingFunction {
         // get processing function
         // TODO: add a default processing function that passes through values
@@ -151,6 +158,9 @@ extension SyllableDetectorConfig
         switch functionName {
         case "mapminmax":
             return try SyllableDetectorConfig.parseMapMinMax(nm, withCount: cnt, from: data)
+            
+        case "mapstd":
+            return try SyllableDetectorConfig.parseMapStd(nm, withCount: cnt, from: data)
             
         case "normalize":
             return Normalize()
@@ -170,6 +180,9 @@ extension SyllableDetectorConfig
         switch functionName {
         case "mapminmax":
             return try SyllableDetectorConfig.parseMapMinMax(nm, withCount: cnt, from: data)
+            
+        case "mapstd":
+            return try SyllableDetectorConfig.parseMapStd(nm, withCount: cnt, from: data)
             
         default:
             throw ParseError.InvalidValue("\(nm).function")
