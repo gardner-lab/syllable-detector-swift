@@ -91,15 +91,15 @@ function convert_processing_functions(fh, nm, put)
     for j = 1:l
         switch put.processFcns{j}
             case 'mapminmax'
-                offsets = sprintf('%.15g, ', put.processSettings{1}.xoffset);
+                offsets = sprintf('%.15g, ', put.processSettings{j}.xoffset);
                 offsets = offsets(1:end - 2); % remove final comma
-                gains = sprintf('%.15g, ', put.processSettings{1}.gain);
+                gains = sprintf('%.15g, ', put.processSettings{j}.gain);
                 gains = gains(1:end - 2); % remove final comma
 
                 fprintf(fh, '%s%d.function = mapminmax\n', nm, j - 1);
                 fprintf(fh, '%s%d.xOffsets = %s\n', nm, j - 1, offsets);
                 fprintf(fh, '%s%d.gains = %s\n', nm, j - 1, gains);
-                fprintf(fh, '%s%d.yMin = %.15g\n', nm, j - 1, put.processSettings{1}.ymin);
+                fprintf(fh, '%s%d.yMin = %.15g\n', nm, j - 1, put.processSettings{j}.ymin);
                 
             otherwise
                 error('Invalid processing function: %s.', put.processFcns{j});
