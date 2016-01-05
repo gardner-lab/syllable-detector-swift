@@ -242,7 +242,10 @@ class ViewControllerSimulator: NSViewController {
         assert(status == noErr)
         
         // processing
-        var nextCount: Int = sd.config.fourierLength + ((sd.config.fourierLength - sd.config.fourierOverlap) * (sd.config.timeRange - 1)), nextValue: Float = 0.0
+        var nextCount: Int = sd.config.windowLength + ((sd.config.windowLength - sd.config.windowOverlap) * (sd.config.timeRange - 1)), nextValue: Float = 0.0
+        if sd.config.windowOverlap < 0 {
+            nextCount = nextCount - sd.config.windowOverlap // since gap is applied even to the first data set
+        }
         var samplePosition: Int64 = 0
         let gcdGroup = dispatch_group_create()
         let gcdQueue = dispatch_queue_create("Encode", DISPATCH_QUEUE_SERIAL)
@@ -296,7 +299,7 @@ class ViewControllerSimulator: NSViewController {
                     }
                     
                     // length
-                    var l = sd.config.fourierLength - sd.config.fourierOverlap
+                    var l = sd.config.windowLength - sd.config.windowOverlap
                     
                     for ; 0 < l && i < numSamples; ++i, --l {
                         newSamples[i] = v
@@ -325,6 +328,8 @@ class ViewControllerSimulator: NSViewController {
                 
                 // append sample buffer
                 if !avWriterInput.appendSampleBuffer(newSampleBuffer!) {
+                    DLog("failed to write sample buffer \(avWriter.status) \(avWriter.error)")
+                    avReader.cancelReading() // cancel reading
                     completedOrFailed = true
                 }
             }
