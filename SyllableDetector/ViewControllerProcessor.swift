@@ -14,6 +14,7 @@ struct ProcessorEntry {
     let inputChannel: Int
     var network: String = ""
     var config: SyllableDetectorConfig?
+    var resampler: Resampler?
     let outputChannel: Int
     
     init(inputChannel: Int, outputChannel: Int) {
@@ -104,8 +105,17 @@ class Processor: AudioInputInterfaceDelegate {
         vDSP_svesq(data, 1, &sum, vDSP_Length(length))
         statInput[index].writeValue(Double(sum) / Double(length))
         
-        // append audio samples
-        detectors[index].appendAudioData(data, withSamples: length)
+        // resample
+        if let r = entries[index].resampler {
+            var resampledData = r.resampleVector(data, ofLength: length)
+            
+            // append audio samples
+            detectors[index].appendAudioData(&resampledData, withSamples: resampledData.count)
+        }
+        else {
+            // append audio samples
+            detectors[index].appendAudioData(data, withSamples: length)
+        }
         
         // process
         dispatch_async(queueProcessing) {
@@ -383,12 +393,12 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
                 if let url = panel.URL, let path = url.path {
                     do {
                         // load file
-                        var config = try SyllableDetectorConfig(fromTextFile: path)
+                        let config = try SyllableDetectorConfig(fromTextFile: path)
                         
                         // check sampling rate
                         if (1 < abs(config.samplingRate - self.deviceInput.sampleRateInput)) {
                             DLog("Mismatched sampling rates. Expecting: \(config.samplingRate). Device: \(self.deviceInput.sampleRateInput).")
-                            config.modifySamplingRate(self.deviceInput.sampleRateInput)
+                            self.processorEntries[row].resampler = ResamplerLinear(fromRate: self.deviceInput.sampleRateInput, toRate: config.samplingRate)
                         }
                         
                         self.processorEntries[row].config = config
