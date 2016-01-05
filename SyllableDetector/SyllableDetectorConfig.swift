@@ -29,10 +29,10 @@ struct SyllableDetectorConfig
         }
     }
     
-    var samplingRate: Double // eqv: samplerate
+    let samplingRate: Double // eqv: samplerate
     let fourierLength: Int // eqv: FFT_SIZE
     let windowLength: Int
-    var windowOverlap: Int // eqv: NOVERLAP = FFT_SIZE - (floor(samplerate * FFT_TIME_SHIFT))
+    let windowOverlap: Int // eqv: NOVERLAP = FFT_SIZE - (floor(samplerate * FFT_TIME_SHIFT))
     
     let freqRange: (Double, Double) // eqv: freq_range
     let timeRange: Int // eqv: time_window_steps = double(floor(time_window / timestep))
@@ -42,28 +42,6 @@ struct SyllableDetectorConfig
     let threshold: Double // eqv: trigger threshold
     
     let net: NeuralNet
-    
-    mutating func modifySamplingRate(newSamplingRate: Double) {
-        // store old things
-        let oldSamplingRate = samplingRate
-        let oldWindowOverlap = windowOverlap
-        
-        if oldSamplingRate == newSamplingRate { return }
-        
-        // window offset (difference in time between two consecutive windows)
-        // calculated using old values, but should be constant even after the new values
-        let windowOffset = Double(windowLength - oldWindowOverlap) / oldSamplingRate
-        
-        let newWindowOverlap = windowLength - Int(round(windowOffset * newSamplingRate))
-        
-        // change the to new things
-        samplingRate = newSamplingRate
-        windowOverlap = newWindowOverlap
-        
-        DLog("Window offset: \(windowOffset)")
-        DLog("Sanity check: \(Double(windowLength - oldWindowOverlap) / oldSamplingRate)")
-        DLog("Window overlap: OLD \(oldWindowOverlap) NEW \(newWindowOverlap)")
-    }
 }
 
 // make parsable

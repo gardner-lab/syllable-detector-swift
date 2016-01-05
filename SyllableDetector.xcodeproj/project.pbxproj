@@ -20,6 +20,7 @@
 		D8625C9C1BE149FE000922D8 /* CircularShortTimeFourierTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C931BE149FE000922D8 /* CircularShortTimeFourierTransform.swift */; };
 		D8625CA41BE14A53000922D8 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = D8625CA21BE14A53000922D8 /* TPCircularBuffer.c */; };
 		D89269891BF3AEDE009482C2 /* SummaryStat.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89269881BF3AEDE009482C2 /* SummaryStat.swift */; };
+		D89803B51C3C2ACF000CFC41 /* Resampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89803B41C3C2ACF000CFC41 /* Resampler.swift */; };
 		D8B59D161BE6B77F0099CB4B /* StreamReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8B59D151BE6B77F0099CB4B /* StreamReader.swift */; };
 		D8D1BD481BE6D61B00059974 /* ViewControllerMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D1BD471BE6D61B00059974 /* ViewControllerMenu.swift */; };
 		D8D1BD4D1BE6E53C00059974 /* WindowControllerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D1BD4C1BE6E53C00059974 /* WindowControllerProcessor.swift */; };
@@ -43,6 +44,7 @@
 		D8625CA31BE14A53000922D8 /* TPCircularBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPCircularBuffer.h; sourceTree = "<group>"; };
 		D8625CA51BE14B8E000922D8 /* SyllableDetector-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SyllableDetector-Bridging-Header.h"; sourceTree = "<group>"; };
 		D89269881BF3AEDE009482C2 /* SummaryStat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SummaryStat.swift; sourceTree = "<group>"; };
+		D89803B41C3C2ACF000CFC41 /* Resampler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Resampler.swift; sourceTree = "<group>"; };
 		D8B59D151BE6B77F0099CB4B /* StreamReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamReader.swift; sourceTree = "<group>"; };
 		D8D1BD471BE6D61B00059974 /* ViewControllerMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewControllerMenu.swift; sourceTree = "<group>"; };
 		D8D1BD4C1BE6E53C00059974 /* WindowControllerProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WindowControllerProcessor.swift; sourceTree = "<group>"; };
@@ -84,6 +86,7 @@
 				D8625C931BE149FE000922D8 /* CircularShortTimeFourierTransform.swift */,
 				D8625C911BE149FE000922D8 /* Common.swift */,
 				D8625C8E1BE149FE000922D8 /* NeuralNet.swift */,
+				D89803B41C3C2ACF000CFC41 /* Resampler.swift */,
 				D8B59D151BE6B77F0099CB4B /* StreamReader.swift */,
 				D89269881BF3AEDE009482C2 /* SummaryStat.swift */,
 				D8625C8B1BE149FE000922D8 /* SyllableDetector.swift */,
@@ -191,6 +194,7 @@
 				D8625C9A1BE149FE000922D8 /* Common.swift in Sources */,
 				D82E7F7B1C10B629004759F7 /* ViewControllerSimulator.swift in Sources */,
 				D8625C7F1BE14922000922D8 /* ViewControllerProcessor.swift in Sources */,
+				D89803B51C3C2ACF000CFC41 /* Resampler.swift in Sources */,
 				D8625C951BE149FE000922D8 /* AudioInterface.swift in Sources */,
 				D89269891BF3AEDE009482C2 /* SummaryStat.swift in Sources */,
 				D8625C7D1BE14922000922D8 /* AppDelegate.swift in Sources */,
