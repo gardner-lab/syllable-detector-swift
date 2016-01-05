@@ -162,6 +162,9 @@ extension SyllableDetectorConfig
         case "mapstd":
             return try SyllableDetectorConfig.parseMapStd(nm, withCount: cnt, from: data)
             
+        case "l2normalize":
+            return L2Normalize()
+            
         case "normalize":
             return Normalize()
             
