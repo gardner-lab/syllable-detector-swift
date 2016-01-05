@@ -39,7 +39,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         self.config = config
         
         // initialize the FFT
-        shortTimeFourierTransform = CircularShortTimeFourierTransform(windowLength: config.windowLength, withOverlap: config.fourierOverlap, fftSizeOf: config.fourierLength)
+        shortTimeFourierTransform = CircularShortTimeFourierTransform(windowLength: config.windowLength, withOverlap: config.windowOverlap, fftSizeOf: config.fourierLength)
         shortTimeFourierTransform.windowType = WindowType.Hamming
         
         // store frequency indices

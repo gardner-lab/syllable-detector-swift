@@ -29,9 +29,9 @@ fh = fopen(fn, 'w');
 
 fprintf(fh, '# AUTOMATICALLY GENERATED SYLLABLE DETECTOR CONFIGURATION\n');
 fprintf(fh, 'samplingRate = %.1f\n', f.samplerate);
-fprintf(fh, 'windowLength = %d\n', f.win_size);
 fprintf(fh, 'fourierLength = %d\n', f.fft_size);
-fprintf(fh, 'fourierOverlap = %d\n', f.fft_size - f.fft_time_shift);
+fprintf(fh, 'windowLength = %d\n', f.win_size);
+fprintf(fh, 'windowOverlap = %d\n', f.fft_size - f.fft_time_shift);
 
 fprintf(fh, 'freqRange = %.1f, %.1f\n', f.freq_range(1), f.freq_range(end));
 fprintf(fh, 'timeRange = %d\n', f.time_window_steps);

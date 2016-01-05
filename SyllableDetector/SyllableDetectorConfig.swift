@@ -30,9 +30,9 @@ struct SyllableDetectorConfig
     }
     
     var samplingRate: Double // eqv: samplerate
-    var windowLength: Int
-    var fourierLength: Int // eqv: FFT_SIZE
-    var fourierOverlap: Int // eqv: NOVERLAP = FFT_SIZE - (floor(samplerate * FFT_TIME_SHIFT))
+    let fourierLength: Int // eqv: FFT_SIZE
+    let windowLength: Int
+    var windowOverlap: Int // eqv: NOVERLAP = FFT_SIZE - (floor(samplerate * FFT_TIME_SHIFT))
     
     let freqRange: (Double, Double) // eqv: freq_range
     let timeRange: Int // eqv: time_window_steps = double(floor(time_window / timestep))
@@ -46,28 +46,23 @@ struct SyllableDetectorConfig
     mutating func modifySamplingRate(newSamplingRate: Double) {
         // store old things
         let oldSamplingRate = samplingRate
-        let oldFourierLength = fourierLength
-        let oldFourierOverlap = fourierOverlap
+        let oldWindowOverlap = windowOverlap
         
         if oldSamplingRate == newSamplingRate { return }
         
+        // window offset (difference in time between two consecutive windows)
+        // calculated using old values, but should be constant even after the new values
+        let windowOffset = Double(windowLength - oldWindowOverlap) / oldSamplingRate
         
-        // get new approximate fourier length
-        let newApproximateFourierLength = newSamplingRate * Double(oldFourierLength) / oldSamplingRate
-        
-        // convert to closest power of 2
-        let newFourierLength = 1 << Int(round(log2(newApproximateFourierLength)))
-        
-        // get new fourier overlap
-        let newFourierOverlap = newFourierLength - Int(round(newSamplingRate * Double(oldFourierLength - oldFourierOverlap) / oldSamplingRate))
+        let newWindowOverlap = windowLength - Int(round(windowOffset * newSamplingRate))
         
         // change the to new things
         samplingRate = newSamplingRate
-        fourierLength = newFourierLength
-        fourierOverlap = newFourierOverlap
+        windowOverlap = newWindowOverlap
         
-        DLog("New fourier length: \(newFourierLength)")
-        DLog("New fourier overlap: \(newFourierOverlap)")
+        DLog("Window offset: \(windowOffset)")
+        DLog("Sanity check: \(Double(windowLength - oldWindowOverlap) / oldSamplingRate)")
+        DLog("Window overlap: OLD \(oldWindowOverlap) NEW \(newWindowOverlap)")
     }
 }
 
@@ -162,6 +157,9 @@ extension SyllableDetectorConfig
         case "mapstd":
             return try SyllableDetectorConfig.parseMapStd(nm, withCount: cnt, from: data)
             
+        case "l2normalize":
+            return L2Normalize()
+            
         case "normalize":
             return Normalize()
             
@@ -231,7 +229,7 @@ extension SyllableDetectorConfig
         }
         
         // fourier length: int
-        fourierOverlap = try SyllableDetectorConfig.parseInt("fourierOverlap", from: data)
+        windowOverlap = try SyllableDetectorConfig.parseInt("windowOverlap", from: data)
         
         // frequency range: double, double
         let potentialFreqRange = try SyllableDetectorConfig.parseDoubleArray("freqRange", withCount: 2, from: data)

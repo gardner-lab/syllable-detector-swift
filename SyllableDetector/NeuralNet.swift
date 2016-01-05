@@ -38,6 +38,28 @@ class PassThrough: InputProcessingFunction, OutputProcessingFunction {
     }
 }
 
+class L2Normalize: InputProcessingFunction {
+    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+        // vDSP functions in the copy version support in place operations
+        applyAndCopy(values, count: count, to: values)
+    }
+    
+    func applyAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
+        let len = vDSP_Length(count)
+        
+        // sum of squares
+        var sumsq: Float = 0.0, sqrtsumsq: Float = 0.0
+        vDSP_svesq(values, 1, &sumsq, len)
+        
+        // get square root
+        sqrtsumsq = sqrt(sumsq)
+        
+        // divide by sum of squares
+        vDSP_vsdiv(values, 1, &sqrtsumsq, destination, 1, len)
+    }
+    
+}
+
 class Normalize: InputProcessingFunction {
     func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
         // vDSP functions in the copy version support in place operations

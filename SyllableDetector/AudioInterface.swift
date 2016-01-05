@@ -337,7 +337,7 @@ class AudioOutputInterface: AudioInterface
     
     var outputHighFor = [Int]()
     
-    init(deviceID: AudioDeviceID, frameSize: Int = 64) {
+    init(deviceID: AudioDeviceID, frameSize: Int = 32) {
         self.deviceID = deviceID
         self.frameSize = frameSize
     }
@@ -469,7 +469,7 @@ class AudioInputInterface: AudioInterface
     
     var bufferList: UnsafeMutableAudioBufferListPointer = UnsafeMutableAudioBufferListPointer(nil)
     
-    init(deviceID: AudioDeviceID, frameSize: Int = 64) {
+    init(deviceID: AudioDeviceID, frameSize: Int = 32) {
         self.deviceID = deviceID
         self.frameSize = frameSize
     }
