@@ -82,6 +82,11 @@ class CircularShortTimeFourierTransform
             guard v.isPowerOfTwo() else {
                 fatalError("The FFT size must be a power of 2.")
             }
+            
+            guard lengthWindow <= v else {
+                fatalError("The FFT size must be greater than or equal to the window length.")
+            }
+            
             lengthFft = v
             fftSize = vDSP_Length(ceil(log2(CDouble(v))))
         }
