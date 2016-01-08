@@ -19,12 +19,46 @@
 		D8625C9A1BE149FE000922D8 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C911BE149FE000922D8 /* Common.swift */; };
 		D8625C9C1BE149FE000922D8 /* CircularShortTimeFourierTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C931BE149FE000922D8 /* CircularShortTimeFourierTransform.swift */; };
 		D8625CA41BE14A53000922D8 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = D8625CA21BE14A53000922D8 /* TPCircularBuffer.c */; };
+		D86BB4741C4026B8004CA928 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D86BB4731C4026B8004CA928 /* Accelerate.framework */; };
+		D86BB4751C4026D9004CA928 /* ORSSerial.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D86BB4701C402696004CA928 /* ORSSerial.framework */; };
+		D86BB4771C402712004CA928 /* ArduinoIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = D86BB4761C402712004CA928 /* ArduinoIO.swift */; };
+		D86BB4791C4056E6004CA928 /* ORSSerial.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D86BB4701C402696004CA928 /* ORSSerial.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D89269891BF3AEDE009482C2 /* SummaryStat.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89269881BF3AEDE009482C2 /* SummaryStat.swift */; };
 		D89803B51C3C2ACF000CFC41 /* Resampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89803B41C3C2ACF000CFC41 /* Resampler.swift */; };
 		D8B59D161BE6B77F0099CB4B /* StreamReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8B59D151BE6B77F0099CB4B /* StreamReader.swift */; };
 		D8D1BD481BE6D61B00059974 /* ViewControllerMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D1BD471BE6D61B00059974 /* ViewControllerMenu.swift */; };
 		D8D1BD4D1BE6E53C00059974 /* WindowControllerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D1BD4C1BE6E53C00059974 /* WindowControllerProcessor.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D86BB46F1C402696004CA928 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D86BB46A1C402696004CA928 /* ORSSerialPort.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 9DCA89121A2BB106009285EB;
+			remoteInfo = ORSSerial;
+		};
+		D86BB4711C402696004CA928 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D86BB46A1C402696004CA928 /* ORSSerialPort.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 9D7472131B6D7767002D8B10;
+			remoteInfo = "ORSSerialPort Tests";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D86BB4781C4056E0004CA928 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				D86BB4791C4056E6004CA928 /* ORSSerial.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		D82E7F7A1C10B629004759F7 /* ViewControllerSimulator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewControllerSimulator.swift; sourceTree = "<group>"; };
@@ -43,6 +77,9 @@
 		D8625CA21BE14A53000922D8 /* TPCircularBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TPCircularBuffer.c; sourceTree = "<group>"; };
 		D8625CA31BE14A53000922D8 /* TPCircularBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPCircularBuffer.h; sourceTree = "<group>"; };
 		D8625CA51BE14B8E000922D8 /* SyllableDetector-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SyllableDetector-Bridging-Header.h"; sourceTree = "<group>"; };
+		D86BB46A1C402696004CA928 /* ORSSerialPort.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ORSSerialPort.xcodeproj; path = "Frameworks/ORSSerialPort/Framework Project/ORSSerialPort.xcodeproj"; sourceTree = "<group>"; };
+		D86BB4731C4026B8004CA928 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		D86BB4761C402712004CA928 /* ArduinoIO.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArduinoIO.swift; sourceTree = "<group>"; };
 		D89269881BF3AEDE009482C2 /* SummaryStat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SummaryStat.swift; sourceTree = "<group>"; };
 		D89803B41C3C2ACF000CFC41 /* Resampler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Resampler.swift; sourceTree = "<group>"; };
 		D8B59D151BE6B77F0099CB4B /* StreamReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamReader.swift; sourceTree = "<group>"; };
@@ -55,6 +92,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D86BB4751C4026D9004CA928 /* ORSSerial.framework in Frameworks */,
+				D86BB4741C4026B8004CA928 /* Accelerate.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -64,6 +103,8 @@
 		D8625C701BE14922000922D8 = {
 			isa = PBXGroup;
 			children = (
+				D86BB46A1C402696004CA928 /* ORSSerialPort.xcodeproj */,
+				D86BB4731C4026B8004CA928 /* Accelerate.framework */,
 				D8625C7B1BE14922000922D8 /* SyllableDetector */,
 				D8625C7A1BE14922000922D8 /* Products */,
 			);
@@ -82,6 +123,7 @@
 			children = (
 				D8625CA11BE14A53000922D8 /* TPCircularBuffer */,
 				D8625C7C1BE14922000922D8 /* AppDelegate.swift */,
+				D86BB4761C402712004CA928 /* ArduinoIO.swift */,
 				D8625C8C1BE149FE000922D8 /* AudioInterface.swift */,
 				D8625C931BE149FE000922D8 /* CircularShortTimeFourierTransform.swift */,
 				D8625C911BE149FE000922D8 /* Common.swift */,
@@ -112,6 +154,15 @@
 			path = TPCircularBuffer;
 			sourceTree = "<group>";
 		};
+		D86BB46B1C402696004CA928 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D86BB4701C402696004CA928 /* ORSSerial.framework */,
+				D86BB4721C402696004CA928 /* ORSSerialPort Tests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -122,6 +173,7 @@
 				D8625C751BE14922000922D8 /* Sources */,
 				D8625C761BE14922000922D8 /* Frameworks */,
 				D8625C771BE14922000922D8 /* Resources */,
+				D86BB4781C4056E0004CA928 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -159,12 +211,35 @@
 			mainGroup = D8625C701BE14922000922D8;
 			productRefGroup = D8625C7A1BE14922000922D8 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = D86BB46B1C402696004CA928 /* Products */;
+					ProjectRef = D86BB46A1C402696004CA928 /* ORSSerialPort.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				D8625C781BE14922000922D8 /* SyllableDetector */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		D86BB4701C402696004CA928 /* ORSSerial.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = ORSSerial.framework;
+			remoteRef = D86BB46F1C402696004CA928 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D86BB4721C402696004CA928 /* ORSSerialPort Tests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "ORSSerialPort Tests.xctest";
+			remoteRef = D86BB4711C402696004CA928 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		D8625C771BE14922000922D8 /* Resources */ = {
@@ -187,6 +262,7 @@
 				D8625CA41BE14A53000922D8 /* TPCircularBuffer.c in Sources */,
 				D8D1BD4D1BE6E53C00059974 /* WindowControllerProcessor.swift in Sources */,
 				D8625C941BE149FE000922D8 /* SyllableDetector.swift in Sources */,
+				D86BB4771C402712004CA928 /* ArduinoIO.swift in Sources */,
 				D8625C981BE149FE000922D8 /* SyllableDetectorConfig.swift in Sources */,
 				D8D1BD481BE6D61B00059974 /* ViewControllerMenu.swift in Sources */,
 				D8625C971BE149FE000922D8 /* NeuralNet.swift in Sources */,

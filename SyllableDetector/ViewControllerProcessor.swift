@@ -26,7 +26,7 @@ struct ProcessorEntry {
 class Processor: AudioInputInterfaceDelegate {
     // input and output interfaces
     let interfaceInput: AudioInputInterface
-    let interfaceOutput: AudioOutputInterface
+    let interfaceOutput: ArduinoIO
     
     // processor entries
     let entries: [ProcessorEntry]
@@ -39,9 +39,11 @@ class Processor: AudioInputInterfaceDelegate {
     
     // high duration
     let highDuration = 0.001 // 1ms
+    var highCount = 0
     
     // dispatch queue
     let queueProcessing: dispatch_queue_t
+    let queueTriggering: dispatch_queue_t
     
     init(deviceInput: AudioInterface.AudioDevice, deviceOutput: AudioInterface.AudioDevice, entries: [ProcessorEntry]) throws {
         // setup processor entries
@@ -71,14 +73,22 @@ class Processor: AudioInputInterfaceDelegate {
         self.statInput = statInput
         self.statOutput = statOutput
         
+        // get serial port (hacky)
+        let ports = ArduinoIO.getSerialPorts().filter() {
+            return $0.name.hasPrefix("usbmodem")
+        }
+        
         // setup input and output devices
         interfaceInput = AudioInputInterface(deviceID: deviceInput.deviceID)
-        interfaceOutput = AudioOutputInterface(deviceID: deviceOutput.deviceID)
+        interfaceOutput = ArduinoIO(serial: ports[0])
         
         // create queue
         queueProcessing = dispatch_queue_create("ProcessorQueue", DISPATCH_QUEUE_SERIAL)
+        queueTriggering = dispatch_queue_create("TriggerQueue", DISPATCH_QUEUE_SERIAL)
         
-        try interfaceOutput.initializeAudio()
+        sleep(2)
+        try interfaceOutput.setPinMode(7, to: .Output)
+        sleep(1)
         try interfaceInput.initializeAudio()
         
         // set self as delegate
@@ -89,7 +99,6 @@ class Processor: AudioInputInterfaceDelegate {
         DLog("deinit processor")
         
         interfaceInput.tearDownAudio()
-        interfaceOutput.tearDownAudio()
     }
     
     func receiveAudioFrom(interface: AudioInputInterface, fromChannel channel: Int, withData data: UnsafeMutablePointer<Float>, ofLength length: Int) {
@@ -138,11 +147,29 @@ class Processor: AudioInputInterfaceDelegate {
             
             // if seen, send output
             if seen {
-                // log
-                DLog("\(channel) play")
+                // start high pulse
+                if 0 == self.highCount {
+                    do {
+                        try self.interfaceOutput.writeTo(7, digitalValue: true)
+                    }
+                    catch {
+                        DLog("\(error)")
+                    }
+                }
                 
-                // play high
-                self.interfaceOutput.createHighOutput(self.entries[index].outputChannel, forDuration: self.highDuration)
+                // set counter
+                self.highCount = 20
+            }
+            else if 0 < self.highCount {
+                self.highCount -= 1
+                if 0 == self.highCount {
+                    do {
+                        try self.interfaceOutput.writeTo(7, digitalValue: false)
+                    }
+                    catch {
+                        DLog("\(error)")
+                    }
+                }
             }
         }
     }
@@ -177,7 +204,6 @@ class Processor: AudioInputInterfaceDelegate {
     
     func tearDown() {
         interfaceInput.tearDownAudio()
-        interfaceOutput.tearDownAudio()
     }
 }
 
