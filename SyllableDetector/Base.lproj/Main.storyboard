@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="9060" systemVersion="15B42" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="9531" systemVersion="15D21" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9060"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9531"/>
     </dependencies>
     <scenes>
         <!--Application-->
@@ -675,7 +675,6 @@
                         <subviews>
                             <popUpButton verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7qK-Lv-fli">
                                 <rect key="frame" x="174" y="99" width="76" height="26"/>
-                                <animations/>
                                 <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="8qw-BF-tFf">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="menu"/>
@@ -691,7 +690,6 @@
                             </popUpButton>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QrV-iO-Lz1">
                                 <rect key="frame" x="18" y="104" width="91" height="17"/>
-                                <animations/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Input Device" id="4JJ-xf-4Zq">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -700,7 +698,6 @@
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="YSk-tX-LKo">
                                 <rect key="frame" x="18" y="63" width="91" height="17"/>
-                                <animations/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Output Device" id="fgm-qy-cA7">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -709,7 +706,6 @@
                             </textField>
                             <popUpButton verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2u4-ec-z4S">
                                 <rect key="frame" x="172" y="58" width="78" height="26"/>
-                                <animations/>
                                 <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="sdi-EJ-fIQ">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="menu"/>
@@ -725,7 +721,6 @@
                             </popUpButton>
                             <button verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Z0Z-gF-eNk">
                                 <rect key="frame" x="168" y="13" width="85" height="32"/>
-                                <animations/>
                                 <buttonCell key="cell" type="push" title="Launch" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="XEC-XR-emA">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -739,7 +734,6 @@ DQ
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yAr-Do-U8B">
                                 <rect key="frame" x="14" y="13" width="93" height="32"/>
-                                <animations/>
                                 <buttonCell key="cell" type="push" title="Simulate" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="zfg-wk-kgq">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -769,7 +763,6 @@ DQ
                             <constraint firstAttribute="trailing" secondItem="Z0Z-gF-eNk" secondAttribute="trailing" constant="20" id="pbK-qF-2bH"/>
                             <constraint firstItem="Z0Z-gF-eNk" firstAttribute="width" secondItem="2u4-ec-z4S" secondAttribute="width" id="vce-PO-qR0"/>
                         </constraints>
-                        <animations/>
                     </view>
                     <connections>
                         <outlet property="buttonLaunch" destination="Z0Z-gF-eNk" id="g5Z-sk-EBb"/>
@@ -830,7 +823,6 @@ DQ
                                 <constraints>
                                     <constraint firstAttribute="width" constant="240" id="ydV-eo-znO"/>
                                 </constraints>
-                                <animations/>
                                 <pathCell key="cell" controlSize="small" selectable="YES" alignment="left" placeholderString="Network" id="1hz-az-ebx">
                                     <font key="font" metaFont="system"/>
                                 </pathCell>
@@ -840,7 +832,6 @@ DQ
                                 <constraints>
                                     <constraint firstAttribute="width" constant="240" id="FCT-as-9XA"/>
                                 </constraints>
-                                <animations/>
                                 <pathCell key="cell" controlSize="small" selectable="YES" alignment="left" placeholderString="Audio" id="3Yn-HU-Gg9">
                                     <font key="font" metaFont="system"/>
                                 </pathCell>
@@ -850,7 +841,6 @@ DQ
                                 <constraints>
                                     <constraint firstAttribute="width" constant="60" id="90U-UK-z9V"/>
                                 </constraints>
-                                <animations/>
                                 <buttonCell key="cell" type="push" title="Run" bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="xLi-LY-HPb">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -864,7 +854,6 @@ DQ
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="3e5-Ht-BRX">
                                 <rect key="frame" x="18" y="97" width="55" height="17"/>
-                                <animations/>
                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Network" id="TRe-Ts-920">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -873,7 +862,6 @@ DQ
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Bdn-dG-wWZ">
                                 <rect key="frame" x="18" y="59" width="55" height="17"/>
-                                <animations/>
                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Audio" id="Uj8-xr-48L">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -882,7 +870,6 @@ DQ
                             </textField>
                             <button verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HkF-29-0ki">
                                 <rect key="frame" x="316" y="90" width="62" height="28"/>
-                                <animations/>
                                 <buttonCell key="cell" type="push" title="Load..." bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5BT-YI-9Ca">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="smallSystem"/>
@@ -893,7 +880,6 @@ DQ
                             </button>
                             <button verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="46w-Zs-6jJ">
                                 <rect key="frame" x="316" y="52" width="62" height="28"/>
-                                <animations/>
                                 <buttonCell key="cell" type="push" title="Load..." bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="hvS-fz-XbF">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="smallSystem"/>
@@ -923,7 +909,6 @@ DQ
                             <constraint firstItem="sX7-LT-7ym" firstAttribute="centerY" secondItem="Bdn-dG-wWZ" secondAttribute="centerY" id="w7w-yu-mfK"/>
                             <constraint firstItem="Bdn-dG-wWZ" firstAttribute="width" secondItem="3e5-Ht-BRX" secondAttribute="width" id="x9w-08-Ga5"/>
                         </constraints>
-                        <animations/>
                     </view>
                     <connections>
                         <outlet property="buttonLoadAudio" destination="46w-Zs-6jJ" id="y2L-1e-VrI"/>
@@ -947,7 +932,6 @@ DQ
                         <subviews>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="gnI-rr-k78">
                                 <rect key="frame" x="396" y="13" width="70" height="32"/>
-                                <animations/>
                                 <buttonCell key="cell" type="push" title="Start" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="pe0-ZU-TtC">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -965,7 +949,6 @@ DQ
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" headerView="BSO-2L-IkA" id="hSn-ax-pc6">
                                             <rect key="frame" x="0.0" y="0.0" width="438" height="65"/>
                                             <autoresizingMask key="autoresizingMask"/>
-                                            <animations/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
@@ -1036,29 +1019,23 @@ DQ
                                             </connections>
                                         </tableView>
                                     </subviews>
-                                    <animations/>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </clipView>
-                                <animations/>
                                 <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="PW5-9D-Onp">
                                     <rect key="frame" x="1" y="269" width="438" height="15"/>
                                     <autoresizingMask key="autoresizingMask"/>
-                                    <animations/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="Ja8-xv-F24">
                                     <rect key="frame" x="424" y="23" width="15" height="0.0"/>
                                     <autoresizingMask key="autoresizingMask"/>
-                                    <animations/>
                                 </scroller>
                                 <tableHeaderView key="headerView" id="BSO-2L-IkA">
                                     <rect key="frame" x="0.0" y="0.0" width="438" height="23"/>
                                     <autoresizingMask key="autoresizingMask"/>
-                                    <animations/>
                                 </tableHeaderView>
                             </scrollView>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dDV-mj-Q5j">
                                 <rect key="frame" x="14" y="13" width="124" height="32"/>
-                                <animations/>
                                 <buttonCell key="cell" type="push" title="Load Network" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Dl5-Im-p2y">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -1078,7 +1055,6 @@ DQ
                             <constraint firstItem="dDV-mj-Q5j" firstAttribute="leading" secondItem="6lm-yd-nKg" secondAttribute="leading" constant="20" id="oP5-FL-x1W"/>
                             <constraint firstItem="TK5-kU-dJM" firstAttribute="leading" secondItem="6lm-yd-nKg" secondAttribute="leading" constant="20" id="v4C-K4-031"/>
                         </constraints>
-                        <animations/>
                     </view>
                     <connections>
                         <outlet property="buttonLoad" destination="dDV-mj-Q5j" id="Wzj-IX-jbf"/>

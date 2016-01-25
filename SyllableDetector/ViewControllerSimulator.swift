@@ -260,6 +260,13 @@ class ViewControllerSimulator: NSViewController {
             var status: OSStatus
             
             while avWriterInput.readyForMoreMediaData && !completedOrFailed {
+                // check status
+                guard avReader.status == AVAssetReaderStatus.Reading else {
+                    DLog("STATUS changed to \(avReader.status)")
+                    completedOrFailed = true
+                    break
+                }
+                
                 // copy next sample buffer
                 guard let sampleBuffer = avReaderOutput.copyNextSampleBuffer() else {
                     completedOrFailed = true
@@ -328,7 +335,7 @@ class ViewControllerSimulator: NSViewController {
                 
                 // append sample buffer
                 if !avWriterInput.appendSampleBuffer(newSampleBuffer!) {
-                    DLog("failed to write sample buffer \(avWriter.status) \(avWriter.error)")
+                    DLog("ERROR writing \(avWriter.status) \(avWriter.error)")
                     avReader.cancelReading() // cancel reading
                     completedOrFailed = true
                 }
