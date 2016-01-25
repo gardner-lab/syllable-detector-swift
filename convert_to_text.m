@@ -1,4 +1,31 @@
-function convert_to_text(fn, mat)
+function convert_to_text(fn, mat, varargin)
+
+% extra input processing functions
+prepend_input_processing = {};
+
+nparams=length(varargin);
+
+if 0 < mod(nparams, 2)
+	error('Parameters must be specified as parameter/value pairs');
+end
+for i = 1:2:nparams
+    nm = lower(varargin{i});
+    switch nm
+        case 'prepend_input_processing'
+            if ischar(varargin{i+1})
+                prepend_input_processing = varargin(i+1);
+            else
+                prepend_input_processing = varargin{i+1};
+            end
+        otherwise
+            if ~exist(nm, 'var')
+                error('Invalid parameter: %s.', nm);
+            end
+            eval([nm ' = varargin{i+1};']);
+    end
+end
+
+%% LOAD NETWORK
 
 % load network definition file
 f = load(mat);
@@ -7,6 +34,8 @@ f = load(mat);
 if ~isfield(f, 'win_size')
     f.win_size = f.fft_size;
 end
+
+%% CHECKS
 
 % FFT msut be a power of 2
 if f.fft_size ~= 2^nextpow2(f.fft_size)
@@ -23,6 +52,8 @@ if 256 > f.fft_size
     warning('The spectrogram defaults to using an FFT size of 256. As a result, the provided FFT size will be ignored.');
     f.fft_size = 256;
 end
+
+%% WRITE TEXT FILE
 
 % open file for writing
 fh = fopen(fn, 'w');
@@ -43,7 +74,7 @@ fprintf(fh, 'scaling = %s\n', f.scaling);
 % build neural network
 
 % input mapping
-convert_processing_functions(fh, 'processInputs', f.net.input);
+convert_processing_functions(fh, 'processInputs', f.net.input, prepend_input_processing);
 
 % output mapping
 convert_processing_functions(fh, 'processOutputs', f.net.output);
@@ -80,15 +111,35 @@ end
 % close file handle
 fclose(fh);
 
-function convert_processing_functions(fh, nm, put)
+%% HELPER FUNCTIONS
+
+function convert_processing_functions(fh, nm, put, pre, post)
     l = length(put.processFcns);
+    
+    if exist('pre', 'var')
+    	l = l + length(pre);
+    end
+    if exist('post', 'var')
+    	l = l + length(post);
+    end
     
     if l == 0
         warning('Zero processing functions no longer results in linear normalization of input vectors.');
     end
     
     fprintf(fh, '%sCount = %d\n', nm, l);
-    for j = 1:l
+    
+    k = 0;
+    
+    if exist('pre', 'var')
+        for j = 1:length(pre)
+            % TODO: eventually support more than just strings here
+            fprintf(fh, '%s%d.function = %s\n', nm, k, pre{j});
+            k = k + 1;
+        end
+    end
+    
+    for j = 1:length(put.processFcns)
         switch put.processFcns{j}
             case 'mapminmax'
                 offsets = sprintf('%.15g, ', put.processSettings{j}.xoffset);
@@ -96,10 +147,10 @@ function convert_processing_functions(fh, nm, put)
                 gains = sprintf('%.15g, ', put.processSettings{j}.gain);
                 gains = gains(1:end - 2); % remove final comma
 
-                fprintf(fh, '%s%d.function = mapminmax\n', nm, j - 1);
-                fprintf(fh, '%s%d.xOffsets = %s\n', nm, j - 1, offsets);
-                fprintf(fh, '%s%d.gains = %s\n', nm, j - 1, gains);
-                fprintf(fh, '%s%d.yMin = %.15g\n', nm, j - 1, put.processSettings{j}.ymin);
+                fprintf(fh, '%s%d.function = mapminmax\n', nm, k);
+                fprintf(fh, '%s%d.xOffsets = %s\n', nm, k, offsets);
+                fprintf(fh, '%s%d.gains = %s\n', nm, k, gains);
+                fprintf(fh, '%s%d.yMin = %.15g\n', nm, k, put.processSettings{j}.ymin);
                 
             case 'mapstd'
                 offsets = sprintf('%.15g, ', put.processSettings{j}.xoffset);
@@ -107,13 +158,23 @@ function convert_processing_functions(fh, nm, put)
                 gains = sprintf('%.15g, ', put.processSettings{j}.gain);
                 gains = gains(1:end - 2); % remove final comma
 
-                fprintf(fh, '%s%d.function = mapstd\n', nm, j - 1);
-                fprintf(fh, '%s%d.xOffsets = %s\n', nm, j - 1, offsets);
-                fprintf(fh, '%s%d.gains = %s\n', nm, j - 1, gains);
-                fprintf(fh, '%s%d.yMean = %.15g\n', nm, j - 1, put.processSettings{j}.ymean);
+                fprintf(fh, '%s%d.function = mapstd\n', nm, k);
+                fprintf(fh, '%s%d.xOffsets = %s\n', nm, k, offsets);
+                fprintf(fh, '%s%d.gains = %s\n', nm, k, gains);
+                fprintf(fh, '%s%d.yMean = %.15g\n', nm, k, put.processSettings{j}.ymean);
                 
             otherwise
                 error('Invalid processing function: %s.', put.processFcns{j});
+        end
+        
+        k = k + 1;
+    end
+    
+    if exist('post', 'var')
+        for j = 1:length(post)
+            % TODO: eventually support more than just strings here
+            fprintf(fh, '%s%d.function = %s\n', nm, k, post{j});
+            k = k + 1;
         end
     end
 end
