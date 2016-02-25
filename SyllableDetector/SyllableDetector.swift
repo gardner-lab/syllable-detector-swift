@@ -74,7 +74,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
     }
     
     func processSampleBuffer(sampleBuffer: CMSampleBuffer) {
-        // has samplesΩ
+        // has samples
         let numSamples = CMSampleBufferGetNumSamples(sampleBuffer)
         guard 0 < numSamples else {
             return

@@ -22,7 +22,7 @@ struct StatMean: Stat
     
     mutating func appendValue(value: Double) {
         sum += value
-        ++count
+        count += 1
     }
     
     func readStat() -> Double? {
