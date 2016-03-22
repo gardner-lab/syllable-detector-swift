@@ -86,9 +86,7 @@ class Processor: AudioInputInterfaceDelegate {
         queueProcessing = dispatch_queue_create("ProcessorQueue", DISPATCH_QUEUE_SERIAL)
         queueTriggering = dispatch_queue_create("TriggerQueue", DISPATCH_QUEUE_SERIAL)
         
-        sleep(2)
         try interfaceOutput.setPinMode(7, to: .Output)
-        sleep(1)
         try interfaceInput.initializeAudio()
         
         // set self as delegate
@@ -128,6 +126,9 @@ class Processor: AudioInputInterfaceDelegate {
         
         // process
         dispatch_async(queueProcessing) {
+            // port still opening
+            // guard self.interfaceOutput.state == .Opened else { return }
+            
             // detector
             let d = self.detectors[index]
             

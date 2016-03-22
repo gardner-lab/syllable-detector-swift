@@ -13,7 +13,7 @@ let kStartupTime = 2.0
 let kTimeoutDuration: NSTimeInterval = 0.5
 
 /// The state of the arduino and serial port.
-private enum ArduinoIOState {
+enum ArduinoIOState: Equatable {
     case Closed
     case Opened
     case WaitingToOpen // Because of potential startup time, there is an inbetween period of 2 seconds during which requests are queued.
@@ -30,13 +30,24 @@ private enum ArduinoIORequest {
 }
 
 /// Errors associated with input and output.
-enum ArduinoIOError: ErrorType {
+enum ArduinoIOError: ErrorType, CustomStringConvertible {
     case UnknownError
     case UnableToOpenPath
     case PortNotOpen
-    case InvalidPin
+    case InvalidPin(Int)
     case InvalidMode // invalid pin mode
     case InvalidValue
+    
+    var description: String {
+        switch self {
+        case .UnknownError: return "Unknown error"
+        case .UnableToOpenPath: return "Unable to open path"
+        case .PortNotOpen: return "Port not open"
+        case .InvalidPin(let p): return "Invalid pin (\(p))"
+        case .InvalidMode: return "Invalid mode"
+        case .InvalidValue: return "Invalid value"
+        }
+    }
 }
 
 
@@ -92,6 +103,92 @@ protocol ArduinoIODelegate: class {
     func arduinoError(message: String, isPermanent: Bool)
 }
 
+///  An example of an extension of the ORSSerialPacketDescriptor that enables identifying delimited packets.
+class DelimitedSerialPacketDescriptor: ORSSerialPacketDescriptor {
+    var delimiter: NSData?
+    
+    convenience init(delimiter: NSData, maximumPacketLength maxPacketLength: UInt, userInfo: AnyObject?, responseEvaluator: ORSSerialPacketEvaluator) {
+        self.init(maximumPacketLength: maxPacketLength, userInfo: userInfo, responseEvaluator: responseEvaluator)
+        
+        // set delimiter
+        self.delimiter = delimiter
+    }
+    
+    convenience init(delimiterString: String, maximumPacketLength maxPacketLength: UInt, userInfo: AnyObject?, responseEvaluator: ORSSerialPacketEvaluator) {
+        self.init(maximumPacketLength: maxPacketLength, userInfo: userInfo, responseEvaluator: responseEvaluator)
+        
+        // set delimiter
+        self.delimiter = delimiterString.dataUsingEncoding(NSUTF8StringEncoding)
+    }
+    
+    private func packetMatchingExcludingFinalDelimiter(buffer: NSData) -> NSData? {
+        // only use log if delimiter is provided (should only be called if delimiter exists)
+        guard let delimiter = delimiter else {
+            return nil
+        }
+        
+        // empty buffer? potentially valid
+        if buffer.length == 0 {
+            if dataIsValidPacket(buffer) {
+                return buffer
+            }
+            return nil
+        }
+        
+        // work back from the end of the buffer
+        for i in 0...buffer.length {
+            // check for delimiter if not reading from the beginning of the buffer
+            if i < buffer.length {
+                // not enough space for the delimiter
+                if i + delimiter.length > buffer.length {
+                    continue
+                }
+                
+                // check for proceeding delimiter
+                // (could be more lenient and just check for the end of the delimiter)
+                let windowDel = buffer.subdataWithRange(NSMakeRange(buffer.length - i - delimiter.length, delimiter.length))
+                
+                // does not match? continue
+                if !windowDel.isEqualToData(delimiter) {
+                    continue
+                }
+            }
+            
+            // make window
+            let window = buffer.subdataWithRange(NSMakeRange(buffer.length - i, i))
+            if dataIsValidPacket(window) {
+                return window
+            }
+        }
+        
+        return nil
+    }
+    
+    override func packetMatchingAtEndOfBuffer(buffer: NSData?) -> NSData? {
+        // only use log if delimiter is provided
+        guard let delimiter = delimiter else {
+            // otherwise inherit normal behavior
+            return super.packetMatchingAtEndOfBuffer(buffer)
+        }
+        
+        // unwrap buffer
+        guard let buffer = buffer else { return nil }
+        
+        // space for delimiter
+        if buffer.length < delimiter.length {
+            return nil
+        }
+        
+        // ensure buffer ends with delimiter
+        let windowFinalDel = buffer.subdataWithRange(NSMakeRange(buffer.length - delimiter.length, delimiter.length))
+        if !windowFinalDel.isEqualTo(delimiter) {
+            return nil
+        }
+        
+        return packetMatchingExcludingFinalDelimiter(buffer.subdataWithRange(NSMakeRange(0, buffer.length - delimiter.length)))
+    }
+}
+
 /// An arduinio input output class based off of the
 /// [MATLAB ArduinoIO package](http://www.mathworks.com/matlabcentral/fileexchange/32374-matlab-support-for-arduino--aka-arduinoio-package-),
 /// which provides a serial interface taht allows controlling pins on an Arduino device. This is meant to work with the exact sketches included
@@ -109,7 +206,7 @@ class ArduinoIO: NSObject, ORSSerialPortDelegate {
     }
     
     // is port open
-    private var state: ArduinoIOState = .Uninitialized {
+    private(set) var state: ArduinoIOState = .Uninitialized {
         didSet {
             //self.delegate?.arduinoStateChangedFrom(oldValue, newState: state)
         }
@@ -125,21 +222,12 @@ class ArduinoIO: NSObject, ORSSerialPortDelegate {
     private var motors = [UInt8](count: 4, repeatedValue: UInt8(0))
     private var steppers = [UInt8](count: 2, repeatedValue: UInt8(0))
     
-    lazy private var responseDescription: ORSSerialPacketDescriptor = ORSSerialPacketDescriptor(maximumPacketLength: 16, userInfo: nil, responseEvaluator: {
+    lazy private var responseDescription: ORSSerialPacketDescriptor = DelimitedSerialPacketDescriptor(delimiter: "\r\n".dataUsingEncoding(NSASCIIStringEncoding)!, maximumPacketLength: 16, userInfo: nil, responseEvaluator: {
         (d: NSData?) -> Bool in
         guard let data = d else {
             return false
         }
-        if data.length < 3 {
-            return false
-        }
-        if let s = NSString(data: data, encoding: NSASCIIStringEncoding) {
-            let str = s as String
-            if str.hasSuffix("\r\n") {
-                return true
-            }
-        }
-        return false
+        return data.length > 0
     })
     
     // used to hold requests while waiting to open
@@ -320,7 +408,7 @@ class ArduinoIO: NSObject, ORSSerialPortDelegate {
             throw ArduinoIOError.PortNotOpen
         }
         guard isValidPin(pin) else {
-            throw ArduinoIOError.InvalidPin
+            throw ArduinoIOError.InvalidPin(pin)
         }
         guard to != .Unassigned else {
             throw ArduinoIOError.InvalidMode
@@ -349,34 +437,12 @@ class ArduinoIO: NSObject, ORSSerialPortDelegate {
         return .Unassigned
     }
     
-    func pulseTo(pin: Int) throws {
-        guard canInteract() else {
-            throw ArduinoIOError.PortNotOpen
-        }
-        guard isValidPin(pin) else {
-            throw ArduinoIOError.InvalidPin
-        }
-        guard pins[pin] == .Output else {
-            throw ArduinoIOError.InvalidMode
-        }
-        guard nil != serial else {
-            throw ArduinoIOError.PortNotOpen
-        }
-        
-        // build data to change pin mode
-        let dataBytes: [UInt8] = [53, 97 + UInt8(pin)]
-        let data = NSData(bytes: dataBytes, length: dataBytes.count)
-        send(data)
-        
-        DLog("ARDUINO PULSE \(pin)")
-    }
-    
     func writeTo(pin: Int, digitalValue: Bool) throws {
         guard canInteract() else {
             throw ArduinoIOError.PortNotOpen
         }
         guard isValidPin(pin) else {
-            throw ArduinoIOError.InvalidPin
+            throw ArduinoIOError.InvalidPin(pin)
         }
         guard pins[pin] == .Output else {
             throw ArduinoIOError.InvalidMode
@@ -386,7 +452,7 @@ class ArduinoIO: NSObject, ORSSerialPortDelegate {
         }
         
         // build data to change pin mode
-        let dataBytes: [UInt8] = [50, 97 + UInt8(pin), digitalValue ? 49 : 48]
+        let dataBytes: [UInt8] = [50, 97 + UInt8(pin), 48 + UInt8(digitalValue ? 1 : 0)]
         let data = NSData(bytes: dataBytes, length: dataBytes.count)
         send(data)
         
@@ -398,7 +464,7 @@ class ArduinoIO: NSObject, ORSSerialPortDelegate {
             throw ArduinoIOError.PortNotOpen
         }
         guard isValidPin(pin) else {
-            throw ArduinoIOError.InvalidPin
+            throw ArduinoIOError.InvalidPin(pin)
         }
         guard pins[pin] == .Input else {
             throw ArduinoIOError.InvalidMode
@@ -418,7 +484,7 @@ class ArduinoIO: NSObject, ORSSerialPortDelegate {
             throw ArduinoIOError.PortNotOpen
         }
         guard (pin >= 2 && pin <= 13) || (pin >= 44 && pin <= 46) else {
-            throw ArduinoIOError.InvalidPin
+            throw ArduinoIOError.InvalidPin(pin)
         }
         guard pins[pin] == .Output else {
             throw ArduinoIOError.InvalidMode
@@ -440,7 +506,7 @@ class ArduinoIO: NSObject, ORSSerialPortDelegate {
             throw ArduinoIOError.PortNotOpen
         }
         guard pin >= 0 && pin <= 15 else {
-            throw ArduinoIOError.InvalidPin
+            throw ArduinoIOError.InvalidPin(pin)
         }
         guard pin < 2 || pins[pin] == .Input else {
             throw ArduinoIOError.InvalidMode
