@@ -69,8 +69,9 @@ class ResamplerLinear: Resampler {
         return ret
     }
     
-    func resampleArray(var arr: [Float]) -> [Float] {
+    func resampleArray(arr: [Float]) -> [Float] {
         // used for testing
+        var arr = arr
         return self.resampleVector(&arr, ofLength: arr.count)
     }
     

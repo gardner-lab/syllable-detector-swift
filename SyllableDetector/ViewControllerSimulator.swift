@@ -290,14 +290,16 @@ class ViewControllerSimulator: NSViewController {
                 
                 // encode previous values
                 var i = 0
-                for ; 0 < nextCount && i < numSamples; ++i, --nextCount {
+                while 0 < nextCount && i < numSamples {
                     newSamples[i] = nextValue
+                    i += 1
+                    nextCount -= 1
                 }
                 
                 // still more to write? don't process any
                 while 0 == nextCount && sd.processNewValue() {
                     // value to write
-                    var v = sd.lastOutput
+                    var v = sd.lastOutput / Float(sd.config.threshold)
                     if v > 1.0 {
                         v = 1.0
                     }
@@ -308,8 +310,10 @@ class ViewControllerSimulator: NSViewController {
                     // length
                     var l = sd.config.windowLength - sd.config.windowOverlap
                     
-                    for ; 0 < l && i < numSamples; ++i, --l {
+                    while 0 < l && i < numSamples {
                         newSamples[i] = v
+                        i += 1
+                        l -= 1
                     }
                     
                     if 0 < l {

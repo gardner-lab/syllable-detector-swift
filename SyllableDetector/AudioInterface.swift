@@ -30,7 +30,7 @@ func renderOutput(inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutabl
         }
         
         // write data out
-        for var i = 0; i < frameCountAsInt; ++i {
+        for i in 0..<frameCountAsInt {
             data[i] = (i < high ? 1.0 : 0.0)
         }
         
@@ -48,7 +48,7 @@ func processInput(inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutabl
     let numberOfChannels = Int(aii.inputFormat.mChannelsPerFrame)
     
     // set buffer data size
-    for var channel = 0; channel < numberOfChannels; ++channel {
+    for channel in 0..<numberOfChannels {
         aii.bufferList[channel].mDataByteSize = aii.inputFormat.mBytesPerFrame * frameCount
     }
     
@@ -64,7 +64,7 @@ func processInput(inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutabl
     let frameCountAsInteger = Int(frameCount)
     
     // multiple channels
-    for var channel = 0; channel < numberOfChannels; ++channel {
+    for channel in 0..<numberOfChannels {
         // call delegate
         aii.delegate?.receiveAudioFrom(aii, fromChannel: channel, withData: UnsafeMutablePointer<Float>(aii.bufferList[channel].mData), ofLength: frameCountAsInteger)
     }
@@ -78,7 +78,7 @@ enum AudioInterfaceError: ErrorType {
     case ErrorResponse(String, Int, Int32)
 }
 
-private func checkError(status: OSStatus, type: AudioInterfaceError? = nil, funct: String = __FUNCTION__, line: Int = __LINE__) throws {
+private func checkError(status: OSStatus, type: AudioInterfaceError? = nil, funct: String = #function, line: Int = #line) throws {
     if noErr != status {
         if let errType = type {
             throw errType
@@ -316,7 +316,7 @@ class AudioInterface
     }
     
     static func dispatchEvent(numAddresses: UInt32, addresses: UnsafePointer<AudioObjectPropertyAddress>) {
-        for var i: UInt32 = 0; i < numAddresses; ++i {
+        for i: UInt32 in 0..<numAddresses {
             let selector = addresses[Int(i)].mSelector
             if let listenersForSelector = listeners[selector] {
                 for entry in listenersForSelector {
@@ -553,7 +553,7 @@ class AudioInputInterface: AudioInterface
         // create buffers
         bufferList = AudioBufferList.allocate(maximumBuffers: Int(outputFormat.mChannelsPerFrame))
         bufferList.count = Int(outputFormat.mChannelsPerFrame)
-        for var channel = 0; channel < Int(outputFormat.mChannelsPerFrame); ++channel {
+        for channel in 0 ..< Int(outputFormat.mChannelsPerFrame) {
             // build buffer
             var buffer = AudioBuffer()
             buffer.mDataByteSize = outputFormat.mBytesPerFrame * maxFrameSize

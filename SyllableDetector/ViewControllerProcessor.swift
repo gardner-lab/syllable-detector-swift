@@ -64,7 +64,7 @@ class Processor: AudioInputInterfaceDelegate {
         // setup stats
         var statInput = [SummaryStat]()
         var statOutput = [SummaryStat]()
-        for var i = 0; i < self.detectors.count; ++i {
+        for _ in 0..<self.detectors.count {
             statInput.append(SummaryStat(withStat: StatMax()))
             statOutput.append(SummaryStat(withStat: StatMax()))
         }
@@ -207,7 +207,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
             
             // start or stop timer
             if isRunning {
-                timerRedraw = NSTimer.scheduledTimerWithTimeInterval(0.1, target: self, selector: "timerUpdateValues:", userInfo: nil, repeats: true)
+                timerRedraw = NSTimer.scheduledTimerWithTimeInterval(0.1, target: self, selector: #selector(ViewControllerProcessor.timerUpdateValues(_:)), userInfo: nil, repeats: true)
             }
             else {
                 timerRedraw?.invalidate()
@@ -220,7 +220,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         super.viewDidLoad()
         
         tableChannels.target = self
-        tableChannels.doubleAction = "tableRowDoubleClicked"
+        tableChannels.doubleAction = #selector(ViewControllerProcessor.tableRowDoubleClicked)
     }
     
     override func viewDidAppear() {

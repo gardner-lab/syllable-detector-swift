@@ -7,7 +7,7 @@
 import Foundation
 
 /// A logging function that only executes in debugging mode.
-func DLog(message: String, function: String = __FUNCTION__ ) {
+func DLog(message: String, function: String = #function ) {
     #if DEBUG
     print("\(function): \(message)")
     #endif

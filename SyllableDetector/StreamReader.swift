@@ -93,7 +93,7 @@ class StreamReader  {
 
 extension StreamReader : SequenceType {
     func generate() -> AnyGenerator<String> {
-        return anyGenerator {
+        return AnyGenerator {
             return self.nextLine()
         }
     }
