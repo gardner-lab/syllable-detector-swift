@@ -281,6 +281,15 @@ class NeuralNet
         bufferInput.dealloc(inputs)
     }
     
+    func test(val: Float) {
+        var inp = [Float](count: inputs, repeatedValue: val)
+        withUnsafePointer(&inp[0]) {
+            DLog("\($0.memory)")
+            let out = self.apply($0)
+            print("\(out)")
+        }
+    }
+    
     func apply(input: UnsafePointer<Float>) -> [Float] {
         // pointer to current buffer
         var currentBuffer: UnsafeMutablePointer<Float> = bufferInput
