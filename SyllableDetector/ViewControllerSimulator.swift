@@ -28,6 +28,8 @@ class ViewControllerSimulator: NSViewController {
     
     override func viewDidDisappear() {
         super.viewDidDisappear()
+        
+        Time.printAll()
     }
     
     @IBAction func loadNetwork(sender: NSButton) {
@@ -282,7 +284,9 @@ class ViewControllerSimulator: NSViewController {
                 DLog("READ: \(numSamples) samples")
                 
                 // run song detector
+                Time.startWithName("ingest")
                 sd.processSampleBuffer(sampleBuffer)
+                Time.stopAndSaveWithName("ingest")
                 
                 // make floats
                 // released by buffer block
@@ -297,7 +301,19 @@ class ViewControllerSimulator: NSViewController {
                 }
                 
                 // still more to write? don't process any
-                while 0 == nextCount && sd.processNewValue() {
+                while 0 == nextCount {
+                    let t = Time()
+                    t.start()
+                    let ret = sd.processNewValue()
+                    t.stop()
+                    if ret {
+                        Time.saveWithName("process", andValue: t.nanoseconds)
+                    }
+                    else {
+                        Time.saveWithName("skip", andValue: t.nanoseconds)
+                        break
+                    }
+                    
                     // value to write
                     var v = sd.lastOutput / Float(sd.config.threshold)
                     if v > 1.0 {

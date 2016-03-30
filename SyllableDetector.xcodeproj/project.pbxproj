@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D8285D1A1CABFBBA00AD5AF8 /* Time.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8285D191CABFBBA00AD5AF8 /* Time.swift */; };
 		D82E7F7B1C10B629004759F7 /* ViewControllerSimulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D82E7F7A1C10B629004759F7 /* ViewControllerSimulator.swift */; };
 		D8625C7D1BE14922000922D8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C7C1BE14922000922D8 /* AppDelegate.swift */; };
 		D8625C7F1BE14922000922D8 /* ViewControllerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C7E1BE14922000922D8 /* ViewControllerProcessor.swift */; };
@@ -27,6 +28,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D8285D191CABFBBA00AD5AF8 /* Time.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Time.swift; sourceTree = "<group>"; };
 		D82E7F7A1C10B629004759F7 /* ViewControllerSimulator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewControllerSimulator.swift; sourceTree = "<group>"; };
 		D8625C791BE14922000922D8 /* SyllableDetector.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SyllableDetector.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D8625C7C1BE14922000922D8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -85,6 +87,7 @@
 				D8625C8C1BE149FE000922D8 /* AudioInterface.swift */,
 				D8625C931BE149FE000922D8 /* CircularShortTimeFourierTransform.swift */,
 				D8625C911BE149FE000922D8 /* Common.swift */,
+				D8285D191CABFBBA00AD5AF8 /* Time.swift */,
 				D8625C8E1BE149FE000922D8 /* NeuralNet.swift */,
 				D89803B41C3C2ACF000CFC41 /* Resampler.swift */,
 				D8B59D151BE6B77F0099CB4B /* StreamReader.swift */,
@@ -187,6 +190,7 @@
 				D8625CA41BE14A53000922D8 /* TPCircularBuffer.c in Sources */,
 				D8D1BD4D1BE6E53C00059974 /* WindowControllerProcessor.swift in Sources */,
 				D8625C941BE149FE000922D8 /* SyllableDetector.swift in Sources */,
+				D8285D1A1CABFBBA00AD5AF8 /* Time.swift in Sources */,
 				D8625C981BE149FE000922D8 /* SyllableDetectorConfig.swift in Sources */,
 				D8D1BD481BE6D61B00059974 /* ViewControllerMenu.swift in Sources */,
 				D8625C971BE149FE000922D8 /* NeuralNet.swift in Sources */,
