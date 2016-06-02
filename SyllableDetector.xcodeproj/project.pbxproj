@@ -25,10 +25,23 @@
 		D8B59D161BE6B77F0099CB4B /* StreamReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8B59D151BE6B77F0099CB4B /* StreamReader.swift */; };
 		D8D1BD481BE6D61B00059974 /* ViewControllerMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D1BD471BE6D61B00059974 /* ViewControllerMenu.swift */; };
 		D8D1BD4D1BE6E53C00059974 /* WindowControllerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D1BD4C1BE6E53C00059974 /* WindowControllerProcessor.swift */; };
+		D8E2DB541D00C74500FC6AE2 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E2DB531D00C74500FC6AE2 /* main.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		D8E2DB4F1D00C74500FC6AE2 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		D8285D191CABFBBA00AD5AF8 /* Time.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Time.swift; sourceTree = "<group>"; };
+		D8285D191CABFBBA00AD5AF8 /* Time.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Time.swift; path = SyllableDetector/Time.swift; sourceTree = "<group>"; };
 		D82E7F7A1C10B629004759F7 /* ViewControllerSimulator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewControllerSimulator.swift; sourceTree = "<group>"; };
 		D8625C791BE14922000922D8 /* SyllableDetector.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SyllableDetector.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D8625C7C1BE14922000922D8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -36,24 +49,33 @@
 		D8625C801BE14922000922D8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D8625C831BE14922000922D8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D8625C851BE14922000922D8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		D8625C8B1BE149FE000922D8 /* SyllableDetector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SyllableDetector.swift; sourceTree = "<group>"; };
+		D8625C8B1BE149FE000922D8 /* SyllableDetector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SyllableDetector.swift; path = Common/SyllableDetector.swift; sourceTree = "<group>"; };
 		D8625C8C1BE149FE000922D8 /* AudioInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioInterface.swift; sourceTree = "<group>"; };
-		D8625C8E1BE149FE000922D8 /* NeuralNet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NeuralNet.swift; sourceTree = "<group>"; };
-		D8625C8F1BE149FE000922D8 /* SyllableDetectorConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SyllableDetectorConfig.swift; sourceTree = "<group>"; };
-		D8625C911BE149FE000922D8 /* Common.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
-		D8625C931BE149FE000922D8 /* CircularShortTimeFourierTransform.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CircularShortTimeFourierTransform.swift; sourceTree = "<group>"; };
-		D8625CA21BE14A53000922D8 /* TPCircularBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TPCircularBuffer.c; sourceTree = "<group>"; };
-		D8625CA31BE14A53000922D8 /* TPCircularBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPCircularBuffer.h; sourceTree = "<group>"; };
+		D8625C8E1BE149FE000922D8 /* NeuralNet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = NeuralNet.swift; path = Common/NeuralNet.swift; sourceTree = "<group>"; };
+		D8625C8F1BE149FE000922D8 /* SyllableDetectorConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SyllableDetectorConfig.swift; path = Common/SyllableDetectorConfig.swift; sourceTree = "<group>"; };
+		D8625C911BE149FE000922D8 /* Common.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Common.swift; path = Common/Common.swift; sourceTree = "<group>"; };
+		D8625C931BE149FE000922D8 /* CircularShortTimeFourierTransform.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CircularShortTimeFourierTransform.swift; path = Common/CircularShortTimeFourierTransform.swift; sourceTree = "<group>"; };
+		D8625CA21BE14A53000922D8 /* TPCircularBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = TPCircularBuffer.c; path = ../../Common/TPCircularBuffer/TPCircularBuffer.c; sourceTree = "<group>"; };
+		D8625CA31BE14A53000922D8 /* TPCircularBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TPCircularBuffer.h; path = ../../Common/TPCircularBuffer/TPCircularBuffer.h; sourceTree = "<group>"; };
 		D8625CA51BE14B8E000922D8 /* SyllableDetector-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SyllableDetector-Bridging-Header.h"; sourceTree = "<group>"; };
 		D89269881BF3AEDE009482C2 /* SummaryStat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SummaryStat.swift; sourceTree = "<group>"; };
-		D89803B41C3C2ACF000CFC41 /* Resampler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Resampler.swift; sourceTree = "<group>"; };
-		D8B59D151BE6B77F0099CB4B /* StreamReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamReader.swift; sourceTree = "<group>"; };
+		D89803B41C3C2ACF000CFC41 /* Resampler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Resampler.swift; path = Common/Resampler.swift; sourceTree = "<group>"; };
+		D8B59D151BE6B77F0099CB4B /* StreamReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StreamReader.swift; path = Common/StreamReader.swift; sourceTree = "<group>"; };
 		D8D1BD471BE6D61B00059974 /* ViewControllerMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewControllerMenu.swift; sourceTree = "<group>"; };
 		D8D1BD4C1BE6E53C00059974 /* WindowControllerProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WindowControllerProcessor.swift; sourceTree = "<group>"; };
+		D8E2DB511D00C74500FC6AE2 /* SyllableDetectorCLI */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SyllableDetectorCLI; sourceTree = BUILT_PRODUCTS_DIR; };
+		D8E2DB531D00C74500FC6AE2 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		D8625C761BE14922000922D8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D8E2DB4E1D00C74500FC6AE2 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -66,7 +88,9 @@
 		D8625C701BE14922000922D8 = {
 			isa = PBXGroup;
 			children = (
+				D8E2DB581D00C76900FC6AE2 /* Common */,
 				D8625C7B1BE14922000922D8 /* SyllableDetector */,
+				D8E2DB521D00C74500FC6AE2 /* SyllableDetectorCLI */,
 				D8625C7A1BE14922000922D8 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -75,6 +99,7 @@
 			isa = PBXGroup;
 			children = (
 				D8625C791BE14922000922D8 /* SyllableDetector.app */,
+				D8E2DB511D00C74500FC6AE2 /* SyllableDetectorCLI */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -82,18 +107,9 @@
 		D8625C7B1BE14922000922D8 /* SyllableDetector */ = {
 			isa = PBXGroup;
 			children = (
-				D8625CA11BE14A53000922D8 /* TPCircularBuffer */,
 				D8625C7C1BE14922000922D8 /* AppDelegate.swift */,
 				D8625C8C1BE149FE000922D8 /* AudioInterface.swift */,
-				D8625C931BE149FE000922D8 /* CircularShortTimeFourierTransform.swift */,
-				D8625C911BE149FE000922D8 /* Common.swift */,
-				D8285D191CABFBBA00AD5AF8 /* Time.swift */,
-				D8625C8E1BE149FE000922D8 /* NeuralNet.swift */,
-				D89803B41C3C2ACF000CFC41 /* Resampler.swift */,
-				D8B59D151BE6B77F0099CB4B /* StreamReader.swift */,
 				D89269881BF3AEDE009482C2 /* SummaryStat.swift */,
-				D8625C8B1BE149FE000922D8 /* SyllableDetector.swift */,
-				D8625C8F1BE149FE000922D8 /* SyllableDetectorConfig.swift */,
 				D8D1BD471BE6D61B00059974 /* ViewControllerMenu.swift */,
 				D8625C7E1BE14922000922D8 /* ViewControllerProcessor.swift */,
 				D82E7F7A1C10B629004759F7 /* ViewControllerSimulator.swift */,
@@ -112,7 +128,32 @@
 				D8625CA21BE14A53000922D8 /* TPCircularBuffer.c */,
 				D8625CA31BE14A53000922D8 /* TPCircularBuffer.h */,
 			);
-			path = TPCircularBuffer;
+			name = TPCircularBuffer;
+			path = SyllableDetector/TPCircularBuffer;
+			sourceTree = "<group>";
+		};
+		D8E2DB521D00C74500FC6AE2 /* SyllableDetectorCLI */ = {
+			isa = PBXGroup;
+			children = (
+				D8E2DB531D00C74500FC6AE2 /* main.swift */,
+			);
+			path = SyllableDetectorCLI;
+			sourceTree = "<group>";
+		};
+		D8E2DB581D00C76900FC6AE2 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				D8625CA11BE14A53000922D8 /* TPCircularBuffer */,
+				D8625C931BE149FE000922D8 /* CircularShortTimeFourierTransform.swift */,
+				D8625C911BE149FE000922D8 /* Common.swift */,
+				D8625C8E1BE149FE000922D8 /* NeuralNet.swift */,
+				D89803B41C3C2ACF000CFC41 /* Resampler.swift */,
+				D8B59D151BE6B77F0099CB4B /* StreamReader.swift */,
+				D8625C8B1BE149FE000922D8 /* SyllableDetector.swift */,
+				D8625C8F1BE149FE000922D8 /* SyllableDetectorConfig.swift */,
+				D8285D191CABFBBA00AD5AF8 /* Time.swift */,
+			);
+			name = Common;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -135,19 +176,39 @@
 			productReference = D8625C791BE14922000922D8 /* SyllableDetector.app */;
 			productType = "com.apple.product-type.application";
 		};
+		D8E2DB501D00C74500FC6AE2 /* SyllableDetectorCLI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D8E2DB571D00C74500FC6AE2 /* Build configuration list for PBXNativeTarget "SyllableDetectorCLI" */;
+			buildPhases = (
+				D8E2DB4D1D00C74500FC6AE2 /* Sources */,
+				D8E2DB4E1D00C74500FC6AE2 /* Frameworks */,
+				D8E2DB4F1D00C74500FC6AE2 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SyllableDetectorCLI;
+			productName = SyllableDetectorCLI;
+			productReference = D8E2DB511D00C74500FC6AE2 /* SyllableDetectorCLI */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		D8625C711BE14922000922D8 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0710;
+				LastSwiftUpdateCheck = 0730;
 				LastUpgradeCheck = 0710;
 				ORGANIZATIONNAME = "Gardner Lab";
 				TargetAttributes = {
 					D8625C781BE14922000922D8 = {
 						CreatedOnToolsVersion = 7.1;
 						DevelopmentTeam = WRZPP65FJN;
+					};
+					D8E2DB501D00C74500FC6AE2 = {
+						CreatedOnToolsVersion = 7.3.1;
 					};
 				};
 			};
@@ -165,6 +226,7 @@
 			projectRoot = "";
 			targets = (
 				D8625C781BE14922000922D8 /* SyllableDetector */,
+				D8E2DB501D00C74500FC6AE2 /* SyllableDetectorCLI */,
 			);
 		};
 /* End PBXProject section */
@@ -202,6 +264,14 @@
 				D8625C951BE149FE000922D8 /* AudioInterface.swift in Sources */,
 				D89269891BF3AEDE009482C2 /* SummaryStat.swift in Sources */,
 				D8625C7D1BE14922000922D8 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D8E2DB4D1D00C74500FC6AE2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D8E2DB541D00C74500FC6AE2 /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -328,6 +398,22 @@
 			};
 			name = Release;
 		};
+		D8E2DB551D00C74500FC6AE2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		D8E2DB561D00C74500FC6AE2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -348,6 +434,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		D8E2DB571D00C74500FC6AE2 /* Build configuration list for PBXNativeTarget "SyllableDetectorCLI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D8E2DB551D00C74500FC6AE2 /* Debug */,
+				D8E2DB561D00C74500FC6AE2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};
