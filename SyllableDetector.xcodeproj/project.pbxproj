@@ -26,7 +26,33 @@
 		D8D1BD481BE6D61B00059974 /* ViewControllerMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D1BD471BE6D61B00059974 /* ViewControllerMenu.swift */; };
 		D8D1BD4D1BE6E53C00059974 /* WindowControllerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D1BD4C1BE6E53C00059974 /* WindowControllerProcessor.swift */; };
 		D8E2DB541D00C74500FC6AE2 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E2DB531D00C74500FC6AE2 /* main.swift */; };
+		D8E2DB591D00C89D00FC6AE2 /* CircularShortTimeFourierTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C931BE149FE000922D8 /* CircularShortTimeFourierTransform.swift */; };
+		D8E2DB5A1D00C8A200FC6AE2 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = D8625CA21BE14A53000922D8 /* TPCircularBuffer.c */; };
+		D8E2DB5B1D00C8A700FC6AE2 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C911BE149FE000922D8 /* Common.swift */; };
+		D8E2DB5C1D00C8AA00FC6AE2 /* NeuralNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C8E1BE149FE000922D8 /* NeuralNet.swift */; };
+		D8E2DB5D1D00C8AC00FC6AE2 /* Resampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89803B41C3C2ACF000CFC41 /* Resampler.swift */; };
+		D8E2DB5E1D00C90700FC6AE2 /* SyllableDetectorConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C8F1BE149FE000922D8 /* SyllableDetectorConfig.swift */; };
+		D8E2DB5F1D00C90A00FC6AE2 /* SyllableDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C8B1BE149FE000922D8 /* SyllableDetector.swift */; };
+		D8E2DB601D00C90D00FC6AE2 /* StreamReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8B59D151BE6B77F0099CB4B /* StreamReader.swift */; };
+		D8E2DB6B1D00CB7000FC6AE2 /* CommandLine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8E2DB681D00CB4D00FC6AE2 /* CommandLine.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D8E2DB671D00CB4D00FC6AE2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D8E2DB621D00CB4D00FC6AE2 /* CommandLine.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5D06884319674D7D00BBFAAC;
+			remoteInfo = CommandLine;
+		};
+		D8E2DB691D00CB4D00FC6AE2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D8E2DB621D00CB4D00FC6AE2 /* CommandLine.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5D06884E19674D7D00BBFAAC;
+			remoteInfo = CommandLineTests;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		D8E2DB4F1D00C74500FC6AE2 /* CopyFiles */ = {
@@ -57,7 +83,7 @@
 		D8625C931BE149FE000922D8 /* CircularShortTimeFourierTransform.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CircularShortTimeFourierTransform.swift; path = Common/CircularShortTimeFourierTransform.swift; sourceTree = "<group>"; };
 		D8625CA21BE14A53000922D8 /* TPCircularBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = TPCircularBuffer.c; path = ../../Common/TPCircularBuffer/TPCircularBuffer.c; sourceTree = "<group>"; };
 		D8625CA31BE14A53000922D8 /* TPCircularBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TPCircularBuffer.h; path = ../../Common/TPCircularBuffer/TPCircularBuffer.h; sourceTree = "<group>"; };
-		D8625CA51BE14B8E000922D8 /* SyllableDetector-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SyllableDetector-Bridging-Header.h"; sourceTree = "<group>"; };
+		D8625CA51BE14B8E000922D8 /* Common-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Common-Bridging-Header.h"; path = "Common/Common-Bridging-Header.h"; sourceTree = "<group>"; };
 		D89269881BF3AEDE009482C2 /* SummaryStat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SummaryStat.swift; sourceTree = "<group>"; };
 		D89803B41C3C2ACF000CFC41 /* Resampler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Resampler.swift; path = Common/Resampler.swift; sourceTree = "<group>"; };
 		D8B59D151BE6B77F0099CB4B /* StreamReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StreamReader.swift; path = Common/StreamReader.swift; sourceTree = "<group>"; };
@@ -65,6 +91,7 @@
 		D8D1BD4C1BE6E53C00059974 /* WindowControllerProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WindowControllerProcessor.swift; sourceTree = "<group>"; };
 		D8E2DB511D00C74500FC6AE2 /* SyllableDetectorCLI */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SyllableDetectorCLI; sourceTree = BUILT_PRODUCTS_DIR; };
 		D8E2DB531D00C74500FC6AE2 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		D8E2DB621D00CB4D00FC6AE2 /* CommandLine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CommandLine.xcodeproj; path = Frameworks/CommandLine/CommandLine.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +106,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D8E2DB6B1D00CB7000FC6AE2 /* CommandLine.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -91,6 +119,7 @@
 				D8E2DB581D00C76900FC6AE2 /* Common */,
 				D8625C7B1BE14922000922D8 /* SyllableDetector */,
 				D8E2DB521D00C74500FC6AE2 /* SyllableDetectorCLI */,
+				D8E2DB611D00CB2900FC6AE2 /* Frameworks */,
 				D8625C7A1BE14922000922D8 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -117,7 +146,6 @@
 				D8625C801BE14922000922D8 /* Assets.xcassets */,
 				D8625C821BE14922000922D8 /* Main.storyboard */,
 				D8625C851BE14922000922D8 /* Info.plist */,
-				D8625CA51BE14B8E000922D8 /* SyllableDetector-Bridging-Header.h */,
 			);
 			path = SyllableDetector;
 			sourceTree = "<group>";
@@ -143,7 +171,7 @@
 		D8E2DB581D00C76900FC6AE2 /* Common */ = {
 			isa = PBXGroup;
 			children = (
-				D8625CA11BE14A53000922D8 /* TPCircularBuffer */,
+				D8625CA51BE14B8E000922D8 /* Common-Bridging-Header.h */,
 				D8625C931BE149FE000922D8 /* CircularShortTimeFourierTransform.swift */,
 				D8625C911BE149FE000922D8 /* Common.swift */,
 				D8625C8E1BE149FE000922D8 /* NeuralNet.swift */,
@@ -152,8 +180,26 @@
 				D8625C8B1BE149FE000922D8 /* SyllableDetector.swift */,
 				D8625C8F1BE149FE000922D8 /* SyllableDetectorConfig.swift */,
 				D8285D191CABFBBA00AD5AF8 /* Time.swift */,
+				D8625CA11BE14A53000922D8 /* TPCircularBuffer */,
 			);
 			name = Common;
+			sourceTree = "<group>";
+		};
+		D8E2DB611D00CB2900FC6AE2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D8E2DB621D00CB4D00FC6AE2 /* CommandLine.xcodeproj */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D8E2DB631D00CB4D00FC6AE2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D8E2DB681D00CB4D00FC6AE2 /* CommandLine.framework */,
+				D8E2DB6A1D00CB4D00FC6AE2 /* CommandLineTests.xctest */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -223,6 +269,12 @@
 			mainGroup = D8625C701BE14922000922D8;
 			productRefGroup = D8625C7A1BE14922000922D8 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = D8E2DB631D00CB4D00FC6AE2 /* Products */;
+					ProjectRef = D8E2DB621D00CB4D00FC6AE2 /* CommandLine.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				D8625C781BE14922000922D8 /* SyllableDetector */,
@@ -230,6 +282,23 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		D8E2DB681D00CB4D00FC6AE2 /* CommandLine.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = CommandLine.framework;
+			remoteRef = D8E2DB671D00CB4D00FC6AE2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D8E2DB6A1D00CB4D00FC6AE2 /* CommandLineTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = CommandLineTests.xctest;
+			remoteRef = D8E2DB691D00CB4D00FC6AE2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		D8625C771BE14922000922D8 /* Resources */ = {
@@ -271,7 +340,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D8E2DB5B1D00C8A700FC6AE2 /* Common.swift in Sources */,
+				D8E2DB5C1D00C8AA00FC6AE2 /* NeuralNet.swift in Sources */,
+				D8E2DB5E1D00C90700FC6AE2 /* SyllableDetectorConfig.swift in Sources */,
+				D8E2DB601D00C90D00FC6AE2 /* StreamReader.swift in Sources */,
+				D8E2DB5F1D00C90A00FC6AE2 /* SyllableDetector.swift in Sources */,
+				D8E2DB5A1D00C8A200FC6AE2 /* TPCircularBuffer.c in Sources */,
+				D8E2DB591D00C89D00FC6AE2 /* CircularShortTimeFourierTransform.swift in Sources */,
 				D8E2DB541D00C74500FC6AE2 /* main.swift in Sources */,
+				D8E2DB5D1D00C8AC00FC6AE2 /* Resampler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -380,7 +457,7 @@
 				OTHER_SWIFT_FLAGS = "-DDEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = edu.gardner.SyllableDetector;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "SyllableDetector/SyllableDetector-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Common/Common-Bridging-Header.h";
 			};
 			name = Debug;
 		};
@@ -394,7 +471,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = edu.gardner.SyllableDetector;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "SyllableDetector/SyllableDetector-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Common/Common-Bridging-Header.h";
 			};
 			name = Release;
 		};
@@ -403,6 +480,7 @@
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Common/Common-Bridging-Header.h";
 			};
 			name = Debug;
 		};
@@ -411,6 +489,7 @@
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Common/Common-Bridging-Header.h";
 			};
 			name = Release;
 		};
