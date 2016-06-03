@@ -39,7 +39,7 @@ struct SyllableDetectorConfig
     
     let spectrogramScaling: Scaling
     
-    let threshold: Double // eqv: trigger threshold
+    let thresholds: [Double] // eqv: trigger threshold
     
     let net: NeuralNet
 }
@@ -77,7 +77,7 @@ extension SyllableDetectorConfig
         return i
     }
     
-    private static func parseDoubleArray(nm: String, withCount cnt: Int, from data: [String: String]) throws -> [Double] {
+    private static func parseDoubleArray(nm: String, withCount cnt: Int? = nil, from data: [String: String]) throws -> [Double] {
         guard let v = data[nm] else { throw ParseError.MissingValue(nm) }
         
         // split into doubles
@@ -88,7 +88,9 @@ extension SyllableDetectorConfig
         if stringParts.count != doubleParts.count { throw ParseError.InvalidValue(nm) }
         
         // check count
-        if doubleParts.count != cnt { throw ParseError.MismatchedLength(nm) }
+        if let desiredCnt = cnt {
+            if doubleParts.count != desiredCnt { throw ParseError.MismatchedLength(nm) }
+        }
         
         return doubleParts
     }
@@ -218,7 +220,13 @@ extension SyllableDetectorConfig
         timeRange = try SyllableDetectorConfig.parseInt("timeRange", from: data)
         
         // threshold: double
-        threshold = try SyllableDetectorConfig.parseDouble("threshold", from: data)
+        do {
+            thresholds = try SyllableDetectorConfig.parseDoubleArray("thresholds", from: data)
+        }
+        catch {
+            // backwards compatibility
+            thresholds = try SyllableDetectorConfig.parseDoubleArray("threshold", from: data)
+        }
         
         // read scaling
         if let scaling = Scaling(fromName: try SyllableDetectorConfig.parseString("scaling", from: data)) {

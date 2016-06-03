@@ -315,7 +315,7 @@ class ViewControllerSimulator: NSViewController {
                     }
                     
                     // value to write
-                    var v = sd.lastOutput / Float(sd.config.threshold)
+                    var v = sd.lastOutputs[0] / Float(sd.config.thresholds[0])
                     if v > 1.0 {
                         v = 1.0
                     }

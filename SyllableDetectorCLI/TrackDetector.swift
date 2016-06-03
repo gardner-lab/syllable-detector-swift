@@ -67,8 +67,17 @@ class TrackDetector
             let curOutput = nextOutput
             nextOutput += detector.config.windowLength - detector.config.windowOverlap
             
+            // look for detection
+            var hasDetection = false
+            for (i, d) in detector.lastOutputs.enumerate() {
+                if Double(d) >= detector.config.thresholds[i] {
+                    hasDetection = true
+                    break
+                }
+            }
+            
             // detection
-            if detector.lastDetected && debounceUntil < curOutput {
+            if hasDetection && debounceUntil < curOutput {
                 // get sample number within current buffer
                 let curSample = curOutput - totalSamples
                 if curSample >= numSamples {
@@ -79,7 +88,12 @@ class TrackDetector
                 let curTime = CMTime(value: presentationTimestamp.value + curSample, timescale: presentationTimestamp.timescale)
                 let curTimeSeconds = CMTimeGetSeconds(curTime)
                 
-                print("\(channel),\(curOutput),\(curTimeSeconds),\(detector.lastOutput)")
+                // print results
+                print("\(channel),\(curOutput),\(curTimeSeconds)", terminator: "")
+                for d in detector.lastOutputs {
+                    print(",\(d)", terminator: "")
+                }
+                print("")
                 
                 // start debounce counter
                 debounceUntil = curOutput + debounceFrames

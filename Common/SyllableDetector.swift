@@ -23,10 +23,10 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
     }
     
     // last values
-    var lastOutput: Float
+    var lastOutputs: [Float]
     var lastDetected: Bool {
         get {
-            return (Double(lastOutput) >= config.threshold)
+            return (Double(lastOutputs[0]) >= config.thresholds[0])
         }
     }
     
@@ -51,7 +51,12 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         // check that matches input size
         let expectedInputs = (freqIndices.1 - freqIndices.0) * config.timeRange
         guard expectedInputs == config.net.inputs else {
-            fatalError("The neural network has \(config.net.inputs), but the configuration settings suggest there should be \(expectedInputs).")
+            fatalError("The neural network has \(config.net.inputs) inputs, but the configuration settings suggest there should be \(expectedInputs).")
+        }
+        
+        // check that the threshold count matches the output size
+        guard config.thresholds.count == config.net.outputs else {
+            fatalError("The neural network has \(config.net.outputs) outputs, but the configuration settings suggest there should be \(config.thresholds.count).")
         }
         
         // create the circular buffer
@@ -62,7 +67,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         }
         
         // no last output
-        lastOutput = 0.0
+        lastOutputs = [Float](count: config.net.outputs, repeatedValue: 0.0)
         
         // call super
         super.init()
@@ -200,8 +205,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
             scaledSamples = samples
         }
         
-        let ret = config.net.apply(scaledSamples)
-        lastOutput = ret[0]
+        lastOutputs = config.net.apply(scaledSamples)
         
         return true
     }

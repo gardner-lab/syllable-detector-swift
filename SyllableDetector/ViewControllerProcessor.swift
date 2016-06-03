@@ -128,7 +128,7 @@ class Processor: AudioInputInterfaceDelegate {
             // while there are new values
             while self.detectors[index].processNewValue() {
                 // send to output
-                self.statOutput[index].writeValue(Double(d.lastOutput))
+                self.statOutput[index].writeValue(Double(d.lastOutputs[0]))
                 
                 // update detected
                 if !seen && d.lastDetected {
