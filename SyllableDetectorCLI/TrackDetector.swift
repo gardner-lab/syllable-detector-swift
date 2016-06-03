@@ -15,10 +15,19 @@ class TrackDetector
     let reader: AVAssetReaderTrackOutput
     let detector: SyllableDetector
     let channel: Int
+    var debounceFrames = 0
+    var debounceTime: Double {
+        get {
+            return Double(debounceFrames) / detector.config.samplingRate
+        }
+        set {
+            debounceFrames = Int(newValue * detector.config.samplingRate)
+        }
+    }
     
-    var nextOutput: Int // counter until next sd output
-    var totalSamples: Int = 0
-    var debounceUntil: Int = -1
+    private var nextOutput: Int // counter until next sd output
+    private var totalSamples: Int = 0
+    private var debounceUntil: Int = -1
 
     init(track: AVAssetTrack, config: SyllableDetectorConfig, channel: Int = 0) {
         detector = SyllableDetector(config: config)
@@ -41,24 +50,13 @@ class TrackDetector
         
         // get number of samples
         let numSamples = CMSampleBufferGetNumSamples(sampleBuffer)
+        //print("\(numSamples)")
         guard 0 < numSamples else {
             return
         }
         
         // get timing information
-        var itemCount: CMItemCount = 0
-        if noErr != CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, 0, nil, &itemCount) {
-            fatalError("Unable to read timing information.")
-        }
-        
-        var timingInfo = UnsafeMutablePointer<CMSampleTimingInfo>(malloc(sizeof(CMSampleTimingInfo) * itemCount))
-        defer {
-            free(timingInfo)
-        }
-        
-        if noErr != CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, itemCount, timingInfo, &itemCount) {
-           fatalError("Unable to read timing information.")
-        }
+        let presentationTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
         
         // process sample buffer
         detector.processSampleBuffer(sampleBuffer)
@@ -78,9 +76,13 @@ class TrackDetector
                 }
                 
                 // get presentation time
-                let tm = CMTimeGetSeconds(timingInfo[curSample].presentationTimeStamp)
+                let curTime = CMTime(value: presentationTimestamp.value + curSample, timescale: presentationTimestamp.timescale)
+                let curTimeSeconds = CMTimeGetSeconds(curTime)
                 
-                print("\(channel),\(curOutput),\(tm),\(detector.lastOutput)")
+                print("\(channel),\(curOutput),\(curTimeSeconds),\(detector.lastOutput)")
+                
+                // start debounce counter
+                debounceUntil = curOutput + debounceFrames
             }
         }
         

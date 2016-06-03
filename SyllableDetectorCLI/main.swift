@@ -8,11 +8,10 @@
 
 import Foundation
 import AVFoundation
-import CommandLine
 
 // UTILITY
 
-var stderr = StandardErrorOutputStream()
+private var stderr = StandardErrorOutputStream()
 
 // PARSE COMMAND LINE
 
@@ -20,15 +19,35 @@ let cli = CommandLine()
 
 let networkPath = StringOption(shortFlag: "n", longFlag: "net", required: true, helpMessage: "Path to trained network file.")
 let audioPaths = MultiStringOption(shortFlag: "a", longFlag: "audio", required: true, helpMessage: "Path to the audio file to process.")
+let debounceTime = DoubleOption(shortFlag: "d", longFlag: "debounce", helpMessage: "Number of seconds to debounce triggers.")
+let help = BoolOption(shortFlag: "h", longFlag: "help", helpMessage: "Prints a help message.")
 
-cli.addOptions(networkPath, audioPaths)
+cli.addOptions(networkPath, audioPaths, debounceTime, help)
 
 do {
     try cli.parse()
 }
 catch {
-    cli.printUsage(error)
-    exit(EX_USAGE)
+    // if help
+    if !help.value {
+        cli.printUsage(error)
+        exit(EX_USAGE)
+    }
+}
+
+// print usage
+if help.value {
+    cli.printUsage()
+    print("The command line will write a comma separated list to standard out of detection events (when the network has at least one output above threshold). For exampling, it might output:")
+    print("")
+    print("\t0,1593298,36.1292063492063,0.918557")
+    print("")
+    print("The columns are:")
+    print("1.\tThe track or channel number from the audio file (starting with 0).")
+    print("2.\tThe sample number from the audio when detection occurred.")
+    print("3.\tThe timestamp from the audio when detection occurred.")
+    print("4.\tThe first neural network output. Note that there may be additional columns for additional outputs.")
+    exit(EX_OK)
 }
 
 // RUN
@@ -77,7 +96,7 @@ audioPaths.value!.forEach {
     
     // validate
     let trackDetectors = potentialTrackDetectors.filter {
-        return !avReader.canAddOutput($0.reader)
+        return avReader.canAddOutput($0.reader)
     }
     if trackDetectors.count == 0 {
         print("Can not read audio tracks found in \(audioPath).", toStream: &stderr)
@@ -89,6 +108,12 @@ audioPaths.value!.forEach {
     
     // add all
     trackDetectors.forEach {
+        // configure
+        if let seconds = debounceTime.value {
+            $0.debounceTime = seconds
+        }
+        
+        // add it
         avReader.addOutput($0.reader)
     }
     
@@ -100,8 +125,9 @@ audioPaths.value!.forEach {
     
     // 2c. iterate over audio
     
-    var completedOrFailed = false
-    var status: OSStatus
+    if 1 < audioPaths.value!.count {
+        print("\(audioPath)")
+    }
     
     while avReader.status == AVAssetReaderStatus.Reading {
         for trackDetector in trackDetectors {
