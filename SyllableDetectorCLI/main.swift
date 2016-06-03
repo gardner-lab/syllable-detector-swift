@@ -38,15 +38,15 @@ catch {
 // print usage
 if help.value {
     cli.printUsage()
-    print("The command line will write a comma separated list to standard out of detection events (when the network has at least one output above threshold). For exampling, it might output:")
+    print("The command line will write a comma-separated list of detection events (when the network has at least one output above threshold) to standard out. For example, it might output:")
     print("")
     print("\t0,1593298,36.1292063492063,0.918557")
     print("")
     print("The columns are:")
-    print("1.\tThe track or channel number from the audio file (starting with 0).")
-    print("2.\tThe sample number from the audio when detection occurred.")
-    print("3.\tThe timestamp from the audio when detection occurred.")
-    print("4.\tThe first neural network output. Note that there may be additional columns for additional outputs.")
+    print("1. The track or channel number from the audio file (starting with 0).")
+    print("2. The sample number from the audio when detection occurred.")
+    print("3. The timestamp from the audio when detection occurred.")
+    print("4. The first neural network output. Note that there may be additional columns for additional outputs.")
     exit(EX_OK)
 }
 
