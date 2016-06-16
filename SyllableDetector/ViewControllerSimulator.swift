@@ -199,16 +199,19 @@ class ViewControllerSimulator: NSViewController {
         monoChannelLayout.mNumberChannelDescriptions = 0
         
         // audio settings
-        let compressionAudioSettings: [String: AnyObject] = [
-            AVFormatIDKey: NSNumber(value: kAudioFormatLinearPCM),
-            AVLinearPCMBitDepthKey: NSNumber(value: 16),
-            AVLinearPCMIsFloatKey: false,
-            AVLinearPCMIsBigEndianKey: false,
-            AVLinearPCMIsNonInterleaved: false,
-            AVSampleRateKey: NSNumber(value: sd.config.samplingRate),
-            AVChannelLayoutKey: Data(bytes: UnsafePointer<UInt8>(&monoChannelLayout), count: sizeof(AudioChannelLayout)),
-            AVNumberOfChannelsKey: NSNumber(value: 1)
-        ]
+        var compressionAudioSettings: [String: AnyObject] = [:]
+        withUnsafePointer(&monoChannelLayout) {
+            compressionAudioSettings = [
+                AVFormatIDKey: NSNumber(value: kAudioFormatLinearPCM),
+                AVLinearPCMBitDepthKey: NSNumber(value: 16),
+                AVLinearPCMIsFloatKey: false,
+                AVLinearPCMIsBigEndianKey: false,
+                AVLinearPCMIsNonInterleaved: false,
+                AVSampleRateKey: NSNumber(value: sd.config.samplingRate),
+                AVChannelLayoutKey: Data(bytes: UnsafePointer<UInt8>($0), count: sizeof(AudioChannelLayout)),
+                AVNumberOfChannelsKey: NSNumber(value: 1)
+            ]
+        }
         
         // make writer input
         let avWriterInput = AVAssetWriterInput(mediaType: AVMediaTypeAudio, outputSettings: compressionAudioSettings)

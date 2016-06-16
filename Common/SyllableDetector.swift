@@ -113,7 +113,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         CMBlockBufferGetDataPointer(audioBuffer, 0, &lengthAtOffset, &totalLength, &inSamples)
         
         // append it to fourier transform
-        shortTimeFourierTransform.appendData(UnsafeMutablePointer<Float>(inSamples), withSamples: numSamples)
+        shortTimeFourierTransform.appendData(UnsafeMutablePointer<Float>(inSamples!), withSamples: numSamples)
     }
     
     func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!) {

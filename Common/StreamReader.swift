@@ -8,7 +8,7 @@
 import Foundation
 
 class StreamReader  {
-    let encoding : UInt
+    let encoding : String.Encoding
     let chunkSize : Int
     
     var fileHandle : FileHandle!
@@ -16,12 +16,12 @@ class StreamReader  {
     let delimData : Data!
     var atEof : Bool = false
     
-    init?(path: String, delimiter: String = "\n", encoding : UInt = String.Encoding.utf8, chunkSize : Int = 4096) {
+    init?(path: String, delimiter: String = "\n", encoding: String.Encoding = .utf8, chunkSize : Int = 4096) {
         self.chunkSize = chunkSize
         self.encoding = encoding
         
         if let fileHandle = FileHandle(forReadingAtPath: path),
-            delimData = delimiter.data(using: String.Encoding(rawValue: encoding)),
+            delimData = delimiter.data(using: encoding),
             buffer = NSMutableData(capacity: chunkSize)
         {
             self.fileHandle = fileHandle
@@ -56,7 +56,7 @@ class StreamReader  {
                 atEof = true
                 if buffer.length > 0 {
                     // Buffer contains last line in file (not terminated by delimiter).
-                    let line = NSString(data: buffer as Data, encoding: encoding)
+                    let line = NSString(data: buffer as Data, encoding: encoding.rawValue)
                     
                     buffer.length = 0
                     return line as String?
@@ -70,7 +70,7 @@ class StreamReader  {
         
         // Convert complete line (excluding the delimiter) to a string:
         let line = NSString(data: buffer.subdata(with: NSMakeRange(0, range.location)),
-            encoding: encoding)
+            encoding: encoding.rawValue)
         // Remove line (and the delimiter) from the buffer:
         buffer.replaceBytes(in: NSMakeRange(0, range.location + range.length), withBytes: nil, length: 0)
         

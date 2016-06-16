@@ -10,11 +10,11 @@ import Foundation
 import AudioToolbox
 import Accelerate
 
-func renderOutput(_ inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutablePointer<AudioUnitRenderActionFlags>, timeStamp: UnsafePointer<AudioTimeStamp>, busNumber: UInt32, frameCount: UInt32, data: UnsafeMutablePointer<AudioBufferList>) -> OSStatus {
+func renderOutput(_ inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutablePointer<AudioUnitRenderActionFlags>, timeStamp: UnsafePointer<AudioTimeStamp>, busNumber: UInt32, frameCount: UInt32, data: UnsafeMutablePointer<AudioBufferList>?) -> OSStatus {
     
     // get audio out interface
     let aoi = unsafeBitCast(inRefCon, to: AudioOutputInterface.self)
-    let usableBufferList = UnsafeMutableAudioBufferListPointer(data)
+    let usableBufferList = UnsafeMutableAudioBufferListPointer(data!)
     
     // number of frames
     let frameCountAsInt = Int(frameCount)
@@ -39,7 +39,7 @@ func renderOutput(_ inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMuta
     return 0
 }
 
-func processInput(_ inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutablePointer<AudioUnitRenderActionFlags>, timeStamp: UnsafePointer<AudioTimeStamp>, busNumber: UInt32, frameCount: UInt32, data: UnsafeMutablePointer<AudioBufferList>) -> OSStatus {
+func processInput(_ inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutablePointer<AudioUnitRenderActionFlags>, timeStamp: UnsafePointer<AudioTimeStamp>, busNumber: UInt32, frameCount: UInt32, data: UnsafeMutablePointer<AudioBufferList>?) -> OSStatus {
     
     // get audio in interface
     let aii = unsafeBitCast(inRefCon, to: AudioInputInterface.self)
@@ -411,7 +411,7 @@ class AudioOutputInterface: AudioInterface
         
         // setup playback callback
         var callbackStruct = AURenderCallbackStruct(inputProc: renderOutput, inputProcRefCon: unsafeBitCast(unsafeAddress(of: self), to: UnsafeMutablePointer<Void>.self))
-        try checkError(AudioUnitSetProperty(audioUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Global, outputBus, &callbackStruct, UInt32(sizeof(AURenderCallbackStruct))))
+        try checkError(AudioUnitSetProperty(audioUnit!, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Global, outputBus, &callbackStruct, UInt32(sizeof(AURenderCallbackStruct))))
         
         // initialize audio unit
         AudioUnitInitialize(audioUnit!)
@@ -568,7 +568,7 @@ class AudioInputInterface: AudioInterface
         
         // setup playback callback
         var callbackStruct = AURenderCallbackStruct(inputProc: processInput, inputProcRefCon: unsafeBitCast(unsafeAddress(of: self), to: UnsafeMutablePointer<Void>.self))
-        try checkError(AudioUnitSetProperty(audioUnit, kAudioOutputUnitProperty_SetInputCallback, kAudioUnitScope_Global, 0, &callbackStruct, UInt32(sizeof(AURenderCallbackStruct))))
+        try checkError(AudioUnitSetProperty(audioUnit!, kAudioOutputUnitProperty_SetInputCallback, kAudioUnitScope_Global, 0, &callbackStruct, UInt32(sizeof(AURenderCallbackStruct))))
         
         // initialize audio unit
         AudioUnitInitialize(audioUnit!)
@@ -583,12 +583,10 @@ class AudioInputInterface: AudioInterface
         }
         
         // free buffer
-        if nil != bufferList.unsafePointer {
-            for b in bufferList {
-                free(b.mData)
-            }
-            free(bufferList.unsafeMutablePointer)
+        for b in bufferList {
+            free(b.mData)
         }
+        free(bufferList.unsafeMutablePointer)
         
         // stop playback
         AudioOutputUnitStop(audioUnit!)

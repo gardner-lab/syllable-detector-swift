@@ -114,14 +114,12 @@ class CircularShortTimeFourierTransform
         
         // setup complex buffers
         complexBufferA = DSPSplitComplex(realp: UnsafeMutablePointer<Float>(allocatingCapacity: halfLength), imagp: UnsafeMutablePointer<Float>(allocatingCapacity: halfLength))
-        complexBufferT = DSPSplitComplex(realp: nil, imagp: nil)
         // to get desired alignment..
-        var p: UnsafeMutablePointer<Void>? = nil
-        posix_memalign(&p, 0x4, halfLength * sizeof(Float))
-        complexBufferT.realp = UnsafeMutablePointer<Float>(p!)
-        p = nil
-        posix_memalign(&p, 0x4, halfLength * sizeof(Float))
-        complexBufferT.imagp = UnsafeMutablePointer<Float>(p!)
+        var pReal: UnsafeMutablePointer<Void>? = nil
+        posix_memalign(&pReal, 0x4, halfLength * sizeof(Float))
+        var pImaginary: UnsafeMutablePointer<Void>? = nil
+        posix_memalign(&pImaginary, 0x4, halfLength * sizeof(Float))
+        complexBufferT = DSPSplitComplex(realp: UnsafeMutablePointer<Float>(pReal!), imagp: UnsafeMutablePointer<Float>(pImaginary!))
         
         // create the circular buffer
         self.buffer = TPCircularBuffer()

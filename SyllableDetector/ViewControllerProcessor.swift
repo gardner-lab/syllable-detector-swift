@@ -429,8 +429,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
     
     func timerUpdateValues(_ timer: Timer!) {
         // create column indices
-        let indexes = NSMutableIndexSet(integer: 1)
-        indexes.add(4)
+        let indexes = IndexSet([1, 4])
         
         // reload data
         tableChannels.reloadData(forRowIndexes: IndexSet(integersIn: NSRange(location: 0, length: processorEntries.count).toRange() ?? 0..<0), columnIndexes: indexes)
