@@ -41,7 +41,7 @@ class Processor: AudioInputInterfaceDelegate {
     let highDuration = 0.001 // 1ms
     
     // dispatch queue
-    let queueProcessing: dispatch_queue_t
+    let queueProcessing: DispatchQueue
     
     init(deviceInput: AudioInterface.AudioDevice, deviceOutput: AudioInterface.AudioDevice, entries: [ProcessorEntry]) throws {
         // setup processor entries
@@ -55,8 +55,8 @@ class Processor: AudioInputInterfaceDelegate {
         }
         
         // setup channels
-        var channels = [Int](count: 1 + (self.entries.map { return max($0.inputChannel, $0.outputChannel) }.maxElement() ?? -1), repeatedValue: -1)
-        for (i, p) in self.entries.enumerate() {
+        var channels = [Int](repeating: -1, count: 1 + (self.entries.map { return max($0.inputChannel, $0.outputChannel) }.max() ?? -1))
+        for (i, p) in self.entries.enumerated() {
             channels[p.inputChannel] = i
         }
         self.channels = channels
@@ -76,7 +76,7 @@ class Processor: AudioInputInterfaceDelegate {
         interfaceOutput = AudioOutputInterface(deviceID: deviceOutput.deviceID)
         
         // create queue
-        queueProcessing = dispatch_queue_create("ProcessorQueue", DISPATCH_QUEUE_SERIAL)
+        queueProcessing = DispatchQueue(label: "ProcessorQueue", attributes: DispatchQueueAttributes.serial)
         
         try interfaceOutput.initializeAudio()
         try interfaceInput.initializeAudio()
@@ -92,7 +92,7 @@ class Processor: AudioInputInterfaceDelegate {
         interfaceOutput.tearDownAudio()
     }
     
-    func receiveAudioFrom(interface: AudioInputInterface, fromChannel channel: Int, withData data: UnsafeMutablePointer<Float>, ofLength length: Int) {
+    func receiveAudioFrom(_ interface: AudioInputInterface, fromChannel channel: Int, withData data: UnsafeMutablePointer<Float>, ofLength length: Int) {
         // valid channel
         guard channel < channels.count else { return }
         
@@ -118,7 +118,7 @@ class Processor: AudioInputInterfaceDelegate {
         }
         
         // process
-        dispatch_async(queueProcessing) {
+        queueProcessing.async {
             // detector
             let d = self.detectors[index]
             
@@ -147,7 +147,7 @@ class Processor: AudioInputInterfaceDelegate {
         }
     }
     
-    func getInputForChannel(channel: Int) -> Double? {
+    func getInputForChannel(_ channel: Int) -> Double? {
         // valid channel
         guard channel < channels.count else { return nil }
         
@@ -163,7 +163,7 @@ class Processor: AudioInputInterfaceDelegate {
         return nil
     }
     
-    func getOutputForChannel(channel: Int) -> Double? {
+    func getOutputForChannel(_ channel: Int) -> Double? {
         // valid channel
         guard channel < channels.count else { return nil }
         
@@ -194,20 +194,20 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
     var processor: Processor?
     
     // timer to redraw interface (saves time)
-    var timerRedraw: NSTimer?
+    var timerRedraw: Timer?
     
     var isRunning = false {
         didSet {
             if oldValue == isRunning { return }
             
             // update interface
-            tableChannels.enabled = !isRunning
-            buttonLoad.enabled = !isRunning
+            tableChannels.isEnabled = !isRunning
+            buttonLoad.isEnabled = !isRunning
             buttonToggle.title = (isRunning ? "Stop" : "Start")
             
             // start or stop timer
             if isRunning {
-                timerRedraw = NSTimer.scheduledTimerWithTimeInterval(0.1, target: self, selector: #selector(ViewControllerProcessor.timerUpdateValues(_:)), userInfo: nil, repeats: true)
+                timerRedraw = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(ViewControllerProcessor.timerUpdateValues(_:)), userInfo: nil, repeats: true)
             }
             else {
                 timerRedraw?.invalidate()
@@ -271,7 +271,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         }
     }
     
-    @IBAction func toggle(sender: NSButton) {
+    @IBAction func toggle(_ sender: NSButton) {
         if isRunning {
             // tear down
             processor?.tearDown()
@@ -292,8 +292,8 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
                 let alert = NSAlert()
                 alert.messageText = "Unable to initialize audio"
                 alert.informativeText = "There was an error initializing the audio interfaces: \(error)."
-                alert.addButtonWithTitle("Ok")
-                alert.beginSheetModalForWindow(self.view.window!, completionHandler:nil)
+                alert.addButton(withTitle: "Ok")
+                alert.beginSheetModal(for: self.view.window!, completionHandler:nil)
                 return
             }
             
@@ -302,7 +302,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         }
     }
     
-    func numberOfRowsInTableView(tableView: NSTableView) -> Int {
+    func numberOfRows(in tableView: NSTableView) -> Int {
         let inputChannels: Int, outputChannels: Int
         
         if nil != deviceInput && 0 < deviceInput.buffersInput.count {
@@ -326,7 +326,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         return min(inputChannels, outputChannels)
     }
     
-    func tableView(tableView: NSTableView, objectValueForTableColumn tableColumn: NSTableColumn?, row: Int) -> AnyObject? {
+    func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> AnyObject? {
         guard let identifier = tableColumn?.identifier else { return nil }
         guard row < processorEntries.count else { return nil }
         
@@ -334,14 +334,14 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         case "ColumnInput", "ColumnOutput": return "Channel \(row + 1)"
         case "ColumnInLevel":
             if let p = processor {
-                return NSNumber(double: 100.0 * (p.getInputForChannel(row) ?? 0.0))
+                return NSNumber(value: 100.0 * (p.getInputForChannel(row) ?? 0.0))
             }
-            return NSNumber(double: 0.00)
+            return NSNumber(value: 0.00)
         case "ColumnOutLevel":
             if let p = processor {
-                return NSNumber(double: 100.0 * (p.getOutputForChannel(row) ?? 0.0))
+                return NSNumber(value: 100.0 * (p.getOutputForChannel(row) ?? 0.0))
             }
-            return NSNumber(double: 0.00)
+            return NSNumber(value: 0.00)
         case "ColumnNetwork": return nil == processorEntries[row].config ? "Not Selected" : processorEntries[row].network
         default: return nil
         }
@@ -356,10 +356,10 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         loadNetworkForRow(tableChannels.clickedRow)
     }
     
-    @IBAction func loadNetwork(sender: NSButton) {
+    @IBAction func loadNetwork(_ sender: NSButton) {
         if 0 > tableChannels.selectedRow { // no row selected...
             // find next row needing a network
-            for (i, p) in processorEntries.enumerate() {
+            for (i, p) in processorEntries.enumerated() {
                 if nil == p.config {
                     loadNetworkForRow(i)
                     break
@@ -372,7 +372,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         }
     }
     
-    func loadNetworkForRow(row: Int) {
+    func loadNetworkForRow(_ row: Int) {
         guard !isRunning else { return } // can not select when running
         guard row < processorEntries.count else { return }
         
@@ -390,7 +390,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
             
             // make sure ok was pressed
             if NSFileHandlingPanelOKButton == result {
-                if let url = panel.URL, let path = url.path {
+                if let url = panel.url, let path = url.path {
                     do {
                         // load file
                         let config = try SyllableDetectorConfig(fromTextFile: path)
@@ -409,8 +409,8 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
                         let alert = NSAlert()
                         alert.messageText = "Unable to load"
                         alert.informativeText = "The text file could not be successfully loaded: \(error)."
-                        alert.addButtonWithTitle("Ok")
-                        alert.beginSheetModalForWindow(self.view.window!, completionHandler:nil)
+                        alert.addButton(withTitle: "Ok")
+                        alert.beginSheetModal(for: self.view.window!, completionHandler:nil)
                         
                         // clear selected
                         self.processorEntries[row].network = ""
@@ -424,16 +424,16 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         }
         
         // show
-        panel.beginSheetModalForWindow(self.view.window!, completionHandler: cb)
+        panel.beginSheetModal(for: self.view.window!, completionHandler: cb)
     }
     
-    func timerUpdateValues(timer: NSTimer!) {
+    func timerUpdateValues(_ timer: Timer!) {
         // create column indices
-        let indexes = NSMutableIndexSet(index: 1)
-        indexes.addIndex(4)
+        let indexes = NSMutableIndexSet(integer: 1)
+        indexes.add(4)
         
         // reload data
-        tableChannels.reloadDataForRowIndexes(NSIndexSet(indexesInRange: NSRange(location: 0, length: processorEntries.count)), columnIndexes: indexes)
+        tableChannels.reloadData(forRowIndexes: IndexSet(integersIn: NSRange(location: 0, length: processorEntries.count).toRange() ?? 0..<0), columnIndexes: indexes)
     }
 }
 

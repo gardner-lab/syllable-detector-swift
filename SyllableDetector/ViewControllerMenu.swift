@@ -21,7 +21,7 @@ class ViewControllerMenu: NSViewController, WindowControllerProcessorDelegate {
         super.viewDidLoad()
         
         // reload devices
-        buttonLaunch.enabled = false
+        buttonLaunch.isEnabled = false
         reloadDevices()
         
         // listen
@@ -63,7 +63,7 @@ class ViewControllerMenu: NSViewController, WindowControllerProcessorDelegate {
         
         // rebuild inputs
         selectInput.removeAllItems()
-        selectInput.addItemWithTitle("Input")
+        selectInput.addItem(withTitle: "Input")
         for d in devices {
             if 0 < d.streamsInput {
                 let item = NSMenuItem()
@@ -72,12 +72,12 @@ class ViewControllerMenu: NSViewController, WindowControllerProcessorDelegate {
                 selectInput.menu?.addItem(item)
             }
         }
-        selectInput.selectItemWithTag(selectedInput)
+        selectInput.selectItem(withTag: selectedInput)
         selectInput.synchronizeTitleAndSelectedItem()
         
         // rebuild outputs
         selectOutput.removeAllItems()
-        selectOutput.addItemWithTitle("Output")
+        selectOutput.addItem(withTitle: "Output")
         for d in devices {
             if 0 < d.streamsOutput {
                 let item = NSMenuItem()
@@ -86,24 +86,24 @@ class ViewControllerMenu: NSViewController, WindowControllerProcessorDelegate {
                 selectOutput.menu?.addItem(item)
             }
         }
-        selectOutput.selectItemWithTag(selectedOutput)
+        selectOutput.selectItem(withTag: selectedOutput)
         selectOutput.synchronizeTitleAndSelectedItem()
     }
     
-    @IBAction func selectDevice(sender: NSPopUpButton) {
-        buttonLaunch.enabled = (0 < selectInput.selectedTag() && 0 < selectOutput.selectedTag())
+    @IBAction func selectDevice(_ sender: NSPopUpButton) {
+        buttonLaunch.isEnabled = (0 < selectInput.selectedTag() && 0 < selectOutput.selectedTag())
     }
     
-    @IBAction func buttonSimulate(sender: NSButton) {
-        guard let sb = storyboard, let controller = sb.instantiateControllerWithIdentifier("Simulator") as? NSWindowController else { return }
+    @IBAction func buttonSimulate(_ sender: NSButton) {
+        guard let sb = storyboard, let controller = sb.instantiateController(withIdentifier: "Simulator") as? NSWindowController else { return }
         
         // launch
         controller.showWindow(sender)
         openSimulators.append(controller)
     }
     
-    @IBAction func buttonLaunch(sender: NSButton) {
-        guard let sb = storyboard, let controller = sb.instantiateControllerWithIdentifier("Processor") as? WindowControllerProcessor else { return }
+    @IBAction func buttonLaunch(_ sender: NSButton) {
+        guard let sb = storyboard, let controller = sb.instantiateController(withIdentifier: "Processor") as? WindowControllerProcessor else { return }
         
         // get input device
         guard let deviceInput = AudioInterface.AudioDevice(deviceID: AudioDeviceID(selectInput.selectedTag())) else {
@@ -133,12 +133,12 @@ class ViewControllerMenu: NSViewController, WindowControllerProcessorDelegate {
         openProcessors.append(controller)
         
         // reset selector
-        selectInput.selectItemAtIndex(0)
-        selectOutput.selectItemAtIndex(0)
-        buttonLaunch.enabled = false
+        selectInput.selectItem(at: 0)
+        selectOutput.selectItem(at: 0)
+        buttonLaunch.isEnabled = false
     }
     
-    func windowControllerDone(controller: WindowControllerProcessor) {
+    func windowControllerDone(_ controller: WindowControllerProcessor) {
         // window controller closed, clean from open processor list
         openProcessors = openProcessors.filter {
             return $0 !== controller

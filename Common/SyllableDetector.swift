@@ -18,7 +18,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
     // very specific audio settings required, since down sampling signal
     var audioSettings: [String: AnyObject] {
         get {
-            return [AVFormatIDKey: NSNumber(unsignedInt: kAudioFormatLinearPCM), AVLinearPCMBitDepthKey: NSNumber(int: 32), AVLinearPCMIsFloatKey: true, AVLinearPCMIsNonInterleaved: true, AVSampleRateKey: NSNumber(double: config.samplingRate)]
+            return [AVFormatIDKey: NSNumber(value: kAudioFormatLinearPCM), AVLinearPCMBitDepthKey: NSNumber(value: 32), AVLinearPCMIsFloatKey: true, AVLinearPCMIsNonInterleaved: true, AVSampleRateKey: NSNumber(value: config.samplingRate)]
         }
     }
     
@@ -40,7 +40,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         
         // initialize the FFT
         shortTimeFourierTransform = CircularShortTimeFourierTransform(windowLength: config.windowLength, withOverlap: config.windowOverlap, fftSizeOf: config.fourierLength)
-        shortTimeFourierTransform.windowType = WindowType.Hamming
+        shortTimeFourierTransform.windowType = WindowType.hamming
         
         // store frequency indices
         guard let idx = shortTimeFourierTransform.frequencyIndexRangeFrom(config.freqRange.0, to: config.freqRange.1, forSampleRate: config.samplingRate) else {
@@ -67,7 +67,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         }
         
         // no last output
-        lastOutputs = [Float](count: config.net.outputs, repeatedValue: 0.0)
+        lastOutputs = [Float](repeating: 0.0, count: config.net.outputs)
         
         // call super
         super.init()
@@ -78,7 +78,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         TPCircularBufferCleanup(&buffer)
     }
     
-    func processSampleBuffer(sampleBuffer: CMSampleBuffer) {
+    func processSampleBuffer(_ sampleBuffer: CMSampleBuffer) {
         // has samples
         let numSamples = CMSampleBufferGetNumSamples(sampleBuffer)
         guard 0 < numSamples else {
@@ -93,11 +93,11 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         let audioDescription = CMAudioFormatDescriptionGetStreamBasicDescription(format)
         
         // is interleaved
-        let isInterleaved = 1 < audioDescription[0].mChannelsPerFrame && 0 == (audioDescription[0].mFormatFlags & kAudioFormatFlagIsNonInterleaved)
-        let isFloat = 0 < (audioDescription[0].mFormatFlags & kAudioFormatFlagIsFloat)
+        let isInterleaved = 1 < (audioDescription?[0].mChannelsPerFrame)! && 0 == ((audioDescription?[0].mFormatFlags)! & kAudioFormatFlagIsNonInterleaved)
+        let isFloat = 0 < ((audioDescription?[0].mFormatFlags)! & kAudioFormatFlagIsFloat)
         
         // checks
-        guard audioDescription[0].mFormatID == kAudioFormatLinearPCM && isFloat && !isInterleaved && audioDescription[0].mBitsPerChannel == 32 else {
+        guard audioDescription?[0].mFormatID == kAudioFormatLinearPCM && isFloat && !isInterleaved && audioDescription?[0].mBitsPerChannel == 32 else {
             fatalError("Invalid audio format.")
         }
         
@@ -109,14 +109,14 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         
         // get data pointer
         var lengthAtOffset: Int = 0, totalLength: Int = 0
-        var inSamples: UnsafeMutablePointer<Int8> = nil
+        var inSamples: UnsafeMutablePointer<Int8>? = nil
         CMBlockBufferGetDataPointer(audioBuffer, 0, &lengthAtOffset, &totalLength, &inSamples)
         
         // append it to fourier transform
         shortTimeFourierTransform.appendData(UnsafeMutablePointer<Float>(inSamples), withSamples: numSamples)
     }
     
-    func captureOutput(captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, fromConnection connection: AVCaptureConnection!) {
+    func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!) {
         // append sample data
         processSampleBuffer(sampleBuffer)
         
@@ -124,7 +124,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         while processNewValue() {}
     }
     
-    func appendAudioData(data: UnsafeMutablePointer<Float>, withSamples numSamples: Int) {
+    func appendAudioData(_ data: UnsafeMutablePointer<Float>, withSamples numSamples: Int) {
         // add to short-time fourier transform
         shortTimeFourierTransform.appendData(data, withSamples: numSamples)
     }
@@ -176,31 +176,31 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         
         let scaledSamples: UnsafeMutablePointer<Float>
         switch config.spectrogramScaling {
-        case .Db:
+        case .db:
             // temporary memory
-            scaledSamples = UnsafeMutablePointer<Float>.alloc(lengthTotal)
+            scaledSamples = UnsafeMutablePointer<Float>(allocatingCapacity: lengthTotal)
             defer {
-                scaledSamples.destroy()
-                scaledSamples.dealloc(lengthTotal)
+                scaledSamples.deinitialize()
+                scaledSamples.deallocateCapacity(lengthTotal)
             }
             
             // convert to db with amplitude flag
             var one: Float = 1.0
             vDSP_vdbcon(samples, 1, &one, scaledSamples, 1, vDSP_Length(lengthTotal), 1)
             
-        case .Log:
+        case .log:
             // temporary memory
-            scaledSamples = UnsafeMutablePointer<Float>.alloc(lengthTotal)
+            scaledSamples = UnsafeMutablePointer<Float>(allocatingCapacity: lengthTotal)
             defer {
-                scaledSamples.destroy()
-                scaledSamples.dealloc(lengthTotal)
+                scaledSamples.deinitialize()
+                scaledSamples.deallocateCapacity(lengthTotal)
             }
             
             // natural log
             var c = Int32(lengthTotal)
             vvlogf(samples, scaledSamples, &c)
             
-        case .Linear:
+        case .linear:
             // no copy needed
             scaledSamples = samples
         }

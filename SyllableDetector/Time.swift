@@ -45,7 +45,7 @@ class Time
         return Double(timeStop - timeStart) * Time.getTimeBase()
     }
     
-    static func startWithName(key: String) {
+    static func startWithName(_ key: String) {
         if let t = Time.globalTimers[key] {
             t.start()
         }
@@ -56,7 +56,7 @@ class Time
         }
     }
     
-    static func stopWithName(key: String) -> Double {
+    static func stopWithName(_ key: String) -> Double {
         if let t = Time.globalTimers[key] {
             t.stop()
             return t.nanoseconds
@@ -65,7 +65,7 @@ class Time
         return -1.0
     }
     
-    static func stopAndSaveWithName(key: String) {
+    static func stopAndSaveWithName(_ key: String) {
         if let t = Time.globalTimers[key] {
             t.stop()
             
@@ -77,7 +77,7 @@ class Time
         }
     }
     
-    static func saveWithName(key: String, andValue value: Double) {
+    static func saveWithName(_ key: String, andValue value: Double) {
         if nil == Time.globalStats[key] {
             Time.globalStats[key] = [Double]()
         }
@@ -85,7 +85,7 @@ class Time
         Time.globalStats[key]!.append(value)
     }
     
-    static func stopAndPrintWithName(key: String) {
+    static func stopAndPrintWithName(_ key: String) {
         if let t = Time.globalTimers[key] {
             t.stop()
             print("\(key): \(t.nanoseconds)ns")
