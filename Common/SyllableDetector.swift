@@ -43,7 +43,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         shortTimeFourierTransform.windowType = WindowType.hamming
         
         // store frequency indices
-        guard let idx = shortTimeFourierTransform.frequencyIndexRangeFrom(config.freqRange.0, to: config.freqRange.1, forSampleRate: config.samplingRate) else {
+        guard let idx = shortTimeFourierTransform.frequencyIndexRangeFrom(config.freqRange.0, through: config.freqRange.1, forSampleRate: config.samplingRate) else {
             fatalError("The frequency range is invalid.")
         }
         freqIndices = idx

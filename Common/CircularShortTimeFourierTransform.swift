@@ -163,7 +163,7 @@ class CircularShortTimeFourierTransform
         return (0..<halfLength).map { Double($0) * toSampleRate }
     }
     
-    func frequencyIndexRangeFrom(_ startFreq: Double, to endFreq: Double, forSampleRate rate: Double) -> (Int, Int)? {
+    func frequencyIndexRangeFrom(_ startFreq: Double, through endFreq: Double, forSampleRate rate: Double) -> (Int, Int)? {
         // sensible inputs
         guard startFreq >= 0.0 && endFreq > startFreq else {
             return nil
@@ -179,8 +179,8 @@ class CircularShortTimeFourierTransform
             return nil
         }
         
-        // calculate end index + 1 (ceil instead of floor)
-        let endIndex = Int(ceil(fromFrequency * endFreq))
+        // calculate end index + 1
+        let endIndex = Int(floor(fromFrequency * endFreq)) + 1
         if endIndex < startIndex {
             return nil
         }
