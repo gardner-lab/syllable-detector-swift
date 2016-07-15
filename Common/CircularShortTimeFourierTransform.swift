@@ -115,10 +115,18 @@ class CircularShortTimeFourierTransform
         // setup complex buffers
         complexBufferA = DSPSplitComplex(realp: UnsafeMutablePointer<Float>(allocatingCapacity: halfLength), imagp: UnsafeMutablePointer<Float>(allocatingCapacity: halfLength))
         // to get desired alignment..
+        let alignment: Int = 0x10
         var pReal: UnsafeMutablePointer<Void>? = nil
-        posix_memalign(&pReal, 0x4, halfLength * sizeof(Float))
+        let ret = posix_memalign(&pReal, alignment, halfLength * sizeof(Float))
+        
+        
+        if ret != noErr {
+            let err = String(validatingUTF8: strerror(ret)) ?? "unknown error"
+            fatalError("Unable to allocate aligned memory: \(err).")
+        }
+        
         var pImaginary: UnsafeMutablePointer<Void>? = nil
-        posix_memalign(&pImaginary, 0x4, halfLength * sizeof(Float))
+        posix_memalign(&pImaginary, alignment, halfLength * sizeof(Float))
         complexBufferT = DSPSplitComplex(realp: UnsafeMutablePointer<Float>(pReal!), imagp: UnsafeMutablePointer<Float>(pImaginary!))
         
         // create the circular buffer

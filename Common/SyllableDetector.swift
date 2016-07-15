@@ -158,7 +158,11 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         
         // let UnsafeMutablePointer<Float>: samples
         var availableBytes: Int32 = 0
-        let samples: UnsafeMutablePointer<Float> = UnsafeMutablePointer<Float>(TPCircularBufferTail(&buffer, &availableBytes))
+        let samples: UnsafeMutablePointer<Float>
+        guard let p = TPCircularBufferTail(&buffer, &availableBytes) else {
+            return false
+        }
+        samples = UnsafeMutablePointer<Float>(p)
         
         // not enough available bytes
         if Int(availableBytes) < (lengthTotal * sizeof(Float)) {

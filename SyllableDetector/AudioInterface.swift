@@ -467,7 +467,7 @@ class AudioInputInterface: AudioInterface
     var inputFormat: AudioStreamBasicDescription = AudioStreamBasicDescription()
     var outputFormat: AudioStreamBasicDescription = AudioStreamBasicDescription()
     
-    var bufferList: UnsafeMutableAudioBufferListPointer = UnsafeMutableAudioBufferListPointer(nil)!
+    var bufferList: UnsafeMutableAudioBufferListPointer!
     
     init(deviceID: AudioDeviceID, frameSize: Int = 32) {
         self.deviceID = deviceID
