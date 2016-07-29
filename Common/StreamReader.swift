@@ -21,8 +21,8 @@ class StreamReader  {
         self.encoding = encoding
         
         if let fileHandle = FileHandle(forReadingAtPath: path),
-            delimData = delimiter.data(using: encoding),
-            buffer = NSMutableData(capacity: chunkSize)
+            let delimData = delimiter.data(using: encoding),
+            let buffer = NSMutableData(capacity: chunkSize)
         {
             self.fileHandle = fileHandle
             self.delimData = delimData

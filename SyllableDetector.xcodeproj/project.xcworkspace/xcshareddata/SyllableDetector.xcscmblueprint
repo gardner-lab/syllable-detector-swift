@@ -5,11 +5,13 @@
   },
   "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
     "CBF5F70D4EDC8047BC75C25236002B0EA7F6B15B" : 0,
+    "5A811E91F5DFF59170683E14D2C5755F19DE18CB" : 0,
     "0DC6A8484D9B4C6C2590765C4EC90EC5CF35B881" : 0
   },
   "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "D06BF7B2-80D5-418B-90F3-F6E9E23620BD",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
     "CBF5F70D4EDC8047BC75C25236002B0EA7F6B15B" : "SyllableDetector\/Frameworks\/CommandLine\/",
+    "5A811E91F5DFF59170683E14D2C5755F19DE18CB" : "SyllableDetector\/Frameworks\/ORSSerialPort\/",
     "0DC6A8484D9B4C6C2590765C4EC90EC5CF35B881" : "SyllableDetector\/"
   },
   "DVTSourceControlWorkspaceBlueprintNameKey" : "SyllableDetector",
@@ -20,6 +22,11 @@
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/nathanntg\/syllable-detector.git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "0DC6A8484D9B4C6C2590765C4EC90EC5CF35B881"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/armadsen\/ORSSerialPort.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "5A811E91F5DFF59170683E14D2C5755F19DE18CB"
     },
     {
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/jatoben\/CommandLine.git",

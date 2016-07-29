@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		D8285D1A1CABFBBA00AD5AF8 /* Time.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8285D191CABFBBA00AD5AF8 /* Time.swift */; };
 		D82E7F7B1C10B629004759F7 /* ViewControllerSimulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D82E7F7A1C10B629004759F7 /* ViewControllerSimulator.swift */; };
+		D84B698A1D4AC5D8008B5853 /* Processor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D84B69891D4AC5D8008B5853 /* Processor.swift */; };
 		D8625C7D1BE14922000922D8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C7C1BE14922000922D8 /* AppDelegate.swift */; };
 		D8625C7F1BE14922000922D8 /* ViewControllerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C7E1BE14922000922D8 /* ViewControllerProcessor.swift */; };
 		D8625C811BE14922000922D8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D8625C801BE14922000922D8 /* Assets.xcassets */; };
@@ -22,6 +23,10 @@
 		D8625CA41BE14A53000922D8 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = D8625CA21BE14A53000922D8 /* TPCircularBuffer.c */; };
 		D89269891BF3AEDE009482C2 /* SummaryStat.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89269881BF3AEDE009482C2 /* SummaryStat.swift */; };
 		D89803B51C3C2ACF000CFC41 /* Resampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89803B41C3C2ACF000CFC41 /* Resampler.swift */; };
+		D8A9C0ED1D4A549000CE3F2C /* ArduinoIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A9C0EC1D4A549000CE3F2C /* ArduinoIO.swift */; };
+		D8A9C0F71D4A54B000CE3F2C /* ORSSerial.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8A9C0F41D4A54A200CE3F2C /* ORSSerial.framework */; };
+		D8A9C0F91D4A54CD00CE3F2C /* ORSSerial.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8A9C0F41D4A54A200CE3F2C /* ORSSerial.framework */; };
+		D8A9C0FA1D4A54CD00CE3F2C /* ORSSerial.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D8A9C0F41D4A54A200CE3F2C /* ORSSerial.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D8B59D161BE6B77F0099CB4B /* StreamReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8B59D151BE6B77F0099CB4B /* StreamReader.swift */; };
 		D8D1BD481BE6D61B00059974 /* ViewControllerMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D1BD471BE6D61B00059974 /* ViewControllerMenu.swift */; };
 		D8D1BD4D1BE6E53C00059974 /* WindowControllerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D1BD4C1BE6E53C00059974 /* WindowControllerProcessor.swift */; };
@@ -47,7 +52,42 @@
 		D8E2DB821D00D68D00FC6AE2 /* TrackDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E2DB811D00D68D00FC6AE2 /* TrackDetector.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		D8A9C0F31D4A54A200CE3F2C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D8A9C0EE1D4A54A200CE3F2C /* ORSSerialPort.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 9DCA89121A2BB106009285EB;
+			remoteInfo = ORSSerial;
+		};
+		D8A9C0F51D4A54A200CE3F2C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D8A9C0EE1D4A54A200CE3F2C /* ORSSerialPort.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 9D7472131B6D7767002D8B10;
+			remoteInfo = "ORSSerialPort Tests";
+		};
+		D8A9C0FB1D4A54CD00CE3F2C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D8A9C0EE1D4A54A200CE3F2C /* ORSSerialPort.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 9DCA89111A2BB106009285EB;
+			remoteInfo = ORSSerial;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
+		D8A9C0FD1D4A54CD00CE3F2C /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				D8A9C0FA1D4A54CD00CE3F2C /* ORSSerial.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D8E2DB4F1D00C74500FC6AE2 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -62,6 +102,7 @@
 /* Begin PBXFileReference section */
 		D8285D191CABFBBA00AD5AF8 /* Time.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Time.swift; path = SyllableDetector/Time.swift; sourceTree = "<group>"; };
 		D82E7F7A1C10B629004759F7 /* ViewControllerSimulator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewControllerSimulator.swift; sourceTree = "<group>"; };
+		D84B69891D4AC5D8008B5853 /* Processor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Processor.swift; sourceTree = "<group>"; };
 		D8625C791BE14922000922D8 /* SyllableDetector.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SyllableDetector.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D8625C7C1BE14922000922D8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D8625C7E1BE14922000922D8 /* ViewControllerProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerProcessor.swift; sourceTree = "<group>"; };
@@ -79,6 +120,8 @@
 		D8625CA51BE14B8E000922D8 /* Common-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Common-Bridging-Header.h"; path = "Common/Common-Bridging-Header.h"; sourceTree = "<group>"; };
 		D89269881BF3AEDE009482C2 /* SummaryStat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SummaryStat.swift; sourceTree = "<group>"; };
 		D89803B41C3C2ACF000CFC41 /* Resampler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Resampler.swift; path = Common/Resampler.swift; sourceTree = "<group>"; };
+		D8A9C0EC1D4A549000CE3F2C /* ArduinoIO.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArduinoIO.swift; sourceTree = "<group>"; };
+		D8A9C0EE1D4A54A200CE3F2C /* ORSSerialPort.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ORSSerialPort.xcodeproj; path = "Frameworks/ORSSerialPort/Framework Project/ORSSerialPort.xcodeproj"; sourceTree = "<group>"; };
 		D8B59D151BE6B77F0099CB4B /* StreamReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StreamReader.swift; path = Common/StreamReader.swift; sourceTree = "<group>"; };
 		D8D1BD471BE6D61B00059974 /* ViewControllerMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewControllerMenu.swift; sourceTree = "<group>"; };
 		D8D1BD4C1BE6E53C00059974 /* WindowControllerProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WindowControllerProcessor.swift; sourceTree = "<group>"; };
@@ -100,10 +143,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D8A9C0F71D4A54B000CE3F2C /* ORSSerial.framework in Frameworks */,
 				D8E2DB731D00CBE200FC6AE2 /* AudioToolbox.framework in Frameworks */,
 				D8E2DB711D00CBC100FC6AE2 /* AVFoundation.framework in Frameworks */,
 				D8E2DB6F1D00CBAF00FC6AE2 /* CoreAudio.framework in Frameworks */,
 				D8E2DB6D1D00CBA200FC6AE2 /* Accelerate.framework in Frameworks */,
+				D8A9C0F91D4A54CD00CE3F2C /* ORSSerial.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -143,7 +188,9 @@
 			isa = PBXGroup;
 			children = (
 				D8625C7C1BE14922000922D8 /* AppDelegate.swift */,
+				D8A9C0EC1D4A549000CE3F2C /* ArduinoIO.swift */,
 				D8625C8C1BE149FE000922D8 /* AudioInterface.swift */,
+				D84B69891D4AC5D8008B5853 /* Processor.swift */,
 				D89269881BF3AEDE009482C2 /* SummaryStat.swift */,
 				D8D1BD471BE6D61B00059974 /* ViewControllerMenu.swift */,
 				D8625C7E1BE14922000922D8 /* ViewControllerProcessor.swift */,
@@ -164,6 +211,15 @@
 			);
 			name = TPCircularBuffer;
 			path = SyllableDetector/TPCircularBuffer;
+			sourceTree = "<group>";
+		};
+		D8A9C0EF1D4A54A200CE3F2C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D8A9C0F41D4A54A200CE3F2C /* ORSSerial.framework */,
+				D8A9C0F61D4A54A200CE3F2C /* ORSSerialPort Tests.xctest */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		D8E2DB521D00C74500FC6AE2 /* SyllableDetectorCLI */ = {
@@ -197,6 +253,7 @@
 			isa = PBXGroup;
 			children = (
 				D8E2DB781D00CE3600FC6AE2 /* CommandLine */,
+				D8A9C0EE1D4A54A200CE3F2C /* ORSSerialPort.xcodeproj */,
 				D8E2DB721D00CBE200FC6AE2 /* AudioToolbox.framework */,
 				D8E2DB701D00CBC100FC6AE2 /* AVFoundation.framework */,
 				D8E2DB6E1D00CBAF00FC6AE2 /* CoreAudio.framework */,
@@ -225,10 +282,12 @@
 				D8625C751BE14922000922D8 /* Sources */,
 				D8625C761BE14922000922D8 /* Frameworks */,
 				D8625C771BE14922000922D8 /* Resources */,
+				D8A9C0FD1D4A54CD00CE3F2C /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				D8A9C0FC1D4A54CD00CE3F2C /* PBXTargetDependency */,
 			);
 			name = SyllableDetector;
 			productName = SyllableDetector;
@@ -283,6 +342,12 @@
 			mainGroup = D8625C701BE14922000922D8;
 			productRefGroup = D8625C7A1BE14922000922D8 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = D8A9C0EF1D4A54A200CE3F2C /* Products */;
+					ProjectRef = D8A9C0EE1D4A54A200CE3F2C /* ORSSerialPort.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				D8625C781BE14922000922D8 /* SyllableDetector */,
@@ -290,6 +355,23 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		D8A9C0F41D4A54A200CE3F2C /* ORSSerial.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = ORSSerial.framework;
+			remoteRef = D8A9C0F31D4A54A200CE3F2C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D8A9C0F61D4A54A200CE3F2C /* ORSSerialPort Tests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "ORSSerialPort Tests.xctest";
+			remoteRef = D8A9C0F51D4A54A200CE3F2C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		D8625C771BE14922000922D8 /* Resources */ = {
@@ -309,6 +391,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D8B59D161BE6B77F0099CB4B /* StreamReader.swift in Sources */,
+				D8A9C0ED1D4A549000CE3F2C /* ArduinoIO.swift in Sources */,
 				D8625CA41BE14A53000922D8 /* TPCircularBuffer.c in Sources */,
 				D8D1BD4D1BE6E53C00059974 /* WindowControllerProcessor.swift in Sources */,
 				D8625C941BE149FE000922D8 /* SyllableDetector.swift in Sources */,
@@ -319,6 +402,7 @@
 				D8625C9C1BE149FE000922D8 /* CircularShortTimeFourierTransform.swift in Sources */,
 				D8625C9A1BE149FE000922D8 /* Common.swift in Sources */,
 				D82E7F7B1C10B629004759F7 /* ViewControllerSimulator.swift in Sources */,
+				D84B698A1D4AC5D8008B5853 /* Processor.swift in Sources */,
 				D8625C7F1BE14922000922D8 /* ViewControllerProcessor.swift in Sources */,
 				D89803B51C3C2ACF000CFC41 /* Resampler.swift in Sources */,
 				D8625C951BE149FE000922D8 /* AudioInterface.swift in Sources */,
@@ -349,6 +433,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D8A9C0FC1D4A54CD00CE3F2C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = ORSSerial;
+			targetProxy = D8A9C0FB1D4A54CD00CE3F2C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		D8625C821BE14922000922D8 /* Main.storyboard */ = {
