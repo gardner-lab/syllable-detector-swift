@@ -72,7 +72,7 @@ func processInput(_ inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMuta
     return 0
 }
 
-enum AudioInterfaceError: ErrorProtocol {
+enum AudioInterfaceError: Error {
     case noComponentFound
     case unsupportedFormat
     case errorResponse(String, Int, Int32)

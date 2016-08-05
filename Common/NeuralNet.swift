@@ -272,13 +272,13 @@ class NeuralNet
         }
         
         // memory for input layer
-        bufferInput = UnsafeMutablePointer<Float>(allocatingCapacity: inputs)
+        bufferInput = UnsafeMutablePointer<Float>.allocate(capacity: inputs)
     }
     
     deinit {
         // free the window
         bufferInput.deinitialize()
-        bufferInput.deallocateCapacity(inputs)
+        bufferInput.deallocate(capacity: inputs)
     }
     
     func test(_ val: Float) {
@@ -353,13 +353,13 @@ class NeuralNetLayer
         self.transferFunction = transferFunction
         
         // memory for intermediate values and output
-        bufferIntermediate = UnsafeMutablePointer<Float>(allocatingCapacity: outputs)
+        bufferIntermediate = UnsafeMutablePointer<Float>.allocate(capacity: outputs)
     }
     
     deinit {
         // free the window
         bufferIntermediate.deinitialize()
-        bufferIntermediate.deallocateCapacity(outputs)
+        bufferIntermediate.deallocate(capacity: outputs)
     }
     
     func apply(_ input: UnsafeMutablePointer<Float>) -> UnsafeMutablePointer<Float> {

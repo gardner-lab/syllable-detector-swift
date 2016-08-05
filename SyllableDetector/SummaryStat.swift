@@ -67,7 +67,7 @@ class SummaryStat
     
     init(withStat stat: Stat) {
         self.stat = stat
-        self.queue = DispatchQueue(label: "SummaryStat\(stat)", attributes: DispatchQueueAttributes.serial)
+        self.queue = DispatchQueue(label: "SummaryStat\(stat)")
     }
     
     func writeValue(_ value: Double) {

@@ -217,7 +217,8 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
             
             // make sure ok was pressed
             if NSFileHandlingPanelOKButton == result {
-                if let url = panel.url, let path = url.path {
+                if let url = panel.url {
+                    let path = url.path
                     do {
                         // load file
                         let config = try SyllableDetectorConfig(fromTextFile: path)

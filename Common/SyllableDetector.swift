@@ -182,10 +182,10 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         switch config.spectrogramScaling {
         case .db:
             // temporary memory
-            scaledSamples = UnsafeMutablePointer<Float>(allocatingCapacity: lengthTotal)
+            scaledSamples = UnsafeMutablePointer<Float>.allocate(capacity: lengthTotal)
             defer {
                 scaledSamples.deinitialize()
-                scaledSamples.deallocateCapacity(lengthTotal)
+                scaledSamples.deallocate(capacity: lengthTotal)
             }
             
             // convert to db with amplitude flag
@@ -194,10 +194,10 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
             
         case .log:
             // temporary memory
-            scaledSamples = UnsafeMutablePointer<Float>(allocatingCapacity: lengthTotal)
+            scaledSamples = UnsafeMutablePointer<Float>.allocate(capacity: lengthTotal)
             defer {
                 scaledSamples.deinitialize()
-                scaledSamples.deallocateCapacity(lengthTotal)
+                scaledSamples.deallocate(capacity: lengthTotal)
             }
             
             // natural log

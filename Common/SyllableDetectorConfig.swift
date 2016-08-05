@@ -47,7 +47,7 @@ struct SyllableDetectorConfig
 // make parsable
 extension SyllableDetectorConfig
 {
-    enum ParseError: ErrorProtocol {
+    enum ParseError: Error {
         case unableToOpenPath(String)
         case missingValue(String)
         case invalidValue(String)

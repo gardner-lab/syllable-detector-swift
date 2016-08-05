@@ -43,7 +43,8 @@ class ViewControllerSimulator: NSViewController {
             (result: Int) -> Void in
             // make sure ok was pressed
             if NSFileHandlingPanelOKButton == result {
-                if let url = panel.url, let path = url.path {
+                if let url = panel.url {
+                    let path = url.path
                     do {
                         // load file
                         let _ = try SyllableDetectorConfig(fromTextFile: path)
@@ -133,7 +134,7 @@ class ViewControllerSimulator: NSViewController {
     
     func simulateNetwork(_ urlNetwork: URL, withAudio urlAudio: URL, writeTo urlOutput: URL) {
         // convert to path
-        guard let pathNetwork = urlNetwork.path else { return }
+        let pathNetwork = urlNetwork.path
         
         // 1. LOAD AUDIO INPUT
         let assetRead = AVAsset(url: urlAudio)
@@ -253,7 +254,7 @@ class ViewControllerSimulator: NSViewController {
         }
         var samplePosition: Int64 = 0
         let gcdGroup = DispatchGroup()
-        let gcdQueue = DispatchQueue(label: "Encode", attributes: DispatchQueueAttributes.serial)
+        let gcdQueue = DispatchQueue(label: "Encode")
         avWriterInput.requestMediaDataWhenReady(on: gcdQueue) {
             // probably not needed
             gcdGroup.enter()
@@ -293,7 +294,7 @@ class ViewControllerSimulator: NSViewController {
                 
                 // make floats
                 // released by buffer block
-                let newSamples = UnsafeMutablePointer<Float>(allocatingCapacity: numSamples)
+                let newSamples = UnsafeMutablePointer<Float>.allocate(capacity: numSamples)
                 
                 // encode previous values
                 var i = 0

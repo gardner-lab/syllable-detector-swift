@@ -79,7 +79,7 @@ class ProcessorBase: Processor, AudioInputInterfaceDelegate {
         interfaceInput = AudioInputInterface(deviceID: deviceInput.deviceID)
         
         // create queue
-        queueProcessing = DispatchQueue(label: "ProcessorQueue", attributes: DispatchQueueAttributes.serial)
+        queueProcessing = DispatchQueue(label: "ProcessorQueue")
         
         // set self as delegate
         interfaceInput.delegate = self
@@ -244,7 +244,7 @@ final class ProcessorArduino: ProcessorBase {
         interfaceOutput = ArduinoIO(serial: deviceOutput)
         
         // create triggering queue
-        queueTriggering = DispatchQueue(label: "TriggerQueue", attributes: .serial)
+        queueTriggering = DispatchQueue(label: "TriggerQueue")
         
         // call parent
         try super.init(deviceInput: deviceInput, entries: entries)

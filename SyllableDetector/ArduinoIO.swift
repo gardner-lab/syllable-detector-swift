@@ -30,7 +30,7 @@ private enum ArduinoIORequest {
 }
 
 /// Errors associated with input and output.
-enum ArduinoIOError: ErrorProtocol, CustomStringConvertible {
+enum ArduinoIOError: Error, CustomStringConvertible {
     case unknownError
     case unableToOpenPath
     case portNotOpen
