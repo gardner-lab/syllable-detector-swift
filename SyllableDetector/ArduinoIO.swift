@@ -647,7 +647,7 @@ class ArduinoIO: NSObject, ORSSerialPortDelegate {
         close()
     }
     
-    func serialPort(_ serialPort: ORSSerialPort, didEncounterError error: NSError) {
+    func serialPort(_ serialPort: ORSSerialPort, didEncounterError error: Error) {
         DLog("SERIAL \(serialPort) ERROR: \(error)")
         
         // send to delegate
