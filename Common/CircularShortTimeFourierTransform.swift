@@ -18,12 +18,12 @@ enum WindowType
     
     func createWindow(_ pointer: UnsafeMutablePointer<Float>, len: Int) {
         switch self {
-        case none:
+        case .none:
             var one: Float = 1.0
             vDSP_vfill(&one, pointer, 1, vDSP_Length(len))
-        case hamming: vDSP_hamm_window(pointer, vDSP_Length(len), 0)
-        case hanning: vDSP_hann_window(pointer, vDSP_Length(len), 0)
-        case blackman: vDSP_blkman_window(pointer, vDSP_Length(len), 0)
+        case .hamming: vDSP_hamm_window(pointer, vDSP_Length(len), 0)
+        case .hanning: vDSP_hann_window(pointer, vDSP_Length(len), 0)
+        case .blackman: vDSP_blkman_window(pointer, vDSP_Length(len), 0)
         }
     }
 }
@@ -117,7 +117,7 @@ class CircularShortTimeFourierTransform
         // to get desired alignment..
         let alignment: Int = 0x10
         var pReal: UnsafeMutablePointer<Void>? = nil
-        let ret = posix_memalign(&pReal, alignment, halfLength * sizeof(Float))
+        let ret = posix_memalign(&pReal, alignment, halfLength * sizeof(Float.self))
         
         
         if ret != noErr {
@@ -126,7 +126,7 @@ class CircularShortTimeFourierTransform
         }
         
         var pImaginary: UnsafeMutablePointer<Void>? = nil
-        posix_memalign(&pImaginary, alignment, halfLength * sizeof(Float))
+        posix_memalign(&pImaginary, alignment, halfLength * sizeof(Float.self))
         complexBufferT = DSPSplitComplex(realp: UnsafeMutablePointer<Float>(pReal!), imagp: UnsafeMutablePointer<Float>(pImaginary!))
         
         // create the circular buffer
@@ -203,7 +203,7 @@ class CircularShortTimeFourierTransform
     }
     
     func appendData(_ data: UnsafeMutablePointer<Float>, withSamples numSamples: Int) {
-        if !TPCircularBufferProduceBytes(&self.buffer, data, Int32(numSamples * sizeof(Float))) {
+        if !TPCircularBufferProduceBytes(&self.buffer, data, Int32(numSamples * sizeof(Float.self))) {
             fatalError("Insufficient space on buffer.")
         }
     }
@@ -232,7 +232,7 @@ class CircularShortTimeFourierTransform
         var samples: UnsafeMutablePointer<Float> = UnsafeMutablePointer<Float>(TPCircularBufferTail(&buffer, &availableBytes))
         
         // not enough available bytes
-        if Int(availableBytes) < ((gap + lengthWindow) * sizeof(Float)) {
+        if Int(availableBytes) < ((gap + lengthWindow) * sizeof(Float.self)) {
             return nil
         }
         
@@ -244,7 +244,7 @@ class CircularShortTimeFourierTransform
         // mark circular buffer as consumed at END of excution
         defer {
             // mark as consumed
-            TPCircularBufferConsume(&buffer, Int32((gap + lengthWindow - overlap) * sizeof(Float)))
+            TPCircularBufferConsume(&buffer, Int32((gap + lengthWindow - overlap) * sizeof(Float.self)))
         }
         
         // get half length
@@ -282,7 +282,7 @@ class CircularShortTimeFourierTransform
         var samples: UnsafeMutablePointer<Float> = UnsafeMutablePointer<Float>(TPCircularBufferTail(&buffer, &availableBytes))
         
         // not enough available bytes
-        if Int(availableBytes) < ((gap + lengthWindow) * sizeof(Float)) {
+        if Int(availableBytes) < ((gap + lengthWindow) * sizeof(Float.self)) {
             return nil
         }
         
@@ -294,7 +294,7 @@ class CircularShortTimeFourierTransform
         // mark circular buffer as consumed at END of excution
         defer {
             // mark as consumed
-            TPCircularBufferConsume(&buffer, Int32((gap + lengthWindow - overlap) * sizeof(Float)))
+            TPCircularBufferConsume(&buffer, Int32((gap + lengthWindow - overlap) * sizeof(Float.self)))
         }
         
         // get half length

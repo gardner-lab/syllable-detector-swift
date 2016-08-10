@@ -209,7 +209,7 @@ class ViewControllerSimulator: NSViewController {
                 AVLinearPCMIsBigEndianKey: false,
                 AVLinearPCMIsNonInterleaved: false,
                 AVSampleRateKey: NSNumber(value: sd.config.samplingRate),
-                AVChannelLayoutKey: Data(bytes: UnsafePointer<UInt8>($0), count: sizeof(AudioChannelLayout)),
+                AVChannelLayoutKey: Data(bytes: UnsafePointer<UInt8>($0), count: sizeof(AudioChannelLayout.self)),
                 AVNumberOfChannelsKey: NSNumber(value: 1)
             ]
         }
@@ -345,7 +345,7 @@ class ViewControllerSimulator: NSViewController {
                 
                 // make block buffer
                 var newBlockBuffer: CMBlockBuffer? = nil
-                status = CMBlockBufferCreateWithMemoryBlock(nil, UnsafeMutablePointer<Void>(newSamples), numSamples * sizeof(Float), nil, nil, 0, numSamples * sizeof(Float), 0, &newBlockBuffer)
+                status = CMBlockBufferCreateWithMemoryBlock(nil, UnsafeMutablePointer<Void>(newSamples), numSamples * sizeof(Float.self), nil, nil, 0, numSamples * sizeof(Float.self), 0, &newBlockBuffer)
                 assert(status == noErr)
                 
                 // timestamp for output

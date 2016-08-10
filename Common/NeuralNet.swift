@@ -26,7 +26,7 @@ class PassThrough: InputProcessingFunction, OutputProcessingFunction {
     }
     
     func applyAndCopy(_ values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
-        memcpy(destination, values, count * sizeof(Float))
+        memcpy(destination, values, count * sizeof(Float.self))
     }
     
     func reverseInPlace(_ values: UnsafeMutablePointer<Float>, count: Int) {
@@ -34,7 +34,7 @@ class PassThrough: InputProcessingFunction, OutputProcessingFunction {
     }
     
     func reverseAndCopy(_ values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
-        memcpy(destination, values, count * sizeof(Float))
+        memcpy(destination, values, count * sizeof(Float.self))
     }
 }
 

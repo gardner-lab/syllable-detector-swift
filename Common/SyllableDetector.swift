@@ -140,7 +140,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         // append data to local circular buffer
         withUnsafePointer(&powr[freqIndices.0]) {
             up in
-            if !TPCircularBufferProduceBytes(&self.buffer, up, Int32(lengthPerTime * sizeof(Float))) {
+            if !TPCircularBufferProduceBytes(&self.buffer, up, Int32(lengthPerTime * sizeof(Float.self))) {
                 fatalError("Insufficient space on buffer.")
             }
         }
@@ -165,14 +165,14 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         samples = UnsafeMutablePointer<Float>(p)
         
         // not enough available bytes
-        if Int(availableBytes) < (lengthTotal * sizeof(Float)) {
+        if Int(availableBytes) < (lengthTotal * sizeof(Float.self)) {
             return false
         }
         
         // mark circular buffer as consumed at END of excution
         defer {
             // mark as consumed, one time per-time length
-            TPCircularBufferConsume(&buffer, Int32(lengthPerTime * sizeof(Float)))
+            TPCircularBufferConsume(&buffer, Int32(lengthPerTime * sizeof(Float.self)))
         }
         
         /// samples now points to a vector of `lengthTotal` bytes of power data for the last `timeRange` outputs of the short-timer fourier transform
