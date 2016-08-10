@@ -7,15 +7,35 @@
 //
 
 import Cocoa
+import ORSSerial
 
 class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableViewDataSource {
     @IBOutlet weak var buttonLoad: NSButton!
     @IBOutlet weak var buttonToggle: NSButton!
     @IBOutlet weak var tableChannels: NSTableView!
     
+    enum OutputDevice {
+        case audio(interface: AudioInterface.AudioDevice)
+        case arduino(port: ORSSerialPort)
+        
+        var outputChannels: Int {
+            get {
+                switch self {
+                case .audio(let interface):
+                    if 0 < interface.buffersOutput.count {
+                        return Int(interface.buffersOutput[0].mNumberChannels)
+                    }
+                    return 0
+                case .arduino(port: _):
+                    return 7
+                }
+            }
+        }
+    }
+    
     // devices
     var deviceInput: AudioInterface.AudioDevice!
-    var deviceOutput: AudioInterface.AudioDevice!
+    var deviceOutput: OutputDevice!
     
     var processorEntries = [ProcessorEntry]()
     var processor: Processor?
@@ -69,12 +89,12 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         super.viewWillDisappear()
     }
     
-    func setupEntries(input deviceInput: AudioInterface.AudioDevice, output deviceOutput: AudioInterface.AudioDevice) {
+    func setupEntries(input deviceInput: AudioInterface.AudioDevice, output deviceOutput: OutputDevice) {
         // store input and output
         self.deviceInput = deviceInput
         self.deviceOutput = deviceOutput
         
-        // get input pairs
+        // get input channels
         let inputChannels: Int
         if 0 < deviceInput.buffersInput.count {
             inputChannels = Int(deviceInput.buffersInput[0].mNumberChannels)
@@ -83,13 +103,8 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
             inputChannels = 0
         }
         
-        let outputChannels: Int
-        if 0 < deviceOutput.buffersOutput.count {
-            outputChannels = Int(deviceOutput.buffersOutput[0].mNumberChannels)
-        }
-        else {
-            outputChannels = 0
-        }
+        // get output channels
+        let outputChannels = deviceOutput.outputChannels
         
         // for each pair, create an entry
         let numEntries = min(inputChannels, outputChannels)
@@ -112,7 +127,12 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         else {
             // create process
             do {
-                processor = try Processor(deviceInput: deviceInput, deviceOutput: deviceOutput, entries: processorEntries)
+                switch deviceOutput! {
+                case .arduino(let port):
+                    processor = try ProcessorArduino(deviceInput: deviceInput, deviceOutput: port, entries: processorEntries)
+                case .audio(let interface):
+                    processor = try ProcessorAudio(deviceInput: deviceInput, deviceOutput: interface, entries: processorEntries)
+                }
             }
             catch {
                 // show an error message
@@ -133,18 +153,14 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         let inputChannels: Int, outputChannels: Int
         
         if nil != deviceInput && 0 < deviceInput.buffersInput.count {
-            inputChannels = deviceInput.buffersInput.reduce(0) {
-                return $0 + Int($1.mNumberChannels)
-            }
+            inputChannels = Int(deviceInput.buffersInput[0].mNumberChannels)
         }
         else {
             inputChannels = 0
         }
         
-        if nil != deviceOutput && 0 < deviceOutput.buffersOutput.count {
-            outputChannels = deviceOutput.buffersOutput.reduce(0) {
-                return $0 + Int($1.mNumberChannels)
-            }
+        if nil != deviceOutput {
+            outputChannels = deviceOutput.outputChannels
         }
         else {
             outputChannels = 0
