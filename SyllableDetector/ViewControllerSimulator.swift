@@ -201,15 +201,15 @@ class ViewControllerSimulator: NSViewController {
         
         // audio settings
         var compressionAudioSettings: [String: AnyObject] = [:]
-        withUnsafePointer(&monoChannelLayout) {
+        withUnsafePointer(to: &monoChannelLayout) {
             compressionAudioSettings = [
                 AVFormatIDKey: NSNumber(value: kAudioFormatLinearPCM),
                 AVLinearPCMBitDepthKey: NSNumber(value: 16),
-                AVLinearPCMIsFloatKey: false,
-                AVLinearPCMIsBigEndianKey: false,
-                AVLinearPCMIsNonInterleaved: false,
+                AVLinearPCMIsFloatKey: false as AnyObject,
+                AVLinearPCMIsBigEndianKey: false as AnyObject,
+                AVLinearPCMIsNonInterleaved: false as AnyObject,
                 AVSampleRateKey: NSNumber(value: sd.config.samplingRate),
-                AVChannelLayoutKey: Data(bytes: UnsafePointer<UInt8>($0), count: sizeof(AudioChannelLayout.self)),
+                AVChannelLayoutKey: Data(bytes: UnsafeRawPointer($0), count: MemoryLayout<AudioChannelLayout>.size) as AnyObject,
                 AVNumberOfChannelsKey: NSNumber(value: 1)
             ]
         }
@@ -345,7 +345,7 @@ class ViewControllerSimulator: NSViewController {
                 
                 // make block buffer
                 var newBlockBuffer: CMBlockBuffer? = nil
-                status = CMBlockBufferCreateWithMemoryBlock(nil, UnsafeMutablePointer<Void>(newSamples), numSamples * sizeof(Float.self), nil, nil, 0, numSamples * sizeof(Float.self), 0, &newBlockBuffer)
+                status = CMBlockBufferCreateWithMemoryBlock(nil, UnsafeMutableRawPointer(newSamples), numSamples * MemoryLayout<Float>.size, nil, nil, 0, numSamples * MemoryLayout<Float>.size, 0, &newBlockBuffer)
                 assert(status == noErr)
                 
                 // timestamp for output

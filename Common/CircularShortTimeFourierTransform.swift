@@ -116,18 +116,10 @@ class CircularShortTimeFourierTransform
         complexBufferA = DSPSplitComplex(realp: UnsafeMutablePointer<Float>.allocate(capacity: halfLength), imagp: UnsafeMutablePointer<Float>.allocate(capacity: halfLength))
         // to get desired alignment..
         let alignment: Int = 0x10
-        var pReal: UnsafeMutablePointer<Void>? = nil
-        let ret = posix_memalign(&pReal, alignment, halfLength * sizeof(Float.self))
+        let ptrReal = UnsafeMutableRawPointer.allocate(bytes: halfLength * MemoryLayout<Float>.size, alignedTo: alignment)
+        let ptrImag = UnsafeMutableRawPointer.allocate(bytes: halfLength * MemoryLayout<Float>.size, alignedTo: alignment)
         
-        
-        if ret != noErr {
-            let err = String(validatingUTF8: strerror(ret)) ?? "unknown error"
-            fatalError("Unable to allocate aligned memory: \(err).")
-        }
-        
-        var pImaginary: UnsafeMutablePointer<Void>? = nil
-        posix_memalign(&pImaginary, alignment, halfLength * sizeof(Float.self))
-        complexBufferT = DSPSplitComplex(realp: UnsafeMutablePointer<Float>(pReal!), imagp: UnsafeMutablePointer<Float>(pImaginary!))
+        complexBufferT = DSPSplitComplex(realp: ptrReal.bindMemory(to: Float.self, capacity: halfLength), imagp: ptrImag.bindMemory(to: Float.self, capacity: halfLength))
         
         // create the circular buffer
         self.buffer = TPCircularBuffer()
@@ -203,7 +195,7 @@ class CircularShortTimeFourierTransform
     }
     
     func appendData(_ data: UnsafeMutablePointer<Float>, withSamples numSamples: Int) {
-        if !TPCircularBufferProduceBytes(&self.buffer, data, Int32(numSamples * sizeof(Float.self))) {
+        if !TPCircularBufferProduceBytes(&self.buffer, data, Int32(numSamples * MemoryLayout<Float>.size)) {
             fatalError("Insufficient space on buffer.")
         }
     }
@@ -218,7 +210,7 @@ class CircularShortTimeFourierTransform
         
         // use vDSP to perform copy with stride
         var zero: Float = 0.0
-        vDSP_vsadd(data + channel, vDSP_Stride(totalChannels), &zero, UnsafeMutablePointer<Float>(head!), 1, vDSP_Length(numSamples))
+        vDSP_vsadd(data + channel, vDSP_Stride(totalChannels), &zero, head!.bindMemory(to: Float.self, capacity: Int(space) / MemoryLayout<Float>.size), 1, vDSP_Length(numSamples))
         
         // move head forward
         TPCircularBufferProduce(&self.buffer, Int32(numSamples))
@@ -229,12 +221,15 @@ class CircularShortTimeFourierTransform
     func extractMagnitude() -> [Float]? {
         // get buffer read point and available bytes
         var availableBytes: Int32 = 0
-        var samples: UnsafeMutablePointer<Float> = UnsafeMutablePointer<Float>(TPCircularBufferTail(&buffer, &availableBytes))
+        let tail = TPCircularBufferTail(&buffer, &availableBytes)
         
         // not enough available bytes
-        if Int(availableBytes) < ((gap + lengthWindow) * sizeof(Float.self)) {
+        if Int(availableBytes) < ((gap + lengthWindow) * MemoryLayout<Float>.size) {
             return nil
         }
+        
+        // make samples
+        var samples = tail!.bindMemory(to: Float.self, capacity: Int(availableBytes) / MemoryLayout<Float>.size)
         
         // skip gap
         if 0 < gap {
@@ -244,7 +239,7 @@ class CircularShortTimeFourierTransform
         // mark circular buffer as consumed at END of excution
         defer {
             // mark as consumed
-            TPCircularBufferConsume(&buffer, Int32((gap + lengthWindow - overlap) * sizeof(Float.self)))
+            TPCircularBufferConsume(&buffer, Int32((gap + lengthWindow - overlap) * MemoryLayout<Float>.size))
         }
         
         // get half length
@@ -257,7 +252,7 @@ class CircularShortTimeFourierTransform
         vDSP_vmul(samples, 1, window, 1, samplesWindowed, 1, UInt(lengthWindow))
             
         // pack samples into complex values (use stride 2 to fill just reals
-        vDSP_ctoz(UnsafePointer<DSPComplex>(samplesWindowed), 2, &complexBufferA, 1, UInt(halfLength))
+        vDSP_ctoz(unsafeBitCast(samplesWindowed, to: UnsafePointer<DSPComplex>.self), 2, &complexBufferA, 1, UInt(halfLength))
             
         // perform FFT
         // TODO: potentially use vDSP_fftm_zrip
@@ -279,12 +274,15 @@ class CircularShortTimeFourierTransform
     func extractPower() -> [Float]? {
         // get buffer read point and available bytes
         var availableBytes: Int32 = 0
-        var samples: UnsafeMutablePointer<Float> = UnsafeMutablePointer<Float>(TPCircularBufferTail(&buffer, &availableBytes))
+        let tail = TPCircularBufferTail(&buffer, &availableBytes)
         
         // not enough available bytes
-        if Int(availableBytes) < ((gap + lengthWindow) * sizeof(Float.self)) {
+        if Int(availableBytes) < ((gap + lengthWindow) * MemoryLayout<Float>.size) {
             return nil
         }
+        
+        // make samples
+        var samples = tail!.bindMemory(to: Float.self, capacity: Int(availableBytes) / MemoryLayout<Float>.size)
         
         // skip gap
         if 0 < gap {
@@ -294,7 +292,7 @@ class CircularShortTimeFourierTransform
         // mark circular buffer as consumed at END of excution
         defer {
             // mark as consumed
-            TPCircularBufferConsume(&buffer, Int32((gap + lengthWindow - overlap) * sizeof(Float.self)))
+            TPCircularBufferConsume(&buffer, Int32((gap + lengthWindow - overlap) * MemoryLayout<Float>.size))
         }
         
         // get half length
@@ -307,7 +305,7 @@ class CircularShortTimeFourierTransform
         vDSP_vmul(samples, 1, window, 1, samplesWindowed, 1, UInt(lengthWindow))
         
         // pack samples into complex values (use stride 2 to fill just reals
-        vDSP_ctoz(UnsafePointer<DSPComplex>(samplesWindowed), 2, &complexBufferA, 1, UInt(halfLength))
+        vDSP_ctoz(unsafeBitCast(samplesWindowed, to: UnsafePointer<DSPComplex>.self), 2, &complexBufferA, 1, UInt(halfLength))
         
         // perform FFT
         // TODO: potentially use vDSP_fftm_zrip

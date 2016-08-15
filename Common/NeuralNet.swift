@@ -26,7 +26,7 @@ class PassThrough: InputProcessingFunction, OutputProcessingFunction {
     }
     
     func applyAndCopy(_ values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
-        memcpy(destination, values, count * sizeof(Float.self))
+        memcpy(destination, values, count * MemoryLayout<Float>.size)
     }
     
     func reverseInPlace(_ values: UnsafeMutablePointer<Float>, count: Int) {
@@ -34,7 +34,7 @@ class PassThrough: InputProcessingFunction, OutputProcessingFunction {
     }
     
     func reverseAndCopy(_ values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
-        memcpy(destination, values, count * sizeof(Float.self))
+        memcpy(destination, values, count * MemoryLayout<Float>.size)
     }
 }
 
@@ -283,7 +283,7 @@ class NeuralNet
     
     func test(_ val: Float) {
         var inp = [Float](repeating: val, count: inputs)
-        withUnsafePointer(&inp[0]) {
+        withUnsafePointer(to: &inp[0]) {
             DLog("\($0.pointee)")
             let out = self.apply($0)
             print("\(out)")

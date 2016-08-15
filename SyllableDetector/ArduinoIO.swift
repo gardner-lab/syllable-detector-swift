@@ -460,7 +460,7 @@ class ArduinoIO: NSObject, ORSSerialPortDelegate {
         DLog("ARDUINO WRITE \(pin): \(digitalValue)")
     }
     
-    func readDigitalValueFrom(_ pin: Int, andExecute cb: (Bool?) -> Void) throws {
+    func readDigitalValueFrom(_ pin: Int, andExecute cb: @escaping (Bool?) -> Void) throws {
         guard canInteract() else {
             throw ArduinoIOError.portNotOpen
         }
@@ -502,7 +502,7 @@ class ArduinoIO: NSObject, ORSSerialPortDelegate {
         DLog("ARDUINO WRITE \(pin): \(analogValue)")
     }
     
-    func readAnalogValueFrom(_ pin: Int, andExecute cb: (UInt16?) -> Void) throws {
+    func readAnalogValueFrom(_ pin: Int, andExecute cb: @escaping (UInt16?) -> Void) throws {
         guard canInteract() else {
             throw ArduinoIOError.portNotOpen
         }

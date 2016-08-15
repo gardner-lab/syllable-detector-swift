@@ -169,7 +169,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         return min(inputChannels, outputChannels)
     }
     
-    func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> AnyObject? {
+    func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
         guard let identifier = tableColumn?.identifier else { return nil }
         guard row < processorEntries.count else { return nil }
         
@@ -246,7 +246,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
                         }
                         
                         self.processorEntries[row].config = config
-                        self.processorEntries[row].network = url.lastPathComponent ?? "Unknown Network"
+                        self.processorEntries[row].network = url.lastPathComponent
                     }
                     catch {
                         // unable to load

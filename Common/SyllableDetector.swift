@@ -18,7 +18,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
     // very specific audio settings required, since down sampling signal
     var audioSettings: [String: AnyObject] {
         get {
-            return [AVFormatIDKey: NSNumber(value: kAudioFormatLinearPCM), AVLinearPCMBitDepthKey: NSNumber(value: 32), AVLinearPCMIsFloatKey: true, AVLinearPCMIsNonInterleaved: true, AVSampleRateKey: NSNumber(value: config.samplingRate)]
+            return [AVFormatIDKey: NSNumber(value: kAudioFormatLinearPCM), AVLinearPCMBitDepthKey: NSNumber(value: 32), AVLinearPCMIsFloatKey: true as AnyObject, AVLinearPCMIsNonInterleaved: true as AnyObject, AVSampleRateKey: NSNumber(value: config.samplingRate)]
         }
     }
     
@@ -113,7 +113,9 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         CMBlockBufferGetDataPointer(audioBuffer, 0, &lengthAtOffset, &totalLength, &inSamples)
         
         // append it to fourier transform
-        shortTimeFourierTransform.appendData(UnsafeMutablePointer<Float>(inSamples!), withSamples: numSamples)
+        inSamples!.withMemoryRebound(to: Float.self, capacity: numSamples) {
+            shortTimeFourierTransform.appendData($0, withSamples: numSamples)
+        }
     }
     
     func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!) {
@@ -138,9 +140,9 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         let lengthPerTime = freqIndices.1 - freqIndices.0
         
         // append data to local circular buffer
-        withUnsafePointer(&powr[freqIndices.0]) {
+        withUnsafePointer(to: &powr[freqIndices.0]) {
             up in
-            if !TPCircularBufferProduceBytes(&self.buffer, up, Int32(lengthPerTime * sizeof(Float.self))) {
+            if !TPCircularBufferProduceBytes(&self.buffer, up, Int32(lengthPerTime * MemoryLayout<Float>.size)) {
                 fatalError("Insufficient space on buffer.")
             }
         }
@@ -162,17 +164,17 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         guard let p = TPCircularBufferTail(&buffer, &availableBytes) else {
             return false
         }
-        samples = UnsafeMutablePointer<Float>(p)
+        samples = p.bindMemory(to: Float.self, capacity: Int(availableBytes) / MemoryLayout<Float>.size)
         
         // not enough available bytes
-        if Int(availableBytes) < (lengthTotal * sizeof(Float.self)) {
+        if Int(availableBytes) < (lengthTotal * MemoryLayout<Float>.size) {
             return false
         }
         
         // mark circular buffer as consumed at END of excution
         defer {
             // mark as consumed, one time per-time length
-            TPCircularBufferConsume(&buffer, Int32(lengthPerTime * sizeof(Float.self)))
+            TPCircularBufferConsume(&buffer, Int32(lengthPerTime * MemoryLayout<Float>.size))
         }
         
         /// samples now points to a vector of `lengthTotal` bytes of power data for the last `timeRange` outputs of the short-timer fourier transform

@@ -10,7 +10,7 @@ import Foundation
 import AudioToolbox
 import Accelerate
 
-func renderOutput(_ inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutablePointer<AudioUnitRenderActionFlags>, timeStamp: UnsafePointer<AudioTimeStamp>, busNumber: UInt32, frameCount: UInt32, data: UnsafeMutablePointer<AudioBufferList>?) -> OSStatus {
+func renderOutput(_ inRefCon:UnsafeMutableRawPointer, actionFlags: UnsafeMutablePointer<AudioUnitRenderActionFlags>, timeStamp: UnsafePointer<AudioTimeStamp>, busNumber: UInt32, frameCount: UInt32, data: UnsafeMutablePointer<AudioBufferList>?) -> OSStatus {
     
     // get audio out interface
     let aoi = unsafeBitCast(inRefCon, to: AudioOutputInterface.self)
@@ -21,7 +21,7 @@ func renderOutput(_ inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMuta
     
     // fill output
     for (channel, buffer) in usableBufferList.enumerated() {
-        let data = UnsafeMutablePointer<Float>(buffer.mData)
+        let data = buffer.mData!.bindMemory(to: Float.self, capacity: frameCountAsInt)
         let high = aoi.outputHighFor[channel]
         
         // decrement high for
@@ -31,7 +31,7 @@ func renderOutput(_ inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMuta
         
         // write data out
         for i in 0..<frameCountAsInt {
-            data?[i] = (i < high ? 1.0 : 0.0)
+            data[i] = (i < high ? 1.0 : 0.0)
         }
         
     }
@@ -39,7 +39,7 @@ func renderOutput(_ inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMuta
     return 0
 }
 
-func processInput(_ inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMutablePointer<AudioUnitRenderActionFlags>, timeStamp: UnsafePointer<AudioTimeStamp>, busNumber: UInt32, frameCount: UInt32, data: UnsafeMutablePointer<AudioBufferList>?) -> OSStatus {
+func processInput(_ inRefCon:UnsafeMutableRawPointer, actionFlags: UnsafeMutablePointer<AudioUnitRenderActionFlags>, timeStamp: UnsafePointer<AudioTimeStamp>, busNumber: UInt32, frameCount: UInt32, data: UnsafeMutablePointer<AudioBufferList>?) -> OSStatus {
     
     // get audio in interface
     let aii = unsafeBitCast(inRefCon, to: AudioInputInterface.self)
@@ -66,7 +66,7 @@ func processInput(_ inRefCon:UnsafeMutablePointer<Void>, actionFlags: UnsafeMuta
     // multiple channels
     for channel in 0..<numberOfChannels {
         // call delegate
-        aii.delegate?.receiveAudioFrom(aii, fromChannel: channel, withData: UnsafeMutablePointer<Float>(aii.bufferList[channel].mData!), ofLength: frameCountAsInteger)
+        aii.delegate?.receiveAudioFrom(aii, fromChannel: channel, withData: aii.bufferList[channel].mData!.bindMemory(to: Float.self, capacity: frameCountAsInteger), ofLength: frameCountAsInteger)
     }
     
     return 0
@@ -114,24 +114,24 @@ class AudioInterface
             
             // size and status variables
             var status: OSStatus
-            var size: UInt32 = UInt32(sizeof(CFString.self))
+            var size: UInt32 = UInt32(MemoryLayout<CFString>.size)
             
             // get device UID
-            var deviceUID: CFString = ""
+            var deviceUID = "" as CFString
             propertyAddress.mSelector = kAudioDevicePropertyDeviceUID
             status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, &deviceUID)
             guard noErr == status else { return nil }
             self.deviceUID = String(deviceUID)
             
             // get deivce name
-            var deviceName: CFString = ""
+            var deviceName = "" as CFString
             propertyAddress.mSelector = kAudioDevicePropertyDeviceNameCFString
             status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, &deviceName)
             guard noErr == status else { return nil }
             self.deviceName = String(deviceName)
             
             // get deivce manufacturer
-            var deviceManufacturer: CFString = ""
+            var deviceManufacturer = "" as CFString
             propertyAddress.mSelector = kAudioDevicePropertyDeviceManufacturerCFString
             status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, &deviceManufacturer)
             guard noErr == status else { return nil }
@@ -143,11 +143,11 @@ class AudioInterface
             propertyAddress.mScope = kAudioDevicePropertyScopeInput
             status = AudioObjectGetPropertyDataSize(deviceID, &propertyAddress, 0, nil, &size)
             guard noErr == status else { return nil }
-            self.streamsInput = Int(size) / sizeof(AudioStreamID.self)
+            self.streamsInput = Int(size) / MemoryLayout<AudioStreamID>.size
             
             if 0 < self.streamsInput {
                 // get sample rate
-                size = UInt32(sizeof(Float64.self))
+                size = UInt32(MemoryLayout<Float64>.size)
                 var sampleRateInput: Float64 = 0.0
                 propertyAddress.mSelector = kAudioDevicePropertyNominalSampleRate
                 status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, &sampleRateInput)
@@ -161,8 +161,8 @@ class AudioInterface
                 guard noErr == status else { DLog("d \(status)"); return nil }
                 
                 // allocate
-                var bufferList = UnsafeMutablePointer<AudioBufferList>(malloc(Int(size)))
-                status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, bufferList!)
+                var bufferList = UnsafeMutableRawPointer.allocate(bytes: Int(size), alignedTo: MemoryLayout<AudioBufferList>.alignment).bindMemory(to: AudioBufferList.self, capacity: 1)
+                status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, bufferList)
                 defer {
                     free(bufferList)
                 }
@@ -173,7 +173,7 @@ class AudioInterface
                 
                 // add device buffers
                 var buffersInput = [AudioBuffer]()
-                for ab in usableBufferList! {
+                for ab in usableBufferList {
                     buffersInput.append(ab)
                 }
                 self.buffersInput = buffersInput
@@ -187,11 +187,11 @@ class AudioInterface
             propertyAddress.mScope = kAudioDevicePropertyScopeOutput
             status = AudioObjectGetPropertyDataSize(deviceID, &propertyAddress, 0, nil, &size)
             guard noErr == status else { return nil }
-            self.streamsOutput = Int(size) / sizeof(AudioStreamID.self)
+            self.streamsOutput = Int(size) / MemoryLayout<AudioStreamID>.size
             
             if 0 < self.streamsOutput {
                 // get sample rate
-                size = UInt32(sizeof(Float64.self))
+                size = UInt32(MemoryLayout<Float64>.size)
                 var sampleRateOutput: Float64 = 0.0
                 propertyAddress.mSelector = kAudioDevicePropertyNominalSampleRate
                 status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, &sampleRateOutput)
@@ -205,8 +205,9 @@ class AudioInterface
                 guard noErr == status else { DLog("d \(status)"); return nil }
                 
                 // allocate
-                var bufferList = UnsafeMutablePointer<AudioBufferList>(malloc(Int(size)))
-                status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, bufferList!)
+                // is it appropriate to call it capacity 1?
+                var bufferList = UnsafeMutableRawPointer.allocate(bytes: Int(size), alignedTo: MemoryLayout<AudioBufferList>.alignment).bindMemory(to: AudioBufferList.self, capacity: 1)
+                status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, bufferList)
                 defer {
                     free(bufferList)
                 }
@@ -217,7 +218,7 @@ class AudioInterface
                 
                 // add device buffers
                 var buffersOutput = [AudioBuffer]()
-                for ab in usableBufferList! {
+                for ab in usableBufferList {
                     buffersOutput.append(ab)
                 }
                 self.buffersOutput = buffersOutput
@@ -240,7 +241,7 @@ class AudioInterface
         try checkError(AudioObjectGetPropertyDataSize(AudioObjectID(kAudioObjectSystemObject), &propertyAddress, 0, nil, &size))
         
         // number of devices
-        let deviceCount = Int(size) / sizeof(AudioDeviceID.self)
+        let deviceCount = Int(size) / MemoryLayout<AudioDeviceID>.size
         var audioDevices = [AudioDeviceID](repeating: AudioDeviceID(0), count: deviceCount)
         
         // get device ids
@@ -251,7 +252,7 @@ class AudioInterface
         }
     }
     
-    static func createListenerForDeviceChange<T: Hashable>(_ cb: (Void) -> Void, withIdentifier unique: T) throws {
+    static func createListenerForDeviceChange<T: Hashable>(_ cb: @escaping (Void) -> Void, withIdentifier unique: T) throws {
         let selector = kAudioHardwarePropertyDevices
         
         // alread has listener
@@ -366,10 +367,10 @@ class AudioOutputInterface: AudioInterface
         
         // set output device
         var outputDevice = deviceID
-        try checkError(AudioUnitSetProperty(audioUnit!, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &outputDevice, UInt32(sizeof(AudioDeviceID.self))))
+        try checkError(AudioUnitSetProperty(audioUnit!, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &outputDevice, UInt32(MemoryLayout<AudioDeviceID>.size)))
         
         // get the audio format
-        var size: UInt32 = UInt32(sizeof(AudioStreamBasicDescription.self))
+        var size: UInt32 = UInt32(MemoryLayout<AudioStreamBasicDescription>.size)
         try checkError(AudioUnitGetProperty(audioUnit!, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, outputBus, &outputFormat, &size))
         
         // print format information for debugging
@@ -390,16 +391,16 @@ class AudioOutputInterface: AudioInterface
         inputFormat.mFormatFlags = kAudioFormatFlagsNativeFloatPacked | kLinearPCMFormatFlagIsNonInterleaved
         inputFormat.mSampleRate = outputFormat.mSampleRate
         inputFormat.mFramesPerPacket = 1
-        inputFormat.mBytesPerPacket = UInt32(sizeof(Float.self))
-        inputFormat.mBytesPerFrame = UInt32(sizeof(Float.self))
+        inputFormat.mBytesPerPacket = UInt32(MemoryLayout<Float>.size)
+        inputFormat.mBytesPerFrame = UInt32(MemoryLayout<Float>.size)
         inputFormat.mChannelsPerFrame = outputFormat.mChannelsPerFrame
-        inputFormat.mBitsPerChannel = UInt32(8 * sizeof(Float.self))
+        inputFormat.mBitsPerChannel = UInt32(8 * MemoryLayout<Float>.size)
         
         // print format information for debugging
         //DLog("OUT:IN \(inputFormat)")
         
         // set the audio format
-        size = UInt32(sizeof(AudioStreamBasicDescription.self))
+        size = UInt32(MemoryLayout<AudioStreamBasicDescription>.size)
         try checkError(AudioUnitSetProperty(audioUnit!, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, outputBus, &inputFormat, size))
         
         // initiate output array
@@ -407,11 +408,11 @@ class AudioOutputInterface: AudioInterface
         
         // set frame size
         var frameSize = UInt32(self.frameSize)
-        try checkError(AudioUnitSetProperty(audioUnit!, kAudioDevicePropertyBufferFrameSize, kAudioUnitScope_Global, outputBus, &frameSize, UInt32(sizeof(UInt32.self))))
+        try checkError(AudioUnitSetProperty(audioUnit!, kAudioDevicePropertyBufferFrameSize, kAudioUnitScope_Global, outputBus, &frameSize, UInt32(MemoryLayout<UInt32>.size)))
         
         // setup playback callback
-        var callbackStruct = AURenderCallbackStruct(inputProc: renderOutput, inputProcRefCon: unsafeBitCast(unsafeAddress(of: self), to: UnsafeMutablePointer<Void>.self))
-        try checkError(AudioUnitSetProperty(audioUnit!, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Global, outputBus, &callbackStruct, UInt32(sizeof(AURenderCallbackStruct.self))))
+        var callbackStruct = AURenderCallbackStruct(inputProc: renderOutput, inputProcRefCon: unsafeBitCast(Unmanaged.passUnretained(self), to: UnsafeMutableRawPointer.self))
+        try checkError(AudioUnitSetProperty(audioUnit!, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Global, outputBus, &callbackStruct, UInt32(MemoryLayout<AURenderCallbackStruct>.size)))
         
         // initialize audio unit
         AudioUnitInitialize(audioUnit!)
@@ -444,7 +445,7 @@ class AudioOutputInterface: AudioInterface
     
     static func defaultOutputDevice() throws -> AudioDeviceID {
         var size: UInt32
-        size = UInt32(sizeof(AudioDeviceID.self))
+        size = UInt32(MemoryLayout<AudioDeviceID>.size)
         var outputDevice = AudioDeviceID()
         var address = AudioObjectPropertyAddress(mSelector: kAudioHardwarePropertyDefaultOutputDevice, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMaster)
         try checkError(AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size, &outputDevice))
@@ -499,7 +500,7 @@ class AudioInputInterface: AudioInterface
         var size: UInt32
         
         // enable input
-        size = UInt32(sizeof(UInt32.self))
+        size = UInt32(MemoryLayout<UInt32>.size)
         var enableIO: UInt32 = 1
         try checkError(AudioUnitSetProperty(audioUnit!, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, inputBus, &enableIO, size))
         
@@ -509,10 +510,10 @@ class AudioInputInterface: AudioInterface
         
         // set input device
         var inputDevice = deviceID
-        try checkError(AudioUnitSetProperty(audioUnit!, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &inputDevice, UInt32(sizeof(AudioDeviceID.self))))
+        try checkError(AudioUnitSetProperty(audioUnit!, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &inputDevice, UInt32(MemoryLayout<AudioDeviceID>.size)))
         
         // get the audio format
-        size = UInt32(sizeof(AudioStreamBasicDescription.self))
+        size = UInt32(MemoryLayout<AudioStreamBasicDescription>.size)
         try checkError(AudioUnitGetProperty(audioUnit!, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, inputBus, &inputFormat, &size))
         
         // print format information for debugging
@@ -533,21 +534,21 @@ class AudioInputInterface: AudioInterface
         outputFormat.mFormatFlags = kAudioFormatFlagsNativeFloatPacked | kLinearPCMFormatFlagIsNonInterleaved
         outputFormat.mSampleRate = inputFormat.mSampleRate
         outputFormat.mFramesPerPacket = 1
-        outputFormat.mBytesPerPacket = UInt32(sizeof(Float.self))
-        outputFormat.mBytesPerFrame = UInt32(sizeof(Float.self))
+        outputFormat.mBytesPerPacket = UInt32(MemoryLayout<Float>.size)
+        outputFormat.mBytesPerFrame = UInt32(MemoryLayout<Float>.size)
         outputFormat.mChannelsPerFrame = inputFormat.mChannelsPerFrame
-        outputFormat.mBitsPerChannel = UInt32(8 * sizeof(Float.self))
+        outputFormat.mBitsPerChannel = UInt32(8 * MemoryLayout<Float>.size)
         
         // print format information for debugging
         //DLog("IN:OUT \(outputFormat)")
         
         // set the audio format
-        size = UInt32(sizeof(AudioStreamBasicDescription.self))
+        size = UInt32(MemoryLayout<AudioStreamBasicDescription>.size)
         try checkError(AudioUnitSetProperty(audioUnit!, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, inputBus, &outputFormat, size))
         
         // get maximum frame size
         var maxFrameSize: UInt32 = 0
-        size = UInt32(sizeof(UInt32.self))
+        size = UInt32(MemoryLayout<UInt32>.size)
         try checkError(AudioUnitGetProperty(audioUnit!, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFrameSize, &size))
         
         // create buffers
@@ -564,11 +565,11 @@ class AudioInputInterface: AudioInterface
         
         // set frame size
         var frameSize: UInt32 = UInt32(self.frameSize)
-        try checkError(AudioUnitSetProperty(audioUnit!, kAudioDevicePropertyBufferFrameSize, kAudioUnitScope_Global, 0, &frameSize, UInt32(sizeof(UInt32.self))))
+        try checkError(AudioUnitSetProperty(audioUnit!, kAudioDevicePropertyBufferFrameSize, kAudioUnitScope_Global, 0, &frameSize, UInt32(MemoryLayout<UInt32>.size)))
         
         // setup playback callback
-        var callbackStruct = AURenderCallbackStruct(inputProc: processInput, inputProcRefCon: unsafeBitCast(unsafeAddress(of: self), to: UnsafeMutablePointer<Void>.self))
-        try checkError(AudioUnitSetProperty(audioUnit!, kAudioOutputUnitProperty_SetInputCallback, kAudioUnitScope_Global, 0, &callbackStruct, UInt32(sizeof(AURenderCallbackStruct.self))))
+        var callbackStruct = AURenderCallbackStruct(inputProc: processInput, inputProcRefCon: unsafeBitCast(Unmanaged.passUnretained(self), to: UnsafeMutableRawPointer.self))
+        try checkError(AudioUnitSetProperty(audioUnit!, kAudioOutputUnitProperty_SetInputCallback, kAudioUnitScope_Global, 0, &callbackStruct, UInt32(MemoryLayout<AURenderCallbackStruct>.size)))
         
         // initialize audio unit
         AudioUnitInitialize(audioUnit!)
@@ -602,7 +603,7 @@ class AudioInputInterface: AudioInterface
     
     static func defaultInputDevice() throws -> AudioDeviceID {
         var size: UInt32
-        size = UInt32(sizeof(AudioDeviceID.self))
+        size = UInt32(MemoryLayout<AudioDeviceID>.size)
         var inputDevice = AudioDeviceID()
         var address = AudioObjectPropertyAddress(mSelector: kAudioHardwarePropertyDefaultInputDevice, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMaster)
         try checkError(AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size, &inputDevice))
