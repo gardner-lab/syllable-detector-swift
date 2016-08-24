@@ -161,7 +161,8 @@ class AudioInterface
                 guard noErr == status else { DLog("d \(status)"); return nil }
                 
                 // allocate
-                var bufferList = UnsafeMutableRawPointer.allocate(bytes: Int(size), alignedTo: MemoryLayout<AudioBufferList>.alignment).bindMemory(to: AudioBufferList.self, capacity: 1)
+                // is it okay to assume binding? or should bind (but if so, what capacity)?
+                var bufferList = UnsafeMutableRawPointer.allocate(bytes: Int(size), alignedTo: MemoryLayout<AudioBufferList>.alignment).assumingMemoryBound(to: AudioBufferList.self)
                 status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, bufferList)
                 defer {
                     free(bufferList)
@@ -205,8 +206,8 @@ class AudioInterface
                 guard noErr == status else { DLog("d \(status)"); return nil }
                 
                 // allocate
-                // is it appropriate to call it capacity 1?
-                var bufferList = UnsafeMutableRawPointer.allocate(bytes: Int(size), alignedTo: MemoryLayout<AudioBufferList>.alignment).bindMemory(to: AudioBufferList.self, capacity: 1)
+                // is it okay to assume binding? or should bind (but if so, what capacity)?
+                var bufferList = UnsafeMutableRawPointer.allocate(bytes: Int(size), alignedTo: MemoryLayout<AudioBufferList>.alignment).assumingMemoryBound(to: AudioBufferList.self)
                 status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, bufferList)
                 defer {
                     free(bufferList)
