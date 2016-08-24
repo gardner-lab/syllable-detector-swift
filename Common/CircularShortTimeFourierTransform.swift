@@ -204,16 +204,16 @@ class CircularShortTimeFourierTransform
         // get head of circular buffer
         var space: Int32 = 0
         let head = TPCircularBufferHead(&self.buffer, &space)
-        if Int(space) < numSamples {
+        if Int(space) < numSamples * MemoryLayout<Float>.size {
             fatalError("Insufficient space on buffer.")
         }
         
         // use vDSP to perform copy with stride
         var zero: Float = 0.0
-        vDSP_vsadd(data + channel, vDSP_Stride(totalChannels), &zero, head!.bindMemory(to: Float.self, capacity: Int(space) / MemoryLayout<Float>.size), 1, vDSP_Length(numSamples))
+        vDSP_vsadd(data + channel, vDSP_Stride(totalChannels), &zero, head!.bindMemory(to: Float.self, capacity: numSamples), 1, vDSP_Length(numSamples))
         
         // move head forward
-        TPCircularBufferProduce(&self.buffer, Int32(numSamples))
+        TPCircularBufferProduce(&self.buffer, Int32(numSamples * MemoryLayout<Float>.size))
     }
     
     // TODO: write better functions that can help avoid double copying
