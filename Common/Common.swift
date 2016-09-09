@@ -7,7 +7,7 @@
 import Foundation
 
 /// A logging function that only executes in debugging mode.
-func DLog(message: String, function: String = __FUNCTION__ ) {
+func DLog(_ message: String, function: String = #function ) {
     #if DEBUG
     print("\(function): \(message)")
     #endif
@@ -15,10 +15,10 @@ func DLog(message: String, function: String = __FUNCTION__ ) {
 
 extension String {
     func trim() -> String {
-        return self.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+        return self.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
     }
     
-    func splitAtCharacter(char: Character) -> [String] {
+    func splitAtCharacter(_ char: Character) -> [String] {
         return self.characters.split { $0 == char } .map(String.init)
     }
 }

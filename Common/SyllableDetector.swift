@@ -18,15 +18,15 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
     // very specific audio settings required, since down sampling signal
     var audioSettings: [String: AnyObject] {
         get {
-            return [AVFormatIDKey: NSNumber(unsignedInt: kAudioFormatLinearPCM), AVLinearPCMBitDepthKey: NSNumber(int: 32), AVLinearPCMIsFloatKey: true, AVLinearPCMIsNonInterleaved: true, AVSampleRateKey: NSNumber(double: config.samplingRate)]
+            return [AVFormatIDKey: NSNumber(value: kAudioFormatLinearPCM), AVLinearPCMBitDepthKey: NSNumber(value: 32), AVLinearPCMIsFloatKey: true as AnyObject, AVLinearPCMIsNonInterleaved: true as AnyObject, AVSampleRateKey: NSNumber(value: config.samplingRate)]
         }
     }
     
     // last values
-    var lastOutput: Float
+    var lastOutputs: [Float]
     var lastDetected: Bool {
         get {
-            return (Double(lastOutput) >= config.threshold)
+            return (Double(lastOutputs[0]) >= config.thresholds[0])
         }
     }
     
@@ -40,10 +40,10 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         
         // initialize the FFT
         shortTimeFourierTransform = CircularShortTimeFourierTransform(windowLength: config.windowLength, withOverlap: config.windowOverlap, fftSizeOf: config.fourierLength)
-        shortTimeFourierTransform.windowType = WindowType.Hamming
+        shortTimeFourierTransform.windowType = WindowType.hamming
         
         // store frequency indices
-        guard let idx = shortTimeFourierTransform.frequencyIndexRangeFrom(config.freqRange.0, to: config.freqRange.1, forSampleRate: config.samplingRate) else {
+        guard let idx = shortTimeFourierTransform.frequencyIndexRangeFrom(config.freqRange.0, through: config.freqRange.1, forSampleRate: config.samplingRate) else {
             fatalError("The frequency range is invalid.")
         }
         freqIndices = idx
@@ -51,7 +51,12 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         // check that matches input size
         let expectedInputs = (freqIndices.1 - freqIndices.0) * config.timeRange
         guard expectedInputs == config.net.inputs else {
-            fatalError("The neural network has \(config.net.inputs), but the configuration settings suggest there should be \(expectedInputs).")
+            fatalError("The neural network has \(config.net.inputs) inputs, but the configuration settings suggest there should be \(expectedInputs).")
+        }
+        
+        // check that the threshold count matches the output size
+        guard config.thresholds.count == config.net.outputs else {
+            fatalError("The neural network has \(config.net.outputs) outputs, but the configuration settings suggest there should be \(config.thresholds.count).")
         }
         
         // create the circular buffer
@@ -62,7 +67,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         }
         
         // no last output
-        lastOutput = 0.0
+        lastOutputs = [Float](repeating: 0.0, count: config.net.outputs)
         
         // call super
         super.init()
@@ -73,7 +78,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         TPCircularBufferCleanup(&buffer)
     }
     
-    func processSampleBuffer(sampleBuffer: CMSampleBuffer) {
+    func processSampleBuffer(_ sampleBuffer: CMSampleBuffer) {
         // has samples
         let numSamples = CMSampleBufferGetNumSamples(sampleBuffer)
         guard 0 < numSamples else {
@@ -88,11 +93,11 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         let audioDescription = CMAudioFormatDescriptionGetStreamBasicDescription(format)
         
         // is interleaved
-        let isInterleaved = 1 < audioDescription[0].mChannelsPerFrame && 0 == (audioDescription[0].mFormatFlags & kAudioFormatFlagIsNonInterleaved)
-        let isFloat = 0 < (audioDescription[0].mFormatFlags & kAudioFormatFlagIsFloat)
+        let isInterleaved = 1 < (audioDescription?[0].mChannelsPerFrame)! && 0 == ((audioDescription?[0].mFormatFlags)! & kAudioFormatFlagIsNonInterleaved)
+        let isFloat = 0 < ((audioDescription?[0].mFormatFlags)! & kAudioFormatFlagIsFloat)
         
         // checks
-        guard audioDescription[0].mFormatID == kAudioFormatLinearPCM && isFloat && !isInterleaved && audioDescription[0].mBitsPerChannel == 32 else {
+        guard audioDescription?[0].mFormatID == kAudioFormatLinearPCM && isFloat && !isInterleaved && audioDescription?[0].mBitsPerChannel == 32 else {
             fatalError("Invalid audio format.")
         }
         
@@ -104,14 +109,16 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         
         // get data pointer
         var lengthAtOffset: Int = 0, totalLength: Int = 0
-        var inSamples: UnsafeMutablePointer<Int8> = nil
+        var inSamples: UnsafeMutablePointer<Int8>? = nil
         CMBlockBufferGetDataPointer(audioBuffer, 0, &lengthAtOffset, &totalLength, &inSamples)
         
         // append it to fourier transform
-        shortTimeFourierTransform.appendData(UnsafeMutablePointer<Float>(inSamples), withSamples: numSamples)
+        inSamples!.withMemoryRebound(to: Float.self, capacity: numSamples) {
+            shortTimeFourierTransform.appendData($0, withSamples: numSamples)
+        }
     }
     
-    func captureOutput(captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, fromConnection connection: AVCaptureConnection!) {
+    func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!) {
         // append sample data
         processSampleBuffer(sampleBuffer)
         
@@ -119,7 +126,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         while processNewValue() {}
     }
     
-    func appendAudioData(data: UnsafeMutablePointer<Float>, withSamples numSamples: Int) {
+    func appendAudioData(_ data: UnsafeMutablePointer<Float>, withSamples numSamples: Int) {
         // add to short-time fourier transform
         shortTimeFourierTransform.appendData(data, withSamples: numSamples)
     }
@@ -133,9 +140,9 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         let lengthPerTime = freqIndices.1 - freqIndices.0
         
         // append data to local circular buffer
-        withUnsafePointer(&powr[freqIndices.0]) {
+        withUnsafePointer(to: &powr[freqIndices.0]) {
             up in
-            if !TPCircularBufferProduceBytes(&self.buffer, up, Int32(lengthPerTime * sizeof(Float))) {
+            if !TPCircularBufferProduceBytes(&self.buffer, up, Int32(lengthPerTime * MemoryLayout<Float>.size)) {
                 fatalError("Insufficient space on buffer.")
             }
         }
@@ -153,17 +160,21 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         
         // let UnsafeMutablePointer<Float>: samples
         var availableBytes: Int32 = 0
-        let samples: UnsafeMutablePointer<Float> = UnsafeMutablePointer<Float>(TPCircularBufferTail(&buffer, &availableBytes))
+        let samples: UnsafeMutablePointer<Float>
+        guard let p = TPCircularBufferTail(&buffer, &availableBytes) else {
+            return false
+        }
+        samples = p.bindMemory(to: Float.self, capacity: Int(availableBytes) / MemoryLayout<Float>.size)
         
         // not enough available bytes
-        if Int(availableBytes) < (lengthTotal * sizeof(Float)) {
+        if Int(availableBytes) < (lengthTotal * MemoryLayout<Float>.size) {
             return false
         }
         
         // mark circular buffer as consumed at END of excution
         defer {
             // mark as consumed, one time per-time length
-            TPCircularBufferConsume(&buffer, Int32(lengthPerTime * sizeof(Float)))
+            TPCircularBufferConsume(&buffer, Int32(lengthPerTime * MemoryLayout<Float>.size))
         }
         
         /// samples now points to a vector of `lengthTotal` bytes of power data for the last `timeRange` outputs of the short-timer fourier transform
@@ -171,37 +182,36 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         
         let scaledSamples: UnsafeMutablePointer<Float>
         switch config.spectrogramScaling {
-        case .Db:
+        case .db:
             // temporary memory
-            scaledSamples = UnsafeMutablePointer<Float>.alloc(lengthTotal)
+            scaledSamples = UnsafeMutablePointer<Float>.allocate(capacity: lengthTotal)
             defer {
-                scaledSamples.destroy()
-                scaledSamples.dealloc(lengthTotal)
+                scaledSamples.deinitialize()
+                scaledSamples.deallocate(capacity: lengthTotal)
             }
             
             // convert to db with amplitude flag
             var one: Float = 1.0
             vDSP_vdbcon(samples, 1, &one, scaledSamples, 1, vDSP_Length(lengthTotal), 1)
             
-        case .Log:
+        case .log:
             // temporary memory
-            scaledSamples = UnsafeMutablePointer<Float>.alloc(lengthTotal)
+            scaledSamples = UnsafeMutablePointer<Float>.allocate(capacity: lengthTotal)
             defer {
-                scaledSamples.destroy()
-                scaledSamples.dealloc(lengthTotal)
+                scaledSamples.deinitialize()
+                scaledSamples.deallocate(capacity: lengthTotal)
             }
             
             // natural log
             var c = Int32(lengthTotal)
             vvlogf(samples, scaledSamples, &c)
             
-        case .Linear:
+        case .linear:
             // no copy needed
             scaledSamples = samples
         }
         
-        let ret = config.net.apply(scaledSamples)
-        lastOutput = ret[0]
+        lastOutputs = config.net.apply(scaledSamples)
         
         return true
     }

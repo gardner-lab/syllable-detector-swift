@@ -9,7 +9,7 @@
 import Cocoa
 
 protocol WindowControllerProcessorDelegate: class {
-    func windowControllerDone(controller: WindowControllerProcessor)
+    func windowControllerDone(_ controller: WindowControllerProcessor)
 }
 
 class WindowControllerProcessor: NSWindowController, NSWindowDelegate {
@@ -21,7 +21,7 @@ class WindowControllerProcessor: NSWindowController, NSWindowDelegate {
         window?.delegate = self
     }
     
-    func windowWillClose(notification: NSNotification) {
+    func windowWillClose(_ notification: Notification) {
         // when window will close, pass it up the chain
         delegate?.windowControllerDone(self)
     }

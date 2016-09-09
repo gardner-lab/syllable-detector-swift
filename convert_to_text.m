@@ -67,7 +67,9 @@ fprintf(fh, 'windowOverlap = %d\n', f.fft_size - f.fft_time_shift);
 fprintf(fh, 'freqRange = %.1f, %.1f\n', f.freq_range(1), f.freq_range(end));
 fprintf(fh, 'timeRange = %d\n', f.time_window_steps);
 
-fprintf(fh, 'threshold = %.15g\n', f.trigger_thresholds);
+thresholds = sprintf('%.15g, ', reshape(f.trigger_thresholds, [], 1));
+thresholds = thresholds(1:end - 2); % remove final comma
+fprintf(fh, 'thresholds = %s\n', thresholds);
 
 fprintf(fh, 'scaling = %s\n', f.scaling);
 

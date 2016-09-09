@@ -7,207 +7,54 @@
 //
 
 import Cocoa
-import Accelerate
-import AudioToolbox
-
-struct ProcessorEntry {
-    let inputChannel: Int
-    var network: String = ""
-    var config: SyllableDetectorConfig?
-    var resampler: Resampler?
-    let outputChannel: Int
-    
-    init(inputChannel: Int, outputChannel: Int) {
-        self.inputChannel = inputChannel
-        self.outputChannel = outputChannel
-    }
-}
-
-class Processor: AudioInputInterfaceDelegate {
-    // input and output interfaces
-    let interfaceInput: AudioInputInterface
-    let interfaceOutput: AudioOutputInterface
-    
-    // processor entries
-    let entries: [ProcessorEntry]
-    let detectors: [SyllableDetector]
-    let channels: [Int]
-    
-    // stats
-    let statInput: [SummaryStat]
-    let statOutput: [SummaryStat]
-    
-    // high duration
-    let highDuration = 0.001 // 1ms
-    
-    // dispatch queue
-    let queueProcessing: dispatch_queue_t
-    
-    init(deviceInput: AudioInterface.AudioDevice, deviceOutput: AudioInterface.AudioDevice, entries: [ProcessorEntry]) throws {
-        // setup processor entries
-        self.entries = entries.filter {
-            return $0.config != nil
-        }
-        
-        // setup processor detectors
-        self.detectors = self.entries.map {
-            return SyllableDetector(config: $0.config!)
-        }
-        
-        // setup channels
-        var channels = [Int](count: 1 + (self.entries.map { return max($0.inputChannel, $0.outputChannel) }.maxElement() ?? -1), repeatedValue: -1)
-        for (i, p) in self.entries.enumerate() {
-            channels[p.inputChannel] = i
-        }
-        self.channels = channels
-        
-        // setup stats
-        var statInput = [SummaryStat]()
-        var statOutput = [SummaryStat]()
-        for var i = 0; i < self.detectors.count; ++i {
-            statInput.append(SummaryStat(withStat: StatMax()))
-            statOutput.append(SummaryStat(withStat: StatMax()))
-        }
-        self.statInput = statInput
-        self.statOutput = statOutput
-        
-        // setup input and output devices
-        interfaceInput = AudioInputInterface(deviceID: deviceInput.deviceID)
-        interfaceOutput = AudioOutputInterface(deviceID: deviceOutput.deviceID)
-        
-        // create queue
-        queueProcessing = dispatch_queue_create("ProcessorQueue", DISPATCH_QUEUE_SERIAL)
-        
-        try interfaceOutput.initializeAudio()
-        try interfaceInput.initializeAudio()
-        
-        // set self as delegate
-        interfaceInput.delegate = self
-    }
-    
-    deinit {
-        DLog("deinit processor")
-        
-        interfaceInput.tearDownAudio()
-        interfaceOutput.tearDownAudio()
-    }
-    
-    func receiveAudioFrom(interface: AudioInputInterface, fromChannel channel: Int, withData data: UnsafeMutablePointer<Float>, ofLength length: Int) {
-        // valid channel
-        guard channel < channels.count else { return }
-        
-        // get index
-        let index = channels[channel]
-        guard index >= 0 else { return }
-        
-        // get audio data
-        var sum: Float = 0.0
-        vDSP_svesq(data, 1, &sum, vDSP_Length(length))
-        statInput[index].writeValue(Double(sum) / Double(length))
-        
-        // resample
-        if let r = entries[index].resampler {
-            var resampledData = r.resampleVector(data, ofLength: length)
-            
-            // append audio samples
-            detectors[index].appendAudioData(&resampledData, withSamples: resampledData.count)
-        }
-        else {
-            // append audio samples
-            detectors[index].appendAudioData(data, withSamples: length)
-        }
-        
-        // process
-        dispatch_async(queueProcessing) {
-            // detector
-            let d = self.detectors[index]
-            
-            // seen syllable
-            var seen = false
-            
-            // while there are new values
-            while self.detectors[index].processNewValue() {
-                // send to output
-                self.statOutput[index].writeValue(Double(d.lastOutput))
-                
-                // update detected
-                if !seen && d.lastDetected {
-                    seen = true
-                }
-            }
-            
-            // if seen, send output
-            if seen {
-                // log
-                DLog("\(channel) play")
-                
-                // play high
-                self.interfaceOutput.createHighOutput(self.entries[index].outputChannel, forDuration: self.highDuration)
-            }
-        }
-    }
-    
-    func getInputForChannel(channel: Int) -> Double? {
-        // valid channel
-        guard channel < channels.count else { return nil }
-        
-        // get index
-        let index = channels[channel]
-        guard index >= 0 else { return nil }
-        
-        // output stat
-        if let meanSquareLevel = statInput[index].readStatAndReset() {
-            return sqrt(meanSquareLevel) // RMS
-        }
-        
-        return nil
-    }
-    
-    func getOutputForChannel(channel: Int) -> Double? {
-        // valid channel
-        guard channel < channels.count else { return nil }
-        
-        // get index
-        let index = channels[channel]
-        guard index >= 0 else { return nil }
-        
-        // output stat
-        return statOutput[index].readStatAndReset()
-    }
-    
-    func tearDown() {
-        interfaceInput.tearDownAudio()
-        interfaceOutput.tearDownAudio()
-    }
-}
+import ORSSerial
 
 class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableViewDataSource {
     @IBOutlet weak var buttonLoad: NSButton!
     @IBOutlet weak var buttonToggle: NSButton!
     @IBOutlet weak var tableChannels: NSTableView!
     
+    enum OutputDevice {
+        case audio(interface: AudioInterface.AudioDevice)
+        case arduino(port: ORSSerialPort)
+        
+        var outputChannels: Int {
+            get {
+                switch self {
+                case .audio(let interface):
+                    if 0 < interface.buffersOutput.count {
+                        return Int(interface.buffersOutput[0].mNumberChannels)
+                    }
+                    return 0
+                case .arduino(port: _):
+                    return 7
+                }
+            }
+        }
+    }
+    
     // devices
     var deviceInput: AudioInterface.AudioDevice!
-    var deviceOutput: AudioInterface.AudioDevice!
+    var deviceOutput: OutputDevice!
     
     var processorEntries = [ProcessorEntry]()
     var processor: Processor?
     
     // timer to redraw interface (saves time)
-    var timerRedraw: NSTimer?
+    var timerRedraw: Timer?
     
     var isRunning = false {
         didSet {
             if oldValue == isRunning { return }
             
             // update interface
-            tableChannels.enabled = !isRunning
-            buttonLoad.enabled = !isRunning
+            tableChannels.isEnabled = !isRunning
+            buttonLoad.isEnabled = !isRunning
             buttonToggle.title = (isRunning ? "Stop" : "Start")
             
             // start or stop timer
             if isRunning {
-                timerRedraw = NSTimer.scheduledTimerWithTimeInterval(0.1, target: self, selector: "timerUpdateValues:", userInfo: nil, repeats: true)
+                timerRedraw = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(ViewControllerProcessor.timerUpdateValues(_:)), userInfo: nil, repeats: true)
             }
             else {
                 timerRedraw?.invalidate()
@@ -220,7 +67,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         super.viewDidLoad()
         
         tableChannels.target = self
-        tableChannels.doubleAction = "tableRowDoubleClicked"
+        tableChannels.doubleAction = #selector(ViewControllerProcessor.tableRowDoubleClicked)
     }
     
     override func viewDidAppear() {
@@ -242,12 +89,12 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         super.viewWillDisappear()
     }
     
-    func setupEntries(input deviceInput: AudioInterface.AudioDevice, output deviceOutput: AudioInterface.AudioDevice) {
+    func setupEntries(input deviceInput: AudioInterface.AudioDevice, output deviceOutput: OutputDevice) {
         // store input and output
         self.deviceInput = deviceInput
         self.deviceOutput = deviceOutput
         
-        // get input pairs
+        // get input channels
         let inputChannels: Int
         if 0 < deviceInput.buffersInput.count {
             inputChannels = Int(deviceInput.buffersInput[0].mNumberChannels)
@@ -256,13 +103,8 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
             inputChannels = 0
         }
         
-        let outputChannels: Int
-        if 0 < deviceOutput.buffersOutput.count {
-            outputChannels = Int(deviceOutput.buffersOutput[0].mNumberChannels)
-        }
-        else {
-            outputChannels = 0
-        }
+        // get output channels
+        let outputChannels = deviceOutput.outputChannels
         
         // for each pair, create an entry
         let numEntries = min(inputChannels, outputChannels)
@@ -271,7 +113,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         }
     }
     
-    @IBAction func toggle(sender: NSButton) {
+    @IBAction func toggle(_ sender: NSButton) {
         if isRunning {
             // tear down
             processor?.tearDown()
@@ -285,15 +127,20 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         else {
             // create process
             do {
-                processor = try Processor(deviceInput: deviceInput, deviceOutput: deviceOutput, entries: processorEntries)
+                switch deviceOutput! {
+                case .arduino(let port):
+                    processor = try ProcessorArduino(deviceInput: deviceInput, deviceOutput: port, entries: processorEntries)
+                case .audio(let interface):
+                    processor = try ProcessorAudio(deviceInput: deviceInput, deviceOutput: interface, entries: processorEntries)
+                }
             }
             catch {
                 // show an error message
                 let alert = NSAlert()
                 alert.messageText = "Unable to initialize audio"
                 alert.informativeText = "There was an error initializing the audio interfaces: \(error)."
-                alert.addButtonWithTitle("Ok")
-                alert.beginSheetModalForWindow(self.view.window!, completionHandler:nil)
+                alert.addButton(withTitle: "Ok")
+                alert.beginSheetModal(for: self.view.window!, completionHandler:nil)
                 return
             }
             
@@ -302,22 +149,18 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         }
     }
     
-    func numberOfRowsInTableView(tableView: NSTableView) -> Int {
+    func numberOfRows(in tableView: NSTableView) -> Int {
         let inputChannels: Int, outputChannels: Int
         
         if nil != deviceInput && 0 < deviceInput.buffersInput.count {
-            inputChannels = deviceInput.buffersInput.reduce(0) {
-                return $0 + Int($1.mNumberChannels)
-            }
+            inputChannels = Int(deviceInput.buffersInput[0].mNumberChannels)
         }
         else {
             inputChannels = 0
         }
         
-        if nil != deviceOutput && 0 < deviceOutput.buffersOutput.count {
-            outputChannels = deviceOutput.buffersOutput.reduce(0) {
-                return $0 + Int($1.mNumberChannels)
-            }
+        if nil != deviceOutput {
+            outputChannels = deviceOutput.outputChannels
         }
         else {
             outputChannels = 0
@@ -326,7 +169,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         return min(inputChannels, outputChannels)
     }
     
-    func tableView(tableView: NSTableView, objectValueForTableColumn tableColumn: NSTableColumn?, row: Int) -> AnyObject? {
+    func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
         guard let identifier = tableColumn?.identifier else { return nil }
         guard row < processorEntries.count else { return nil }
         
@@ -334,14 +177,14 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         case "ColumnInput", "ColumnOutput": return "Channel \(row + 1)"
         case "ColumnInLevel":
             if let p = processor {
-                return NSNumber(double: 100.0 * (p.getInputForChannel(row) ?? 0.0))
+                return NSNumber(value: 100.0 * (p.getInputForChannel(row) ?? 0.0))
             }
-            return NSNumber(double: 0.00)
+            return NSNumber(value: 0.00)
         case "ColumnOutLevel":
             if let p = processor {
-                return NSNumber(double: 100.0 * (p.getOutputForChannel(row) ?? 0.0))
+                return NSNumber(value: 100.0 * (p.getOutputForChannel(row) ?? 0.0))
             }
-            return NSNumber(double: 0.00)
+            return NSNumber(value: 0.00)
         case "ColumnNetwork": return nil == processorEntries[row].config ? "Not Selected" : processorEntries[row].network
         default: return nil
         }
@@ -356,10 +199,10 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         loadNetworkForRow(tableChannels.clickedRow)
     }
     
-    @IBAction func loadNetwork(sender: NSButton) {
+    @IBAction func loadNetwork(_ sender: NSButton) {
         if 0 > tableChannels.selectedRow { // no row selected...
             // find next row needing a network
-            for (i, p) in processorEntries.enumerate() {
+            for (i, p) in processorEntries.enumerated() {
                 if nil == p.config {
                     loadNetworkForRow(i)
                     break
@@ -372,7 +215,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         }
     }
     
-    func loadNetworkForRow(row: Int) {
+    func loadNetworkForRow(_ row: Int) {
         guard !isRunning else { return } // can not select when running
         guard row < processorEntries.count else { return }
         
@@ -390,7 +233,8 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
             
             // make sure ok was pressed
             if NSFileHandlingPanelOKButton == result {
-                if let url = panel.URL, let path = url.path {
+                if let url = panel.url {
+                    let path = url.path
                     do {
                         // load file
                         let config = try SyllableDetectorConfig(fromTextFile: path)
@@ -402,15 +246,15 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
                         }
                         
                         self.processorEntries[row].config = config
-                        self.processorEntries[row].network = url.lastPathComponent ?? "Unknown Network"
+                        self.processorEntries[row].network = url.lastPathComponent
                     }
                     catch {
                         // unable to load
                         let alert = NSAlert()
                         alert.messageText = "Unable to load"
                         alert.informativeText = "The text file could not be successfully loaded: \(error)."
-                        alert.addButtonWithTitle("Ok")
-                        alert.beginSheetModalForWindow(self.view.window!, completionHandler:nil)
+                        alert.addButton(withTitle: "Ok")
+                        alert.beginSheetModal(for: self.view.window!, completionHandler:nil)
                         
                         // clear selected
                         self.processorEntries[row].network = ""
@@ -424,16 +268,15 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         }
         
         // show
-        panel.beginSheetModalForWindow(self.view.window!, completionHandler: cb)
+        panel.beginSheetModal(for: self.view.window!, completionHandler: cb)
     }
     
-    func timerUpdateValues(timer: NSTimer!) {
+    func timerUpdateValues(_ timer: Timer!) {
         // create column indices
-        let indexes = NSMutableIndexSet(index: 1)
-        indexes.addIndex(4)
+        let indexes = IndexSet([1, 4])
         
         // reload data
-        tableChannels.reloadDataForRowIndexes(NSIndexSet(indexesInRange: NSRange(location: 0, length: processorEntries.count)), columnIndexes: indexes)
+        tableChannels.reloadData(forRowIndexes: IndexSet(integersIn: NSRange(location: 0, length: processorEntries.count).toRange() ?? 0..<0), columnIndexes: indexes)
     }
 }
 

@@ -11,18 +11,18 @@ import Foundation
 struct SyllableDetectorConfig
 {
     enum Scaling {
-        case Linear
-        case Log
-        case Db
+        case linear
+        case log
+        case db
         
         init?(fromName name: String) {
             switch name {
             case "linear":
-                self = .Linear
+                self = .linear
             case "log":
-                self = .Log
+                self = .log
             case "db":
-                self = .Db
+                self = .db
             default:
                 return nil
             }
@@ -39,7 +39,7 @@ struct SyllableDetectorConfig
     
     let spectrogramScaling: Scaling
     
-    let threshold: Double // eqv: trigger threshold
+    let thresholds: [Double] // eqv: trigger threshold
     
     let net: NeuralNet
 }
@@ -47,83 +47,85 @@ struct SyllableDetectorConfig
 // make parsable
 extension SyllableDetectorConfig
 {
-    enum ParseError: ErrorType {
-        case UnableToOpenPath(String)
-        case MissingValue(String)
-        case InvalidValue(String)
-        case MismatchedLength(String)
+    enum ParseError: Error {
+        case unableToOpenPath(String)
+        case missingValue(String)
+        case invalidValue(String)
+        case mismatchedLength(String)
     }
     
-    private static func parseString(nm: String, from data: [String: String]) throws -> String {
-        guard let v = data[nm] else { throw ParseError.MissingValue(nm) }
+    private static func parseString(_ nm: String, from data: [String: String]) throws -> String {
+        guard let v = data[nm] else { throw ParseError.missingValue(nm) }
         return v
     }
     
-    private static func parseDouble(nm: String, from data: [String: String]) throws -> Double {
-        guard let v = data[nm] else { throw ParseError.MissingValue(nm) }
-        guard let d = Double(v) else { throw ParseError.InvalidValue(nm) }
+    private static func parseDouble(_ nm: String, from data: [String: String]) throws -> Double {
+        guard let v = data[nm] else { throw ParseError.missingValue(nm) }
+        guard let d = Double(v) else { throw ParseError.invalidValue(nm) }
         return d
     }
     
-    private static func parseFloat(nm: String, from data: [String: String]) throws -> Float {
-        guard let v = data[nm] else { throw ParseError.MissingValue(nm) }
-        guard let f = Float(v) else { throw ParseError.InvalidValue(nm) }
+    private static func parseFloat(_ nm: String, from data: [String: String]) throws -> Float {
+        guard let v = data[nm] else { throw ParseError.missingValue(nm) }
+        guard let f = Float(v) else { throw ParseError.invalidValue(nm) }
         return f
     }
     
-    private static func parseInt(nm: String, from data: [String: String]) throws -> Int {
-        guard let v = data[nm] else { throw ParseError.MissingValue(nm) }
-        guard let i = Int(v) else { throw ParseError.InvalidValue(nm) }
+    private static func parseInt(_ nm: String, from data: [String: String]) throws -> Int {
+        guard let v = data[nm] else { throw ParseError.missingValue(nm) }
+        guard let i = Int(v) else { throw ParseError.invalidValue(nm) }
         return i
     }
     
-    private static func parseDoubleArray(nm: String, withCount cnt: Int, from data: [String: String]) throws -> [Double] {
-        guard let v = data[nm] else { throw ParseError.MissingValue(nm) }
+    private static func parseDoubleArray(_ nm: String, withCount cnt: Int? = nil, from data: [String: String]) throws -> [Double] {
+        guard let v = data[nm] else { throw ParseError.missingValue(nm) }
         
         // split into doubles
         let stringParts = v.splitAtCharacter(",").map { $0.trim() }
         let doubleParts = stringParts.flatMap(Double.init)
         
         // compare lengths to make sure all doubles were parsed
-        if stringParts.count != doubleParts.count { throw ParseError.InvalidValue(nm) }
+        if stringParts.count != doubleParts.count { throw ParseError.invalidValue(nm) }
         
         // check count
-        if doubleParts.count != cnt { throw ParseError.MismatchedLength(nm) }
+        if let desiredCnt = cnt {
+            if doubleParts.count != desiredCnt { throw ParseError.mismatchedLength(nm) }
+        }
         
         return doubleParts
     }
     
-    private static func parseFloatArray(nm: String, withCount cnt: Int, from data: [String: String]) throws -> [Float] {
-        guard let v = data[nm] else { throw ParseError.MissingValue(nm) }
+    private static func parseFloatArray(_ nm: String, withCount cnt: Int, from data: [String: String]) throws -> [Float] {
+        guard let v = data[nm] else { throw ParseError.missingValue(nm) }
         
         // split into doubles
         let stringParts = v.splitAtCharacter(",").map { $0.trim() }
         let floatParts = stringParts.flatMap(Float.init)
         
         // compare lengths to make sure all doubles were parsed
-        if stringParts.count != floatParts.count { throw ParseError.InvalidValue(nm) }
+        if stringParts.count != floatParts.count { throw ParseError.invalidValue(nm) }
         
         // check count
-        if floatParts.count != cnt { throw ParseError.MismatchedLength(nm) }
+        if floatParts.count != cnt { throw ParseError.mismatchedLength(nm) }
         
         return floatParts
     }
     
-    private static func parseMapMinMax(nm: String, withCount cnt: Int, from data: [String: String]) throws -> MapMinMax {
+    private static func parseMapMinMax(_ nm: String, withCount cnt: Int, from data: [String: String]) throws -> MapMinMax {
         let xOffsets = try SyllableDetectorConfig.parseFloatArray("\(nm).xOffsets", withCount: cnt, from: data)
         let gains = try SyllableDetectorConfig.parseFloatArray("\(nm).gains", withCount: cnt, from: data)
         let yMin = try SyllableDetectorConfig.parseFloat("\(nm).yMin", from: data)
         return MapMinMax(xOffsets: xOffsets, gains: gains, yMin: yMin)
     }
     
-    private static func parseMapStd(nm: String, withCount cnt: Int, from data: [String: String]) throws -> MapStd {
+    private static func parseMapStd(_ nm: String, withCount cnt: Int, from data: [String: String]) throws -> MapStd {
         let xOffsets = try SyllableDetectorConfig.parseFloatArray("\(nm).xOffsets", withCount: cnt, from: data)
         let gains = try SyllableDetectorConfig.parseFloatArray("\(nm).gains", withCount: cnt, from: data)
         let yMean = try SyllableDetectorConfig.parseFloat("\(nm).yMean", from: data)
         return MapStd(xOffsets: xOffsets, gains: gains, yMean: yMean)
     }
     
-    private static func parseInputProcessingFunction(nm: String, withCount cnt: Int, from data: [String: String]) throws -> InputProcessingFunction {
+    private static func parseInputProcessingFunction(_ nm: String, withCount cnt: Int, from data: [String: String]) throws -> InputProcessingFunction {
         // get processing function
         // TODO: add a default processing function that passes through values
         let functionName = try SyllableDetectorConfig.parseString("\(nm).function", from: data)
@@ -145,11 +147,11 @@ extension SyllableDetectorConfig
             return NormalizeStd()
             
         default:
-            throw ParseError.InvalidValue("\(nm).function")
+            throw ParseError.invalidValue("\(nm).function")
         }
     }
     
-    private static func parseOutputProcessingFunction(nm: String, withCount cnt: Int, from data: [String: String]) throws -> OutputProcessingFunction {
+    private static func parseOutputProcessingFunction(_ nm: String, withCount cnt: Int, from data: [String: String]) throws -> OutputProcessingFunction {
         // get processing function
         let functionName = try SyllableDetectorConfig.parseString("\(nm).function", from: data)
         
@@ -161,14 +163,14 @@ extension SyllableDetectorConfig
             return try SyllableDetectorConfig.parseMapStd(nm, withCount: cnt, from: data)
             
         default:
-            throw ParseError.InvalidValue("\(nm).function")
+            throw ParseError.invalidValue("\(nm).function")
         }
     }
     
     init(fromTextFile path: String) throws {
         // get stream
         guard let stream = StreamReader(path: path) else {
-            throw ParseError.UnableToOpenPath(path)
+            throw ParseError.unableToOpenPath(path)
         }
         
         // automatically close
@@ -195,7 +197,7 @@ extension SyllableDetectorConfig
         // fourier length: int
         fourierLength = try SyllableDetectorConfig.parseInt("fourierLength", from: data)
         if !fourierLength.isPowerOfTwo() {
-            throw SyllableDetectorConfig.ParseError.InvalidValue("fourierLength")
+            throw SyllableDetectorConfig.ParseError.invalidValue("fourierLength")
         }
         
         // window length: int, defaults to fourierLength
@@ -211,21 +213,27 @@ extension SyllableDetectorConfig
         
         // frequency range: double, double
         let potentialFreqRange = try SyllableDetectorConfig.parseDoubleArray("freqRange", withCount: 2, from: data)
-        if 2 != potentialFreqRange.count { throw ParseError.MismatchedLength("freqRange") }
+        if 2 != potentialFreqRange.count { throw ParseError.mismatchedLength("freqRange") }
         freqRange = (potentialFreqRange[0], potentialFreqRange[1])
         
         // time range: int
         timeRange = try SyllableDetectorConfig.parseInt("timeRange", from: data)
         
         // threshold: double
-        threshold = try SyllableDetectorConfig.parseDouble("threshold", from: data)
+        do {
+            thresholds = try SyllableDetectorConfig.parseDoubleArray("thresholds", from: data)
+        }
+        catch {
+            // backwards compatibility
+            thresholds = try SyllableDetectorConfig.parseDoubleArray("threshold", from: data)
+        }
         
         // read scaling
         if let scaling = Scaling(fromName: try SyllableDetectorConfig.parseString("scaling", from: data)) {
             spectrogramScaling = scaling
         }
         else {
-            throw ParseError.InvalidValue("scaling")
+            throw ParseError.invalidValue("scaling")
         }
         
         // get layers
@@ -244,7 +252,7 @@ extension SyllableDetectorConfig
             case "LogSig": transferFunction = LogSig()
             case "PureLin": transferFunction = PureLin()
             case "SatLin": transferFunction = SatLin()
-            default: throw ParseError.InvalidValue("layer\(i).transferFunction")
+            default: throw ParseError.invalidValue("layer\(i).transferFunction")
             }
             
             return NeuralNetLayer(inputs: inputs, weights: weights, biases: biases, outputs: outputs, transferFunction: transferFunction)

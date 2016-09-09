@@ -1,0 +1,6 @@
+[submodule "Frameworks/CommandLine"]
+	path = Frameworks/CommandLine
+	url = https://github.com/jatoben/CommandLine.git
+[submodule "Frameworks/ORSSerialPort"]
+	path = Frameworks/ORSSerialPort
+	url = https://github.com/armadsen/ORSSerialPort.git

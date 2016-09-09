@@ -23,14 +23,16 @@ class ViewControllerSimulator: NSViewController {
         super.viewDidLoad()
         
         // reload devices
-        buttonRun.enabled = false
+        buttonRun.isEnabled = false
     }
     
     override func viewDidDisappear() {
         super.viewDidDisappear()
+        
+        Time.printAll()
     }
     
-    @IBAction func loadNetwork(sender: NSButton) {
+    @IBAction func loadNetwork(_ sender: NSButton) {
         let panel = NSOpenPanel()
         panel.title = "Select Network Definition"
         panel.allowedFileTypes = ["txt"]
@@ -41,34 +43,35 @@ class ViewControllerSimulator: NSViewController {
             (result: Int) -> Void in
             // make sure ok was pressed
             if NSFileHandlingPanelOKButton == result {
-                if let url = panel.URL, let path = url.path {
+                if let url = panel.url {
+                    let path = url.path
                     do {
                         // load file
                         let _ = try SyllableDetectorConfig(fromTextFile: path)
                         
                         // confirm loaded
-                        self.pathNetwork.URL = url
+                        self.pathNetwork.url = url
                         
                         // update buttons
-                        self.buttonRun.enabled = (self.pathNetwork.URL != nil && self.pathAudio.URL != nil)
+                        self.buttonRun.isEnabled = (self.pathNetwork.url != nil && self.pathAudio.url != nil)
                     }
                     catch {
                         // unable to load
                         let alert = NSAlert()
                         alert.messageText = "Unable to load"
                         alert.informativeText = "The text file could not be successfully loaded: \(error)."
-                        alert.addButtonWithTitle("Ok")
-                        alert.beginSheetModalForWindow(self.view.window!, completionHandler:nil)
+                        alert.addButton(withTitle: "Ok")
+                        alert.beginSheetModal(for: self.view.window!, completionHandler:nil)
                     }
                 }
             }
         }
         
         // show
-        panel.beginSheetModalForWindow(self.view.window!, completionHandler: cb)
+        panel.beginSheetModal(for: self.view.window!, completionHandler: cb)
     }
     
-    @IBAction func loadAudio(sender: NSButton) {
+    @IBAction func loadAudio(_ sender: NSButton) {
         let panel = NSOpenPanel()
         panel.allowedFileTypes = [AVFileTypeWAVE, AVFileTypeAppleM4A]
         panel.title = "Select Audio File"
@@ -78,30 +81,30 @@ class ViewControllerSimulator: NSViewController {
             (result: Int) -> Void in
             // make sure ok was pressed
             if NSFileHandlingPanelOKButton == result {
-                if let url = panel.URL {
+                if let url = panel.url {
                     // store audio path
-                    self.pathAudio.URL = url
+                    self.pathAudio.url = url
                         
                     // update buttons
-                    self.buttonRun.enabled = (self.pathNetwork.URL != nil && self.pathAudio.URL != nil)
+                    self.buttonRun.isEnabled = (self.pathNetwork.url != nil && self.pathAudio.url != nil)
                 }
             }
         }
         
         // show
-        panel.beginSheetModalForWindow(self.view.window!, completionHandler: cb)
+        panel.beginSheetModal(for: self.view.window!, completionHandler: cb)
     }
     
-    @IBAction func run(sender: NSButton) {
+    @IBAction func run(_ sender: NSButton) {
         // confirm there are URLs
-        guard let urlNetwork = pathNetwork.URL, let urlAudio = pathAudio.URL else {
+        guard let urlNetwork = pathNetwork.url, let urlAudio = pathAudio.url else {
             return
         }
         
         // diable all
-        buttonRun.enabled = false
-        buttonLoadAudio.enabled = false
-        buttonLoadNetwork.enabled = false
+        buttonRun.isEnabled = false
+        buttonLoadAudio.isEnabled = false
+        buttonLoadNetwork.isEnabled = false
         
         let panel = NSSavePanel()
         panel.allowedFileTypes = [AVFileTypeWAVE]
@@ -113,28 +116,28 @@ class ViewControllerSimulator: NSViewController {
             (result: Int) -> Void in
             // make sure ok was pressed
             if NSFileHandlingPanelOKButton == result {
-                if let url = panel.URL {
+                if let url = panel.url {
                     // simulate
                     self.simulateNetwork(urlNetwork, withAudio: urlAudio, writeTo: url)
                 }
                 
                 // enable all
-                self.buttonRun.enabled = true
-                self.buttonLoadAudio.enabled = true
-                self.buttonLoadNetwork.enabled = true
+                self.buttonRun.isEnabled = true
+                self.buttonLoadAudio.isEnabled = true
+                self.buttonLoadNetwork.isEnabled = true
             }
         }
         
         // show
-        panel.beginSheetModalForWindow(self.view.window!, completionHandler: cb)
+        panel.beginSheetModal(for: self.view.window!, completionHandler: cb)
     }
     
-    func simulateNetwork(urlNetwork: NSURL, withAudio urlAudio: NSURL, writeTo urlOutput: NSURL) {
+    func simulateNetwork(_ urlNetwork: URL, withAudio urlAudio: URL, writeTo urlOutput: URL) {
         // convert to path
-        guard let pathNetwork = urlNetwork.path else { return }
+        let pathNetwork = urlNetwork.path
         
         // 1. LOAD AUDIO INPUT
-        let assetRead = AVAsset(URL: urlAudio)
+        let assetRead = AVAsset(url: urlAudio)
         let avReader: AVAssetReader
         do {
             avReader = try AVAssetReader(asset: assetRead)
@@ -145,7 +148,7 @@ class ViewControllerSimulator: NSViewController {
         }
         
         // get  number of audio tracks
-        let tracksAudio = assetRead.tracksWithMediaType(AVMediaTypeAudio)
+        let tracksAudio = assetRead.tracks(withMediaType: AVMediaTypeAudio)
         guard 0 < tracksAudio.count else {
             DLog("no audio tracks")
             return
@@ -171,8 +174,8 @@ class ViewControllerSimulator: NSViewController {
         // 3. CONFIGURE READER
         // track reader
         let avReaderOutput = AVAssetReaderTrackOutput(track: tracksAudio[0], outputSettings: sd.audioSettings)
-        if avReader.canAddOutput(avReaderOutput) {
-            avReader.addOutput(avReaderOutput)
+        if avReader.canAdd(avReaderOutput) {
+            avReader.add(avReaderOutput)
         }
         else {
             DLog("Unable to add reader output.")
@@ -183,7 +186,7 @@ class ViewControllerSimulator: NSViewController {
         // create asset and asset writer
         let avWriter: AVAssetWriter
         do {
-            avWriter = try AVAssetWriter(URL: urlOutput, fileType: AVFileTypeWAVE)
+            avWriter = try AVAssetWriter(url: urlOutput, fileType: AVFileTypeWAVE)
         }
         catch {
             DLog("\(error)")
@@ -197,22 +200,25 @@ class ViewControllerSimulator: NSViewController {
         monoChannelLayout.mNumberChannelDescriptions = 0
         
         // audio settings
-        let compressionAudioSettings: [String: AnyObject] = [
-            AVFormatIDKey: NSNumber(unsignedInt: kAudioFormatLinearPCM),
-            AVLinearPCMBitDepthKey: NSNumber(int: 16),
-            AVLinearPCMIsFloatKey: false,
-            AVLinearPCMIsBigEndianKey: false,
-            AVLinearPCMIsNonInterleaved: false,
-            AVSampleRateKey: NSNumber(double: sd.config.samplingRate),
-            AVChannelLayoutKey: NSData(bytes: &monoChannelLayout, length: sizeof(AudioChannelLayout)),
-            AVNumberOfChannelsKey: NSNumber(unsignedInteger: 1)
-        ]
+        var compressionAudioSettings: [String: AnyObject] = [:]
+        withUnsafePointer(to: &monoChannelLayout) {
+            compressionAudioSettings = [
+                AVFormatIDKey: NSNumber(value: kAudioFormatLinearPCM),
+                AVLinearPCMBitDepthKey: NSNumber(value: 16),
+                AVLinearPCMIsFloatKey: false as AnyObject,
+                AVLinearPCMIsBigEndianKey: false as AnyObject,
+                AVLinearPCMIsNonInterleaved: false as AnyObject,
+                AVSampleRateKey: NSNumber(value: sd.config.samplingRate),
+                AVChannelLayoutKey: Data(bytes: UnsafeRawPointer($0), count: MemoryLayout<AudioChannelLayout>.size) as AnyObject,
+                AVNumberOfChannelsKey: NSNumber(value: 1)
+            ]
+        }
         
         // make writer input
         let avWriterInput = AVAssetWriterInput(mediaType: AVMediaTypeAudio, outputSettings: compressionAudioSettings)
         avWriterInput.expectsMediaDataInRealTime = true
-        if avWriter.canAddInput(avWriterInput) {
-            avWriter.addInput(avWriterInput)
+        if avWriter.canAdd(avWriterInput) {
+            avWriter.add(avWriterInput)
         }
         else {
             DLog("Can not add input to writer.")
@@ -231,7 +237,7 @@ class ViewControllerSimulator: NSViewController {
             return
         }
         
-        avWriter.startSessionAtSourceTime(kCMTimeZero)
+        avWriter.startSession(atSourceTime: kCMTimeZero)
         
         // DESCRIBE OUTPUT FORMAT
         
@@ -247,21 +253,21 @@ class ViewControllerSimulator: NSViewController {
             nextCount = nextCount - sd.config.windowOverlap // since gap is applied even to the first data set
         }
         var samplePosition: Int64 = 0
-        let gcdGroup = dispatch_group_create()
-        let gcdQueue = dispatch_queue_create("Encode", DISPATCH_QUEUE_SERIAL)
-        avWriterInput.requestMediaDataWhenReadyOnQueue(gcdQueue) {
+        let gcdGroup = DispatchGroup()
+        let gcdQueue = DispatchQueue(label: "Encode")
+        avWriterInput.requestMediaDataWhenReady(on: gcdQueue) {
             // probably not needed
-            dispatch_group_enter(gcdGroup)
+            gcdGroup.enter()
             defer {
-                dispatch_group_leave(gcdGroup)
+                gcdGroup.leave()
             }
             
             var completedOrFailed = false
             var status: OSStatus
             
-            while avWriterInput.readyForMoreMediaData && !completedOrFailed {
+            while avWriterInput.isReadyForMoreMediaData && !completedOrFailed {
                 // check status
-                guard avReader.status == AVAssetReaderStatus.Reading else {
+                guard avReader.status == AVAssetReaderStatus.reading else {
                     DLog("STATUS changed to \(avReader.status)")
                     completedOrFailed = true
                     break
@@ -282,22 +288,38 @@ class ViewControllerSimulator: NSViewController {
                 DLog("READ: \(numSamples) samples")
                 
                 // run song detector
+                Time.startWithName("ingest")
                 sd.processSampleBuffer(sampleBuffer)
+                Time.stopAndSaveWithName("ingest")
                 
                 // make floats
                 // released by buffer block
-                let newSamples = UnsafeMutablePointer<Float>.alloc(numSamples)
+                let newSamples = UnsafeMutablePointer<Float>.allocate(capacity: numSamples)
                 
                 // encode previous values
                 var i = 0
-                for ; 0 < nextCount && i < numSamples; ++i, --nextCount {
+                while 0 < nextCount && i < numSamples {
                     newSamples[i] = nextValue
+                    i += 1
+                    nextCount -= 1
                 }
                 
                 // still more to write? don't process any
-                while 0 == nextCount && sd.processNewValue() {
+                while 0 == nextCount {
+                    let t = Time()
+                    t.start()
+                    let ret = sd.processNewValue()
+                    t.stop()
+                    if ret {
+                        Time.saveWithName("process", andValue: t.nanoseconds)
+                    }
+                    else {
+                        Time.saveWithName("skip", andValue: t.nanoseconds)
+                        break
+                    }
+                    
                     // value to write
-                    var v = sd.lastOutput
+                    var v = sd.lastOutputs[0] / Float(sd.config.thresholds[0])
                     if v > 1.0 {
                         v = 1.0
                     }
@@ -308,8 +330,10 @@ class ViewControllerSimulator: NSViewController {
                     // length
                     var l = sd.config.windowLength - sd.config.windowOverlap
                     
-                    for ; 0 < l && i < numSamples; ++i, --l {
+                    while 0 < l && i < numSamples {
                         newSamples[i] = v
+                        i += 1
+                        l -= 1
                     }
                     
                     if 0 < l {
@@ -321,7 +345,7 @@ class ViewControllerSimulator: NSViewController {
                 
                 // make block buffer
                 var newBlockBuffer: CMBlockBuffer? = nil
-                status = CMBlockBufferCreateWithMemoryBlock(nil, UnsafeMutablePointer<Void>(newSamples), numSamples * sizeof(Float), nil, nil, 0, numSamples * sizeof(Float), 0, &newBlockBuffer)
+                status = CMBlockBufferCreateWithMemoryBlock(nil, UnsafeMutableRawPointer(newSamples), numSamples * MemoryLayout<Float>.size, nil, nil, 0, numSamples * MemoryLayout<Float>.size, 0, &newBlockBuffer)
                 assert(status == noErr)
                 
                 // timestamp for output
@@ -334,7 +358,7 @@ class ViewControllerSimulator: NSViewController {
                 assert(status == noErr)
                 
                 // append sample buffer
-                if !avWriterInput.appendSampleBuffer(newSampleBuffer!) {
+                if !avWriterInput.append(newSampleBuffer!) {
                     DLog("ERROR writing \(avWriter.status) \(avWriter.error)")
                     avReader.cancelReading() // cancel reading
                     completedOrFailed = true
@@ -343,7 +367,7 @@ class ViewControllerSimulator: NSViewController {
             
             if completedOrFailed {
                 avWriterInput.markAsFinished()
-                avWriter.finishWritingWithCompletionHandler {
+                avWriter.finishWriting {
                     DLog("done!")
                 }
             }

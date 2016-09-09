@@ -10,7 +10,7 @@ import Foundation
 import Accelerate
 
 protocol Resampler {
-    func resampleVector(data: UnsafePointer<Float>, ofLength numSamples: Int) -> [Float]
+    func resampleVector(_ data: UnsafePointer<Float>, ofLength numSamples: Int) -> [Float]
 //    func resampleVector(data: UnsafePointer<Float>, ofLength numSamples: Int, toOutput: UnsafeMutablePointer<Float>) -> Int
 }
 
@@ -32,7 +32,7 @@ class ResamplerLinear: Resampler {
         self.step = Float(samplingRateIn / samplingRateOut)
     }
     
-    func resampleVector(data: UnsafePointer<Float>, ofLength numSamplesIn: Int) -> [Float] {
+    func resampleVector(_ data: UnsafePointer<Float>, ofLength numSamplesIn: Int) -> [Float] {
         // need to interpolate across last set of samples
         let interpolateAcross = (offset < 0)
         
@@ -40,14 +40,14 @@ class ResamplerLinear: Resampler {
         let numSamplesOut = Int((Float(numSamplesIn) - offset) / step)
         
         // return list
-        var ret = [Float](count: numSamplesOut, repeatedValue: 0.0)
+        var ret = [Float](repeating: 0.0, count: numSamplesOut)
         
         // indices
-        let indices = UnsafeMutablePointer<Float>.alloc(numSamplesOut)
+        let indices = UnsafeMutablePointer<Float>.allocate(capacity: numSamplesOut)
         var t_offset = offset, t_step = step
         defer {
-            indices.destroy()
-            indices.dealloc(numSamplesOut)
+            indices.deinitialize()
+            indices.deallocate(capacity: numSamplesOut)
         }
         vDSP_vramp(&t_offset, &t_step, indices, 1, vDSP_Length(numSamplesOut))
         
@@ -69,8 +69,9 @@ class ResamplerLinear: Resampler {
         return ret
     }
     
-    func resampleArray(var arr: [Float]) -> [Float] {
+    func resampleArray(_ arr: [Float]) -> [Float] {
         // used for testing
+        var arr = arr
         return self.resampleVector(&arr, ofLength: arr.count)
     }
     

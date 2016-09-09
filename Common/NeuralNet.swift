@@ -11,40 +11,40 @@ import Accelerate
 
 // mapping function protocol
 protocol InputProcessingFunction {
-    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int)
-    func applyAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>)
+    func applyInPlace(_ values: UnsafeMutablePointer<Float>, count: Int)
+    func applyAndCopy(_ values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>)
 }
 
 protocol OutputProcessingFunction {
-    func reverseInPlace(values: UnsafeMutablePointer<Float>, count: Int)
-    func reverseAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>)
+    func reverseInPlace(_ values: UnsafeMutablePointer<Float>, count: Int)
+    func reverseAndCopy(_ values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>)
 }
 
 class PassThrough: InputProcessingFunction, OutputProcessingFunction {
-    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+    func applyInPlace(_ values: UnsafeMutablePointer<Float>, count: Int) {
         // do nothing
     }
     
-    func applyAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
-        memcpy(destination, values, count * sizeof(Float))
+    func applyAndCopy(_ values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
+        memcpy(destination, values, count * MemoryLayout<Float>.size)
     }
     
-    func reverseInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+    func reverseInPlace(_ values: UnsafeMutablePointer<Float>, count: Int) {
         // do nothing
     }
     
-    func reverseAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
-        memcpy(destination, values, count * sizeof(Float))
+    func reverseAndCopy(_ values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
+        memcpy(destination, values, count * MemoryLayout<Float>.size)
     }
 }
 
 class L2Normalize: InputProcessingFunction {
-    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+    func applyInPlace(_ values: UnsafeMutablePointer<Float>, count: Int) {
         // vDSP functions in the copy version support in place operations
         applyAndCopy(values, count: count, to: values)
     }
     
-    func applyAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
+    func applyAndCopy(_ values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
         let len = vDSP_Length(count)
         
         // sum of squares
@@ -61,12 +61,12 @@ class L2Normalize: InputProcessingFunction {
 }
 
 class Normalize: InputProcessingFunction {
-    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+    func applyInPlace(_ values: UnsafeMutablePointer<Float>, count: Int) {
         // vDSP functions in the copy version support in place operations
         applyAndCopy(values, count: count, to: values)
     }
     
-    func applyAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
+    func applyAndCopy(_ values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
         let len = vDSP_Length(count)
         
         // max and min values
@@ -97,12 +97,12 @@ class Normalize: InputProcessingFunction {
 }
 
 class NormalizeStd: InputProcessingFunction {
-    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+    func applyInPlace(_ values: UnsafeMutablePointer<Float>, count: Int) {
         // vDSP functions in the copy version support in place operations
         applyAndCopy(values, count: count, to: values)
     }
     
-    func applyAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
+    func applyAndCopy(_ values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
         var mean: Float = 0.0, stddev: Float = 0.0
         vDSP_normalize(values, 1, destination, 1, &mean, &stddev, vDSP_Length(count))
     }
@@ -119,23 +119,23 @@ class MapMinMax: InputProcessingFunction, OutputProcessingFunction {
         self.yMin = yMin
     }
     
-    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+    func applyInPlace(_ values: UnsafeMutablePointer<Float>, count: Int) {
         // vDSP functions in the copy version support in place operations
         applyAndCopy(values, count: count, to: values)
     }
     
-    func applyAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
+    func applyAndCopy(_ values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
         // (values - xOffsets) * gain + yMin
         vDSP_vsbm(values, 1, &xOffsets, 1, &gains, 1, destination, 1, vDSP_Length(count))
         vDSP_vsadd(destination, 1, &yMin, destination, 1, vDSP_Length(count))
     }
     
-    func reverseInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+    func reverseInPlace(_ values: UnsafeMutablePointer<Float>, count: Int) {
         // vDSP functions in the copy version support in place operations
         reverseAndCopy(values, count: count, to: values)
     }
     
-    func reverseAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
+    func reverseAndCopy(_ values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
         var negYMin = 0 - yMin
         vDSP_vsadd(values, 1, &negYMin, destination, 1, vDSP_Length(count))
         vDSP_vdiv(&gains, 1, destination, 1, destination, 1, vDSP_Length(count))
@@ -154,12 +154,12 @@ class MapStd: InputProcessingFunction, OutputProcessingFunction {
         self.yMean = yMean
     }
     
-    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+    func applyInPlace(_ values: UnsafeMutablePointer<Float>, count: Int) {
         // vDSP functions in the copy version support in place operations
         applyAndCopy(values, count: count, to: values)
     }
     
-    func applyAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
+    func applyAndCopy(_ values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
         // (values - xOffsets) * gain + yMean
         vDSP_vsbm(values, 1, &xOffsets, 1, &gains, 1, destination, 1, vDSP_Length(count))
         
@@ -168,12 +168,12 @@ class MapStd: InputProcessingFunction, OutputProcessingFunction {
         }
     }
     
-    func reverseInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+    func reverseInPlace(_ values: UnsafeMutablePointer<Float>, count: Int) {
         // vDSP functions in the copy version support in place operations
         reverseAndCopy(values, count: count, to: values)
     }
     
-    func reverseAndCopy(values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
+    func reverseAndCopy(_ values: UnsafePointer<Float>, count: Int, to destination: UnsafeMutablePointer<Float>) {
         var negYMean = 0 - yMean
         vDSP_vsadd(values, 1, &negYMean, destination, 1, vDSP_Length(count))
         vDSP_vdiv(&gains, 1, destination, 1, destination, 1, vDSP_Length(count))
@@ -183,18 +183,18 @@ class MapStd: InputProcessingFunction, OutputProcessingFunction {
 
 // transfer function protocol
 protocol TransferFunction {
-    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int)
+    func applyInPlace(_ values: UnsafeMutablePointer<Float>, count: Int)
 }
 
 struct TanSig: TransferFunction {
-    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+    func applyInPlace(_ values: UnsafeMutablePointer<Float>, count: Int) {
         var c = Int32(count)
         vvtanhf(values, values, &c)
     }
 }
 
 struct LogSig: TransferFunction {
-    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+    func applyInPlace(_ values: UnsafeMutablePointer<Float>, count: Int) {
         let len = vDSP_Length(count)
         
         // invert sign
@@ -215,13 +215,13 @@ struct LogSig: TransferFunction {
 }
 
 struct PureLin: TransferFunction {
-    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+    func applyInPlace(_ values: UnsafeMutablePointer<Float>, count: Int) {
         // dp nothing
     }
 }
 
 struct SatLin: TransferFunction {
-    func applyInPlace(values: UnsafeMutablePointer<Float>, count: Int) {
+    func applyInPlace(_ values: UnsafeMutablePointer<Float>, count: Int) {
         var zero: Float = 0.0, one: Float = 1.0
         vDSP_vclip(values, 1, &zero, &one, values, 1, vDSP_Length(count))
     }
@@ -245,7 +245,7 @@ class NeuralNet
             fatalError("Neural network must have 1 or more layers.")
         }
         
-        for (i, l) in layers.enumerate() {
+        for (i, l) in layers.enumerated() {
             if 0 < i {
                 if layers[i - 1].outputs != l.inputs {
                     fatalError("Number of inputs for layer \(i) does not match previous outputs.")
@@ -272,22 +272,31 @@ class NeuralNet
         }
         
         // memory for input layer
-        bufferInput = UnsafeMutablePointer<Float>.alloc(inputs)
+        bufferInput = UnsafeMutablePointer<Float>.allocate(capacity: inputs)
     }
     
     deinit {
         // free the window
-        bufferInput.destroy()
-        bufferInput.dealloc(inputs)
+        bufferInput.deinitialize()
+        bufferInput.deallocate(capacity: inputs)
     }
     
-    func apply(input: UnsafePointer<Float>) -> [Float] {
+    func test(_ val: Float) {
+        var inp = [Float](repeating: val, count: inputs)
+        withUnsafePointer(to: &inp[0]) {
+            DLog("\($0.pointee)")
+            let out = self.apply($0)
+            print("\(out)")
+        }
+    }
+    
+    func apply(_ input: UnsafePointer<Float>) -> [Float] {
         // pointer to current buffer
         var currentBuffer: UnsafeMutablePointer<Float> = bufferInput
-        var curOutput = [Float](count: outputs, repeatedValue: 0.0)
+        var curOutput = [Float](repeating: 0.0, count: outputs)
 
         // create input
-        for (k, ip) in inputProcessing.enumerate() {
+        for (k, ip) in inputProcessing.enumerated() {
             if k == 0 {
                 ip.applyAndCopy(input, count: inputs, to: currentBuffer)
             }
@@ -303,7 +312,7 @@ class NeuralNet
         }
         
         // create output
-        for (k, op) in outputProcessing.enumerate() {
+        for (k, op) in outputProcessing.enumerated() {
             if k == 0 {
                 op.reverseAndCopy(currentBuffer, count: outputs, to: &curOutput)
             }
@@ -344,16 +353,16 @@ class NeuralNetLayer
         self.transferFunction = transferFunction
         
         // memory for intermediate values and output
-        bufferIntermediate = UnsafeMutablePointer<Float>.alloc(outputs)
+        bufferIntermediate = UnsafeMutablePointer<Float>.allocate(capacity: outputs)
     }
     
     deinit {
         // free the window
-        bufferIntermediate.destroy()
-        bufferIntermediate.dealloc(outputs)
+        bufferIntermediate.deinitialize()
+        bufferIntermediate.deallocate(capacity: outputs)
     }
     
-    func apply(input: UnsafeMutablePointer<Float>) -> UnsafeMutablePointer<Float> {
+    func apply(_ input: UnsafeMutablePointer<Float>) -> UnsafeMutablePointer<Float> {
         // transform inputs
         vDSP_mmul(&weights, 1, input, 1, bufferIntermediate, 1, vDSP_Length(outputs), 1, vDSP_Length(inputs))
         
