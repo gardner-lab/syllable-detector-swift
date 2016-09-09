@@ -107,14 +107,14 @@ protocol ArduinoIODelegate: class {
 class DelimitedSerialPacketDescriptor: ORSSerialPacketDescriptor {
     var delimiter: Data?
     
-    convenience init(delimiter: Data, maximumPacketLength maxPacketLength: UInt, userInfo: AnyObject?, responseEvaluator: ORSSerialPacketEvaluator) {
+    convenience init(delimiter: Data, maximumPacketLength maxPacketLength: UInt, userInfo: AnyObject?, responseEvaluator: @escaping ORSSerialPacketEvaluator) {
         self.init(maximumPacketLength: maxPacketLength, userInfo: userInfo, responseEvaluator: responseEvaluator)
         
         // set delimiter
         self.delimiter = delimiter
     }
     
-    convenience init(delimiterString: String, maximumPacketLength maxPacketLength: UInt, userInfo: AnyObject?, responseEvaluator: ORSSerialPacketEvaluator) {
+    convenience init(delimiterString: String, maximumPacketLength maxPacketLength: UInt, userInfo: AnyObject?, responseEvaluator: @escaping ORSSerialPacketEvaluator) {
         self.init(maximumPacketLength: maxPacketLength, userInfo: userInfo, responseEvaluator: responseEvaluator)
         
         // set delimiter
