@@ -146,7 +146,7 @@ class DelimitedSerialPacketDescriptor: ORSSerialPacketDescriptor {
                 
                 // check for proceeding delimiter
                 // (could be more lenient and just check for the end of the delimiter)
-                let windowDel = buffer.subdata(in: (buffer.count - i - delimiter.count)..<delimiter.count)
+                let windowDel = buffer.subdata(in: (buffer.count - i - delimiter.count)..<(buffer.count - i))
                 
                 // does not match? continue
                 if windowDel != delimiter {
@@ -155,7 +155,7 @@ class DelimitedSerialPacketDescriptor: ORSSerialPacketDescriptor {
             }
             
             // make window
-            let window = buffer.subdata(in: (buffer.count - i)..<i)
+            let window = buffer.subdata(in: (buffer.count - i)..<buffer.count)
             if dataIsValidPacket(window) {
                 return window
             }
@@ -180,8 +180,8 @@ class DelimitedSerialPacketDescriptor: ORSSerialPacketDescriptor {
         }
         
         // ensure buffer ends with delimiter
-        let windowFinalDel = buffer.subdata(in: (buffer.count - delimiter.count)..<delimiter.count)
-        if !windowFinalDel.elementsEqual(delimiter) {
+        let windowFinalDel = buffer.subdata(in: (buffer.count - delimiter.count)..<buffer.count)
+        if windowFinalDel != delimiter {
             return nil
         }
         
