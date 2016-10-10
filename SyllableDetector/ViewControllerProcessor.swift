@@ -127,12 +127,16 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         else {
             // create process
             do {
+                // initialize processor
                 switch deviceOutput! {
                 case .arduino(let port):
                     processor = try ProcessorArduino(deviceInput: deviceInput, deviceOutput: port, entries: processorEntries)
                 case .audio(let interface):
                     processor = try ProcessorAudio(deviceInput: deviceInput, deviceOutput: interface, entries: processorEntries)
                 }
+                
+                // setup
+                try processor!.setUp()
             }
             catch {
                 // show an error message
@@ -241,7 +245,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
                         
                         // check sampling rate
                         if (1 < abs(config.samplingRate - self.deviceInput.sampleRateInput)) {
-                            DLog("Mismatched sampling rates. Expecting: \(config.samplingRate). Device: \(self.deviceInput.sampleRateInput).")
+                            print("Mismatched sampling rates. Expecting: \(config.samplingRate). Device: \(self.deviceInput.sampleRateInput).")
                             self.processorEntries[row].resampler = ResamplerLinear(fromRate: self.deviceInput.sampleRateInput, toRate: config.samplingRate)
                         }
                         

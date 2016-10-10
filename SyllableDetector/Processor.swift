@@ -289,5 +289,7 @@ final class ProcessorArduino: ProcessorBase {
                 }
             }
         }
+        
+        super.prepareOutputFor(index: index, seenSyllable: seen)
     }
 }
