@@ -69,7 +69,7 @@ class TrackDetector
             
             // look for detection
             var hasDetection = false
-            for (i, d) in detector.lastOutputs.enumerate() {
+            for (i, d) in detector.lastOutputs.enumerated() {
                 if Double(d) >= detector.config.thresholds[i] {
                     hasDetection = true
                     break

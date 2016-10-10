@@ -8,22 +8,14 @@
 
 import Foundation
 
-extension OutputStreamType {
+extension TextOutputStream {
     mutating func writeLine(string: String) {
         self.write("\(string)\n")
     }
 }
 
-class StandardOutputStream: OutputStreamType {
-    func write(string: String) {
-        let stdout = NSFileHandle.fileHandleWithStandardOutput()
-        stdout.writeData(string.dataUsingEncoding(NSUTF8StringEncoding)!)
-    }
-}
-
-class StandardErrorOutputStream: OutputStreamType {
-    func write(string: String) {
-        let stderr = NSFileHandle.fileHandleWithStandardError()
-        stderr.writeData(string.dataUsingEncoding(NSUTF8StringEncoding)!)
+extension FileHandle {
+    func writeLine(_ string: String) {
+        write("\(string)\n".data(using: String.Encoding.utf8)!)
     }
 }

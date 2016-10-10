@@ -11,7 +11,7 @@ import AVFoundation
 
 // UTILITY
 
-private var stderr = StandardErrorOutputStream()
+private var stderr = FileHandle.standardError
 
 // PARSE COMMAND LINE
 
@@ -60,7 +60,7 @@ do {
     config = try SyllableDetectorConfig(fromTextFile: networkPath.value!)
 }
 catch {
-    print("Unable to load the network configuration: \(error)", toStream: &stderr)
+    stderr.writeLine("Unable to load the network configuration: \(error)")
     fatalError()
 }
 
@@ -71,39 +71,39 @@ audioPaths.value!.forEach {
     
     // 2b. open asset
     
-    let assetRead = AVAsset(URL: NSURL(fileURLWithPath: audioPath))
+    let assetRead = AVAsset(url: URL(fileURLWithPath: audioPath))
     let avReader: AVAssetReader
     do {
         avReader = try AVAssetReader(asset: assetRead)
     }
     catch {
-        print("Unable to read \(audioPath): \(error)", toStream: &stderr)
+        stderr.writeLine("Unable to read \(audioPath): \(error)")
         return
     }
     
     // get  number of audio tracks
-    let tracksAudio = assetRead.tracksWithMediaType(AVMediaTypeAudio)
+    let tracksAudio = assetRead.tracks(withMediaType: AVMediaTypeAudio)
     guard 0 < tracksAudio.count else {
-        print("No audio tracks found in \(audioPath).", toStream: &stderr)
+        stderr.writeLine("No audio tracks found in \(audioPath).")
         return
     }
     
     // make detectors
-    let potentialTrackDetectors = tracksAudio.enumerate().map {
+    let potentialTrackDetectors = tracksAudio.enumerated().map {
         (i, track) in
         return TrackDetector(track: track, config: config, channel: i)
     }
     
     // validate
     let trackDetectors = potentialTrackDetectors.filter {
-        return avReader.canAddOutput($0.reader)
+        return avReader.canAdd($0.reader)
     }
     if trackDetectors.count == 0 {
-        print("Can not read audio tracks found in \(audioPath).", toStream: &stderr)
+        stderr.writeLine("Can not read audio tracks found in \(audioPath).")
         return
     }
     if trackDetectors.count < potentialTrackDetectors.count {
-        print("Can not read from \(potentialTrackDetectors.count - trackDetectors.count) audio track(s) in \(audioPath). Skipping those tracks.", toStream: &stderr)
+        stderr.writeLine("Can not read from \(potentialTrackDetectors.count - trackDetectors.count) audio track(s) in \(audioPath). Skipping those tracks.")
     }
     
     // add all
@@ -114,12 +114,12 @@ audioPaths.value!.forEach {
         }
         
         // add it
-        avReader.addOutput($0.reader)
+        avReader.add($0.reader)
     }
     
     // start reading
     if !avReader.startReading() {
-        print("Can not start reading \(audioPath): \(avReader.error).", toStream: &stderr)
+        stderr.writeLine("Can not start reading \(audioPath): \(avReader.error).")
         return
     }
     
@@ -129,7 +129,7 @@ audioPaths.value!.forEach {
         print("\(audioPath)")
     }
     
-    while avReader.status == AVAssetReaderStatus.Reading {
+    while avReader.status == AVAssetReaderStatus.reading {
         for trackDetector in trackDetectors {
             trackDetector.process()
         }
