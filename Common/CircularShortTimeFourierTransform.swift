@@ -116,8 +116,8 @@ class CircularShortTimeFourierTransform
         complexBufferA = DSPSplitComplex(realp: UnsafeMutablePointer<Float>.allocate(capacity: halfLength), imagp: UnsafeMutablePointer<Float>.allocate(capacity: halfLength))
         // to get desired alignment..
         let alignment: Int = 0x10
-        let ptrReal = UnsafeMutableRawPointer.allocate(bytes: halfLength * MemoryLayout<Float>.size, alignedTo: alignment)
-        let ptrImag = UnsafeMutableRawPointer.allocate(bytes: halfLength * MemoryLayout<Float>.size, alignedTo: alignment)
+        let ptrReal = UnsafeMutableRawPointer.allocate(bytes: halfLength * MemoryLayout<Float>.stride, alignedTo: alignment)
+        let ptrImag = UnsafeMutableRawPointer.allocate(bytes: halfLength * MemoryLayout<Float>.stride, alignedTo: alignment)
         
         complexBufferT = DSPSplitComplex(realp: ptrReal.bindMemory(to: Float.self, capacity: halfLength), imagp: ptrImag.bindMemory(to: Float.self, capacity: halfLength))
         
@@ -163,7 +163,7 @@ class CircularShortTimeFourierTransform
         return (0..<halfLength).map { Double($0) * toSampleRate }
     }
     
-    func frequencyIndexRangeFrom(_ startFreq: Double, through endFreq: Double, forSampleRate rate: Double) -> (Int, Int)? {
+    func frequencyIndexRange(from startFreq: Double, through endFreq: Double, forSampleRate rate: Double) -> (Int, Int)? {
         // sensible inputs
         guard startFreq >= 0.0 && endFreq > startFreq else {
             return nil
@@ -195,7 +195,7 @@ class CircularShortTimeFourierTransform
     }
     
     func appendData(_ data: UnsafeMutablePointer<Float>, withSamples numSamples: Int) {
-        if !TPCircularBufferProduceBytes(&self.buffer, data, Int32(numSamples * MemoryLayout<Float>.size)) {
+        if !TPCircularBufferProduceBytes(&self.buffer, data, Int32(numSamples * MemoryLayout<Float>.stride)) {
             fatalError("Insufficient space on buffer.")
         }
     }
@@ -204,7 +204,7 @@ class CircularShortTimeFourierTransform
         // get head of circular buffer
         var space: Int32 = 0
         let head = TPCircularBufferHead(&self.buffer, &space)
-        if Int(space) < numSamples * MemoryLayout<Float>.size {
+        if Int(space) < numSamples * MemoryLayout<Float>.stride {
             fatalError("Insufficient space on buffer.")
         }
         
@@ -213,7 +213,7 @@ class CircularShortTimeFourierTransform
         vDSP_vsadd(data + channel, vDSP_Stride(totalChannels), &zero, head!.bindMemory(to: Float.self, capacity: numSamples), 1, vDSP_Length(numSamples))
         
         // move head forward
-        TPCircularBufferProduce(&self.buffer, Int32(numSamples * MemoryLayout<Float>.size))
+        TPCircularBufferProduce(&self.buffer, Int32(numSamples * MemoryLayout<Float>.stride))
     }
     
     // TODO: write better functions that can help avoid double copying
@@ -224,12 +224,12 @@ class CircularShortTimeFourierTransform
         let tail = TPCircularBufferTail(&buffer, &availableBytes)
         
         // not enough available bytes
-        if Int(availableBytes) < ((gap + lengthWindow) * MemoryLayout<Float>.size) {
+        if Int(availableBytes) < ((gap + lengthWindow) * MemoryLayout<Float>.stride) {
             return nil
         }
         
         // make samples
-        var samples = tail!.bindMemory(to: Float.self, capacity: Int(availableBytes) / MemoryLayout<Float>.size)
+        var samples = tail!.bindMemory(to: Float.self, capacity: Int(availableBytes) / MemoryLayout<Float>.stride)
         
         // skip gap
         if 0 < gap {
@@ -239,7 +239,7 @@ class CircularShortTimeFourierTransform
         // mark circular buffer as consumed at END of excution
         defer {
             // mark as consumed
-            TPCircularBufferConsume(&buffer, Int32((gap + lengthWindow - overlap) * MemoryLayout<Float>.size))
+            TPCircularBufferConsume(&buffer, Int32((gap + lengthWindow - overlap) * MemoryLayout<Float>.stride))
         }
         
         // get half length
@@ -277,12 +277,12 @@ class CircularShortTimeFourierTransform
         let tail = TPCircularBufferTail(&buffer, &availableBytes)
         
         // not enough available bytes
-        if Int(availableBytes) < ((gap + lengthWindow) * MemoryLayout<Float>.size) {
+        if Int(availableBytes) < ((gap + lengthWindow) * MemoryLayout<Float>.stride) {
             return nil
         }
         
         // make samples
-        var samples = tail!.bindMemory(to: Float.self, capacity: Int(availableBytes) / MemoryLayout<Float>.size)
+        var samples = tail!.bindMemory(to: Float.self, capacity: Int(availableBytes) / MemoryLayout<Float>.stride)
         
         // skip gap
         if 0 < gap {
@@ -292,7 +292,7 @@ class CircularShortTimeFourierTransform
         // mark circular buffer as consumed at END of excution
         defer {
             // mark as consumed
-            TPCircularBufferConsume(&buffer, Int32((gap + lengthWindow - overlap) * MemoryLayout<Float>.size))
+            TPCircularBufferConsume(&buffer, Int32((gap + lengthWindow - overlap) * MemoryLayout<Float>.stride))
         }
         
         // get half length

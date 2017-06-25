@@ -345,7 +345,7 @@ class ViewControllerSimulator: NSViewController {
                 
                 // make block buffer
                 var newBlockBuffer: CMBlockBuffer? = nil
-                status = CMBlockBufferCreateWithMemoryBlock(nil, UnsafeMutableRawPointer(newSamples), numSamples * MemoryLayout<Float>.size, nil, nil, 0, numSamples * MemoryLayout<Float>.size, 0, &newBlockBuffer)
+                status = CMBlockBufferCreateWithMemoryBlock(nil, UnsafeMutableRawPointer(newSamples), numSamples * MemoryLayout<Float>.stride, nil, nil, 0, numSamples * MemoryLayout<Float>.stride, 0, &newBlockBuffer)
                 assert(status == noErr)
                 
                 // timestamp for output

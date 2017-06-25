@@ -43,7 +43,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         shortTimeFourierTransform.windowType = WindowType.hamming
         
         // store frequency indices
-        guard let idx = shortTimeFourierTransform.frequencyIndexRangeFrom(config.freqRange.0, through: config.freqRange.1, forSampleRate: config.samplingRate) else {
+        guard let idx = shortTimeFourierTransform.frequencyIndexRange(from: config.freqRange.0, through: config.freqRange.1, forSampleRate: config.samplingRate) else {
             fatalError("The frequency range is invalid.")
         }
         freqIndices = idx
@@ -142,7 +142,7 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         // append data to local circular buffer
         withUnsafePointer(to: &powr[freqIndices.0]) {
             up in
-            if !TPCircularBufferProduceBytes(&self.buffer, up, Int32(lengthPerTime * MemoryLayout<Float>.size)) {
+            if !TPCircularBufferProduceBytes(&self.buffer, up, Int32(lengthPerTime * MemoryLayout<Float>.stride)) {
                 fatalError("Insufficient space on buffer.")
             }
         }
@@ -164,17 +164,17 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
         guard let p = TPCircularBufferTail(&buffer, &availableBytes) else {
             return false
         }
-        samples = p.bindMemory(to: Float.self, capacity: Int(availableBytes) / MemoryLayout<Float>.size)
+        samples = p.bindMemory(to: Float.self, capacity: Int(availableBytes) / MemoryLayout<Float>.stride)
         
         // not enough available bytes
-        if Int(availableBytes) < (lengthTotal * MemoryLayout<Float>.size) {
+        if Int(availableBytes) < (lengthTotal * MemoryLayout<Float>.stride) {
             return false
         }
         
         // mark circular buffer as consumed at END of excution
         defer {
             // mark as consumed, one time per-time length
-            TPCircularBufferConsume(&buffer, Int32(lengthPerTime * MemoryLayout<Float>.size))
+            TPCircularBufferConsume(&buffer, Int32(lengthPerTime * MemoryLayout<Float>.stride))
         }
         
         /// samples now points to a vector of `lengthTotal` bytes of power data for the last `timeRange` outputs of the short-timer fourier transform
