@@ -227,13 +227,13 @@ class ViewControllerSimulator: NSViewController {
         
         // 5. START PROCESSING
         if !avReader.startReading() {
-            DLog("Unable to read: \(avReader.error)")
+            DLog("Unable to read: \(String(describing: avReader.error))")
             return
         }
         
         // start writing
         if !avWriter.startWriting() {
-            DLog("Unable to write: \(avWriter.error)")
+            DLog("Unable to write: \(String(describing: avWriter.error))")
             return
         }
         
@@ -350,7 +350,7 @@ class ViewControllerSimulator: NSViewController {
                 
                 // timestamp for output
                 let timestamp = CMTimeMake(samplePosition, Int32(outputAudioFormatDescription.mSampleRate))
-                samplePosition += numSamples
+                samplePosition += Int64(numSamples)
                 
                 // get sample buffer
                 var newSampleBuffer: CMSampleBuffer? = nil
@@ -359,7 +359,7 @@ class ViewControllerSimulator: NSViewController {
                 
                 // append sample buffer
                 if !avWriterInput.append(newSampleBuffer!) {
-                    DLog("ERROR writing \(avWriter.status) \(avWriter.error)")
+                    DLog("ERROR writing \(avWriter.status) \(String(describing: avWriter.error))")
                     avReader.cancelReading() // cancel reading
                     completedOrFailed = true
                 }
