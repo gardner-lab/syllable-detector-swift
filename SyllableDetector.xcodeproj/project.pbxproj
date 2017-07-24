@@ -322,7 +322,7 @@
 					D8625C781BE14922000922D8 = {
 						CreatedOnToolsVersion = 7.1;
 						DevelopmentTeam = WRZPP65FJN;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 0900;
 					};
 					D8E2DB501D00C74500FC6AE2 = {
 						CreatedOnToolsVersion = 7.3.1;
@@ -561,7 +561,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = edu.gardner.SyllableDetector;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Common/Common-Bridging-Header.h";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -577,7 +577,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Common/Common-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};

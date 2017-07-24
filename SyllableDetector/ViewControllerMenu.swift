@@ -67,7 +67,7 @@ class ViewControllerMenu: NSViewController, WindowControllerProcessorDelegate {
     }
     
     // serial port
-    func serialPortsWereConnected(_ notification: Notification) {
+    @objc func serialPortsWereConnected(_ notification: Notification) {
         if let userInfo = (notification as NSNotification).userInfo {
             let connectedPorts = userInfo[ORSConnectedSerialPortsKey] as! [ORSSerialPort]
             DLog("Ports were connected: \(connectedPorts)")
@@ -75,7 +75,7 @@ class ViewControllerMenu: NSViewController, WindowControllerProcessorDelegate {
         }
     }
     
-    func serialPortsWereDisconnected(_ notification: Notification) {
+    @objc func serialPortsWereDisconnected(_ notification: Notification) {
         if let userInfo = (notification as NSNotification).userInfo {
             let disconnectedPorts: [ORSSerialPort] = userInfo[ORSDisconnectedSerialPortsKey] as! [ORSSerialPort]
             DLog("Ports were disconnected: \(disconnectedPorts)")
@@ -153,7 +153,7 @@ class ViewControllerMenu: NSViewController, WindowControllerProcessorDelegate {
     }
     
     @IBAction func buttonSimulate(_ sender: NSButton) {
-        guard let sb = storyboard, let controller = sb.instantiateController(withIdentifier: "Simulator") as? NSWindowController else { return }
+        guard let sb = storyboard, let controller = sb.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier(rawValue: "Simulator")) as? NSWindowController else { return }
         
         // launch
         controller.showWindow(sender)
@@ -161,7 +161,7 @@ class ViewControllerMenu: NSViewController, WindowControllerProcessorDelegate {
     }
     
     @IBAction func buttonLaunch(_ sender: NSButton) {
-        guard let sb = storyboard, let controller = sb.instantiateController(withIdentifier: "Processor") as? WindowControllerProcessor else { return }
+        guard let sb = storyboard, let controller = sb.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier(rawValue: "Processor")) as? WindowControllerProcessor else { return }
         
         // get input device representation
         guard let menuItemInput = selectInput.selectedItem, let objInput = menuItemInput.representedObject, let deviceRepresentationInput = objInput as? DeviceRepresentation else {

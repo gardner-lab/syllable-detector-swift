@@ -40,9 +40,9 @@ class ViewControllerSimulator: NSViewController {
         
         // callback for handling response
         let cb = {
-            (result: Int) -> Void in
+            (result: NSApplication.ModalResponse) -> Void in
             // make sure ok was pressed
-            if NSFileHandlingPanelOKButton == result {
+            if NSApplication.ModalResponse.OK == result {
                 if let url = panel.url {
                     let path = url.path
                     do {
@@ -73,14 +73,14 @@ class ViewControllerSimulator: NSViewController {
     
     @IBAction func loadAudio(_ sender: NSButton) {
         let panel = NSOpenPanel()
-        panel.allowedFileTypes = [AVFileTypeWAVE, AVFileTypeAppleM4A]
+        panel.allowedFileTypes = [AVFileType.wav.rawValue, AVFileType.m4a.rawValue]
         panel.title = "Select Audio File"
         
         // callback for handling response
         let cb = {
-            (result: Int) -> Void in
+            (result: NSApplication.ModalResponse) -> Void in
             // make sure ok was pressed
-            if NSFileHandlingPanelOKButton == result {
+            if NSApplication.ModalResponse.OK == result {
                 if let url = panel.url {
                     // store audio path
                     self.pathAudio.url = url
@@ -107,15 +107,15 @@ class ViewControllerSimulator: NSViewController {
         buttonLoadNetwork.isEnabled = false
         
         let panel = NSSavePanel()
-        panel.allowedFileTypes = [AVFileTypeWAVE]
+        panel.allowedFileTypes = [AVFileType.wav.rawValue]
         panel.allowsOtherFileTypes = false
         panel.title = "Save Output File"
         
         // callback for handling response
         let cb = {
-            (result: Int) -> Void in
+            (result: NSApplication.ModalResponse) -> Void in
             // make sure ok was pressed
-            if NSFileHandlingPanelOKButton == result {
+            if NSApplication.ModalResponse.OK == result {
                 if let url = panel.url {
                     // simulate
                     self.simulateNetwork(urlNetwork, withAudio: urlAudio, writeTo: url)
@@ -148,7 +148,7 @@ class ViewControllerSimulator: NSViewController {
         }
         
         // get  number of audio tracks
-        let tracksAudio = assetRead.tracks(withMediaType: AVMediaTypeAudio)
+        let tracksAudio = assetRead.tracks(withMediaType: AVMediaType.audio)
         guard 0 < tracksAudio.count else {
             DLog("no audio tracks")
             return
@@ -186,7 +186,7 @@ class ViewControllerSimulator: NSViewController {
         // create asset and asset writer
         let avWriter: AVAssetWriter
         do {
-            avWriter = try AVAssetWriter(url: urlOutput, fileType: AVFileTypeWAVE)
+            avWriter = try AVAssetWriter(url: urlOutput, fileType: AVFileType.wav)
         }
         catch {
             DLog("\(error)")
@@ -215,7 +215,7 @@ class ViewControllerSimulator: NSViewController {
         }
         
         // make writer input
-        let avWriterInput = AVAssetWriterInput(mediaType: AVMediaTypeAudio, outputSettings: compressionAudioSettings)
+        let avWriterInput = AVAssetWriterInput(mediaType: AVMediaType.audio, outputSettings: compressionAudioSettings)
         avWriterInput.expectsMediaDataInRealTime = true
         if avWriter.canAdd(avWriterInput) {
             avWriter.add(avWriterInput)

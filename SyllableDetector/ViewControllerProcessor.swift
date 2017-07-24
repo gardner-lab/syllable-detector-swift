@@ -177,7 +177,7 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         guard let identifier = tableColumn?.identifier else { return nil }
         guard row < processorEntries.count else { return nil }
         
-        switch identifier {
+        switch identifier.rawValue {
         case "ColumnInput", "ColumnOutput": return "Channel \(row + 1)"
         case "ColumnInLevel":
             if let p = processor {
@@ -194,10 +194,10 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         }
     }
     
-    func tableRowDoubleClicked() {
+    @objc func tableRowDoubleClicked() {
         guard !isRunning else { return } // can not select when running
         guard 0 <= tableChannels.clickedColumn else { return } // valid column
-        guard "ColumnNetwork" == tableChannels.tableColumns[tableChannels.clickedColumn].identifier else { return } // double clicked network column
+        guard "ColumnNetwork" == tableChannels.tableColumns[tableChannels.clickedColumn].identifier.rawValue else { return } // double clicked network column
         
         // show network selector
         loadNetworkForRow(tableChannels.clickedRow)
@@ -230,13 +230,13 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         
         // callback for handling response
         let cb = {
-            (result: Int) -> Void in
+            (result: NSApplication.ModalResponse) -> Void in
             // check again, just in case
             guard !self.isRunning else { return } // can not select when running
             guard row < self.processorEntries.count else { return }
             
             // make sure ok was pressed
-            if NSFileHandlingPanelOKButton == result {
+            if NSApplication.ModalResponse.OK == result {
                 if let url = panel.url {
                     let path = url.path
                     do {
@@ -275,12 +275,12 @@ class ViewControllerProcessor: NSViewController, NSTableViewDelegate, NSTableVie
         panel.beginSheetModal(for: self.view.window!, completionHandler: cb)
     }
     
-    func timerUpdateValues(_ timer: Timer!) {
+    @objc func timerUpdateValues(_ timer: Timer!) {
         // create column indices
         let indexes = IndexSet([1, 4])
         
         // reload data
-        tableChannels.reloadData(forRowIndexes: IndexSet(integersIn: NSRange(location: 0, length: processorEntries.count).toRange() ?? 0..<0), columnIndexes: indexes)
+        tableChannels.reloadData(forRowIndexes: IndexSet(integersIn: 0..<processorEntries.count), columnIndexes: indexes)
     }
 }
 
