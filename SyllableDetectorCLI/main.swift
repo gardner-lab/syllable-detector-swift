@@ -82,7 +82,7 @@ audioPaths.value!.forEach {
     }
     
     // get  number of audio tracks
-    let tracksAudio = assetRead.tracks(withMediaType: AVMediaTypeAudio)
+    let tracksAudio = assetRead.tracks(withMediaType: AVMediaType.audio)
     guard 0 < tracksAudio.count else {
         stderr.writeLine("No audio tracks found in \(audioPath).")
         return
@@ -119,7 +119,7 @@ audioPaths.value!.forEach {
     
     // start reading
     if !avReader.startReading() {
-        stderr.writeLine("Can not start reading \(audioPath): \(avReader.error).")
+        stderr.writeLine("Can not start reading \(audioPath): \(String(describing: avReader.error)).")
         return
     }
     
