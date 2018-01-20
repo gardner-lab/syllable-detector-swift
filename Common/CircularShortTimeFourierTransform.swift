@@ -262,14 +262,16 @@ class CircularShortTimeFourierTransform
             
         // clear imagp, represents frequency at midpoint of symmetry, due to packing of array
         complexBufferA.imagp[0] = 0
-            
-        // convert to magnitudes
-        vDSP_zvmags(&complexBufferA, 1, &output, 1, UInt(halfLength))
         
-        // scaling unit
-        var scale: Float = 4.0
-        withUnsafeMutablePointer(to: &output[0]) {
-            vDSP_vsdiv($0, 1, &scale, $0, 1, UInt(halfLength))
+        output.withUnsafeMutableBufferPointer() {
+            guard let ba = $0.baseAddress else { return }
+            
+            // convert to magnitudes
+            vDSP_zvmags(&complexBufferA, 1, ba, 1, UInt(halfLength))
+            
+            // scaling unit
+            var scale: Float = 4.0
+            vDSP_vsdiv(ba, 1, &scale, ba, 1, UInt(halfLength))
         }
         
         return output
@@ -320,13 +322,15 @@ class CircularShortTimeFourierTransform
         // clear imagp, represents frequency at midpoint of symmetry, due to packing of array
         complexBufferA.imagp[0] = 0
         
-        // convert to magnitudes
-        vDSP_zvabs(&complexBufferA, 1, &output, 1, UInt(halfLength))
-        
-        // scaling unit
-        var scale: Float = 2.0
-        withUnsafeMutablePointer(to: &output[0]) {
-            vDSP_vsdiv($0, 1, &scale, $0, 1, UInt(halfLength))
+        output.withUnsafeMutableBufferPointer() {
+            guard let ba = $0.baseAddress else { return }
+            
+            // convert to magnitudes
+            vDSP_zvabs(&complexBufferA, 1, ba, 1, UInt(halfLength))
+            
+            // scaling unit
+            var scale: Float = 2.0
+            vDSP_vsdiv(ba, 1, &scale, ba, 1, UInt(halfLength))
         }
         
         return output
