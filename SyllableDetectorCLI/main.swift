@@ -8,6 +8,7 @@
 
 import Foundation
 import AVFoundation
+import Moderator
 
 // UTILITY
 
@@ -15,29 +16,18 @@ private var stderr = FileHandle.standardError
 
 // PARSE COMMAND LINE
 
-let cli = CommandLine()
+let cli = Moderator(description: "")
 
-let networkPath = StringOption(shortFlag: "n", longFlag: "net", required: true, helpMessage: "Path to trained network file.")
-let audioPaths = MultiStringOption(shortFlag: "a", longFlag: "audio", required: true, helpMessage: "Path to the audio file to process.")
-let debounceTime = DoubleOption(shortFlag: "d", longFlag: "debounce", helpMessage: "Number of seconds to debounce triggers.")
-let help = BoolOption(shortFlag: "h", longFlag: "help", helpMessage: "Prints a help message.")
-
-cli.addOptions(networkPath, audioPaths, debounceTime, help)
+let argNetworkPath = cli.add(Argument<String?>.optionWithValue("n", "net", description: "Path to trained network file.").required())
+let argAudioPaths = cli.add(Argument<String?>.optionWithValue("a", "audio", description: "Path to the audio file to process.").repeat())
+let argDebounceTime = cli.add(Argument<String?>.optionWithValue("d", "debounce", description: "Number of seconds to debounce triggers."))
 
 do {
     try cli.parse()
 }
 catch {
     // if help
-    if !help.value {
-        cli.printUsage(error)
-        exit(EX_USAGE)
-    }
-}
-
-// print usage
-if help.value {
-    cli.printUsage()
+    print(cli.usagetext)
     print("The command line will write a comma-separated list of detection events (when the network has at least one output above threshold) to standard out. For example, it might output:")
     print("")
     print("\t0,1593298,36.1292063492063,0.918557")
@@ -47,8 +37,12 @@ if help.value {
     print("2. The sample number from the audio when detection occurred.")
     print("3. The timestamp from the audio when detection occurred.")
     print("4. The first neural network output. Note that there may be additional columns for additional outputs.")
-    exit(EX_OK)
+    exit(EX_USAGE)
 }
+
+let audioPaths = argAudioPaths.value
+let networkPath = argNetworkPath.value
+let debounceTime: Double? = argDebounceTime.value != nil ? Double.init(argDebounceTime.value!) : nil
 
 // RUN
 
@@ -57,7 +51,7 @@ if help.value {
 let config: SyllableDetectorConfig
 do {
     // load file
-    config = try SyllableDetectorConfig(fromTextFile: networkPath.value!)
+    config = try SyllableDetectorConfig(fromTextFile: networkPath)
 }
 catch {
     stderr.writeLine("Unable to load the network configuration: \(error)")
@@ -66,7 +60,7 @@ catch {
 
 // 2. read in the audio
 
-audioPaths.value!.forEach {
+audioPaths.forEach {
     audioPath in
     
     // 2b. open asset
@@ -109,7 +103,7 @@ audioPaths.value!.forEach {
     // add all
     trackDetectors.forEach {
         // configure
-        if let seconds = debounceTime.value {
+        if let seconds = debounceTime {
             $0.debounceTime = seconds
         }
         
@@ -125,7 +119,7 @@ audioPaths.value!.forEach {
     
     // 2c. iterate over audio
     
-    if 1 < audioPaths.value!.count {
+    if 1 < audioPaths.count {
         print("\(audioPath)")
     }
     
