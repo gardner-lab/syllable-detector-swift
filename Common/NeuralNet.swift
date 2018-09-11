@@ -277,8 +277,8 @@ class NeuralNet
     
     deinit {
         // free the window
-        bufferInput.deinitialize()
-        bufferInput.deallocate(capacity: inputs)
+        bufferInput.deinitialize(count: inputs)
+        bufferInput.deallocate()
     }
     
     func test(_ val: Float) {
@@ -359,8 +359,8 @@ class NeuralNetLayer
     
     deinit {
         // free the window
-        bufferIntermediate.deinitialize()
-        bufferIntermediate.deallocate(capacity: outputs)
+        bufferIntermediate.deinitialize(count: outputs)
+        bufferIntermediate.deallocate()
     }
     
     func apply(_ input: UnsafeMutablePointer<Float>) -> UnsafeMutablePointer<Float> {

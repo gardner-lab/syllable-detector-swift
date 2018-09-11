@@ -46,8 +46,8 @@ class ResamplerLinear: Resampler {
         let indices = UnsafeMutablePointer<Float>.allocate(capacity: numSamplesOut)
         var t_offset = offset, t_step = step
         defer {
-            indices.deinitialize()
-            indices.deallocate(capacity: numSamplesOut)
+            indices.deinitialize(count: numSamplesOut)
+            indices.deallocate()
         }
         vDSP_vramp(&t_offset, &t_step, indices, 1, vDSP_Length(numSamplesOut))
         

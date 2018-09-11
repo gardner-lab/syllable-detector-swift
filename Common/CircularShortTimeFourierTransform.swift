@@ -116,8 +116,8 @@ class CircularShortTimeFourierTransform
         complexBufferA = DSPSplitComplex(realp: UnsafeMutablePointer<Float>.allocate(capacity: halfLength), imagp: UnsafeMutablePointer<Float>.allocate(capacity: halfLength))
         // to get desired alignment..
         let alignment: Int = 0x10
-        let ptrReal = UnsafeMutableRawPointer.allocate(bytes: halfLength * MemoryLayout<Float>.stride, alignedTo: alignment)
-        let ptrImag = UnsafeMutableRawPointer.allocate(bytes: halfLength * MemoryLayout<Float>.stride, alignedTo: alignment)
+        let ptrReal = UnsafeMutableRawPointer.allocate(byteCount: halfLength * MemoryLayout<Float>.stride, alignment: alignment)
+        let ptrImag = UnsafeMutableRawPointer.allocate(byteCount: halfLength * MemoryLayout<Float>.stride, alignment: alignment)
         
         complexBufferT = DSPSplitComplex(realp: ptrReal.bindMemory(to: Float.self, capacity: halfLength), imagp: ptrImag.bindMemory(to: Float.self, capacity: halfLength))
         
@@ -133,25 +133,25 @@ class CircularShortTimeFourierTransform
         let halfLength = lengthFft / 2
         
         // free the complex buffer
-        complexBufferA.realp.deinitialize()
-        complexBufferA.realp.deallocate(capacity: halfLength)
-        complexBufferA.imagp.deinitialize()
-        complexBufferA.imagp.deallocate(capacity: halfLength)
-        complexBufferT.realp.deinitialize()
-        complexBufferT.realp.deallocate(capacity: halfLength)
-        complexBufferT.imagp.deinitialize()
-        complexBufferT.imagp.deallocate(capacity: halfLength)
+        complexBufferA.realp.deinitialize(count: halfLength)
+        complexBufferA.realp.deallocate()
+        complexBufferA.imagp.deinitialize(count: halfLength)
+        complexBufferA.imagp.deallocate()
+        complexBufferT.realp.deinitialize(count: halfLength)
+        complexBufferT.realp.deallocate()
+        complexBufferT.imagp.deinitialize(count: halfLength)
+        complexBufferT.imagp.deallocate()
         
         // free the FFT setup
         vDSP_destroy_fftsetup(fftSetup)
         
         // free the memory used to store the samples
-        samplesWindowed.deinitialize()
-        samplesWindowed.deallocate(capacity: lengthFft)
+        samplesWindowed.deinitialize(count: lengthFft)
+        samplesWindowed.deallocate()
         
         // free the window
-        window.deinitialize()
-        window.deallocate(capacity: lengthWindow)
+        window.deinitialize(count: lengthWindow)
+        window.deallocate()
         
         // release the circular buffer
         TPCircularBufferCleanup(&self.buffer)

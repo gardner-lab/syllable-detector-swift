@@ -82,7 +82,7 @@ extension SyllableDetectorConfig
         
         // split into doubles
         let stringParts = v.splitAtCharacter(",").map { $0.trim() }
-        let doubleParts = stringParts.flatMap(Double.init)
+        let doubleParts = stringParts.compactMap(Double.init)
         
         // compare lengths to make sure all doubles were parsed
         if stringParts.count != doubleParts.count { throw ParseError.invalidValue(nm) }
@@ -100,7 +100,7 @@ extension SyllableDetectorConfig
         
         // split into doubles
         let stringParts = v.splitAtCharacter(",").map { $0.trim() }
-        let floatParts = stringParts.flatMap(Float.init)
+        let floatParts = stringParts.compactMap(Float.init)
         
         // compare lengths to make sure all doubles were parsed
         if stringParts.count != floatParts.count { throw ParseError.invalidValue(nm) }

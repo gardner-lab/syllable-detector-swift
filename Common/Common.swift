@@ -19,7 +19,7 @@ extension String {
     }
     
     func splitAtCharacter(_ char: Character) -> [String] {
-        return self.characters.split { $0 == char } .map(String.init)
+        return self.split { $0 == char } .map(String.init)
     }
 }
 

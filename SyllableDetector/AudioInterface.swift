@@ -92,7 +92,7 @@ private func checkError(_ status: OSStatus, type: AudioInterfaceError? = nil, fu
 class AudioInterface
 {
     // event listeners
-    static var listeners = [AudioObjectPropertySelector: Array<(Int, (() -> Void))>]()
+    static var listeners = [AudioObjectPropertySelector: Array<(Int, ((Void) -> Void))>]()
     
     struct AudioDevice {
         let deviceID: AudioDeviceID
@@ -162,7 +162,7 @@ class AudioInterface
                 
                 // allocate
                 // is it okay to assume binding? or should bind (but if so, what capacity)?
-                var bufferList = UnsafeMutableRawPointer.allocate(bytes: Int(size), alignedTo: MemoryLayout<AudioBufferList>.alignment).assumingMemoryBound(to: AudioBufferList.self)
+                var bufferList = UnsafeMutableRawPointer.allocate(byteCount: Int(size), alignment: MemoryLayout<AudioBufferList>.alignment).assumingMemoryBound(to: AudioBufferList.self)
                 status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, bufferList)
                 defer {
                     free(bufferList)
@@ -207,7 +207,7 @@ class AudioInterface
                 
                 // allocate
                 // is it okay to assume binding? or should bind (but if so, what capacity)?
-                var bufferList = UnsafeMutableRawPointer.allocate(bytes: Int(size), alignedTo: MemoryLayout<AudioBufferList>.alignment).assumingMemoryBound(to: AudioBufferList.self)
+                var bufferList = UnsafeMutableRawPointer.allocate(byteCount: Int(size), alignment: MemoryLayout<AudioBufferList>.alignment).assumingMemoryBound(to: AudioBufferList.self)
                 status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, bufferList)
                 defer {
                     free(bufferList)
@@ -248,12 +248,12 @@ class AudioInterface
         // get device ids
         try checkError(AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &propertyAddress, 0, nil, &size, &audioDevices[0]))
         
-        return audioDevices.flatMap {
+        return audioDevices.compactMap {
             return AudioDevice(deviceID: $0)
         }
     }
     
-    static func createListenerForDeviceChange<T: Hashable>(_ cb: @escaping () -> Void, withIdentifier unique: T) throws {
+    static func createListenerForDeviceChange<T: Hashable>(_ cb: @escaping (Void) -> Void, withIdentifier unique: T) throws {
         let selector = kAudioHardwarePropertyDevices
         
         // alread has listener
@@ -275,7 +275,7 @@ class AudioInterface
         try checkError(AudioObjectAddPropertyListenerBlock(onAudioObject, &propertyAddress, nil, dispatchEvent))
         
         // create callbacks array
-        let cbs: Array<(Int, (() -> Void))> = [(unique.hashValue, cb)]
+        let cbs: Array<(Int, ((Void) -> Void))> = [(unique.hashValue, cb)]
         listeners[selector] = cbs
     }
     
