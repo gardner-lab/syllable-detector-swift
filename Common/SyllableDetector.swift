@@ -186,8 +186,8 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
             // temporary memory
             scaledSamples = UnsafeMutablePointer<Float>.allocate(capacity: lengthTotal)
             defer {
-                scaledSamples.deinitialize()
-                scaledSamples.deallocate(capacity: lengthTotal)
+                scaledSamples.deinitialize(count: lengthTotal)
+                scaledSamples.deallocate()
             }
             
             // convert to db with amplitude flag
@@ -198,8 +198,8 @@ class SyllableDetector: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate
             // temporary memory
             scaledSamples = UnsafeMutablePointer<Float>.allocate(capacity: lengthTotal)
             defer {
-                scaledSamples.deinitialize()
-                scaledSamples.deallocate(capacity: lengthTotal)
+                scaledSamples.deinitialize(count: lengthTotal)
+                scaledSamples.deallocate()
             }
             
             // natural log
