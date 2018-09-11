@@ -253,7 +253,7 @@ class AudioInterface
         }
     }
     
-    static func createListenerForDeviceChange<T: Hashable>(_ cb: @escaping (Void) -> Void, withIdentifier unique: T) throws {
+    static func createListenerForDeviceChange<T: Hashable>(_ cb: @escaping () -> Void, withIdentifier unique: T) throws {
         let selector = kAudioHardwarePropertyDevices
         
         // alread has listener

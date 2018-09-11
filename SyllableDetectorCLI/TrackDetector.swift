@@ -85,7 +85,7 @@ class TrackDetector
                 }
                 
                 // get presentation time
-                let curTime = CMTime(value: presentationTimestamp.value + curSample, timescale: presentationTimestamp.timescale)
+                let curTime = CMTime(value: presentationTimestamp.value + Int64(curSample), timescale: presentationTimestamp.timescale)
                 let curTimeSeconds = CMTimeGetSeconds(curTime)
                 
                 // print results

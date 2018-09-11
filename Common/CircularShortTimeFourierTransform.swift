@@ -252,7 +252,9 @@ class CircularShortTimeFourierTransform
         vDSP_vmul(samples, 1, window, 1, samplesWindowed, 1, UInt(lengthWindow))
             
         // pack samples into complex values (use stride 2 to fill just reals
-        vDSP_ctoz(unsafeBitCast(samplesWindowed, to: UnsafePointer<DSPComplex>.self), 2, &complexBufferA, 1, UInt(halfLength))
+        samplesWindowed.withMemoryRebound(to: DSPComplex.self, capacity: halfLength) {
+            vDSP_ctoz($0, 2, &complexBufferA, 1, UInt(halfLength))
+        }
             
         // perform FFT
         // TODO: potentially use vDSP_fftm_zrip
@@ -260,13 +262,17 @@ class CircularShortTimeFourierTransform
             
         // clear imagp, represents frequency at midpoint of symmetry, due to packing of array
         complexBufferA.imagp[0] = 0
-            
-        // convert to magnitudes
-        vDSP_zvmags(&complexBufferA, 1, &output, 1, UInt(halfLength))
         
-        // scaling unit
-        var scale: Float = 4.0
-        vDSP_vsdiv(&output, 1, &scale, &output, 1, UInt(halfLength))
+        output.withUnsafeMutableBufferPointer() {
+            guard let ba = $0.baseAddress else { return }
+            
+            // convert to magnitudes
+            vDSP_zvmags(&complexBufferA, 1, ba, 1, UInt(halfLength))
+            
+            // scaling unit
+            var scale: Float = 4.0
+            vDSP_vsdiv(ba, 1, &scale, ba, 1, UInt(halfLength))
+        }
         
         return output
     }
@@ -305,7 +311,9 @@ class CircularShortTimeFourierTransform
         vDSP_vmul(samples, 1, window, 1, samplesWindowed, 1, UInt(lengthWindow))
         
         // pack samples into complex values (use stride 2 to fill just reals
-        vDSP_ctoz(unsafeBitCast(samplesWindowed, to: UnsafePointer<DSPComplex>.self), 2, &complexBufferA, 1, UInt(halfLength))
+        samplesWindowed.withMemoryRebound(to: DSPComplex.self, capacity: halfLength) {
+            vDSP_ctoz($0, 2, &complexBufferA, 1, UInt(halfLength))
+        }
         
         // perform FFT
         // TODO: potentially use vDSP_fftm_zrip
@@ -314,12 +322,16 @@ class CircularShortTimeFourierTransform
         // clear imagp, represents frequency at midpoint of symmetry, due to packing of array
         complexBufferA.imagp[0] = 0
         
-        // convert to magnitudes
-        vDSP_zvabs(&complexBufferA, 1, &output, 1, UInt(halfLength))
-        
-        // scaling unit
-        var scale: Float = 2.0
-        vDSP_vsdiv(&output, 1, &scale, &output, 1, UInt(halfLength))
+        output.withUnsafeMutableBufferPointer() {
+            guard let ba = $0.baseAddress else { return }
+            
+            // convert to magnitudes
+            vDSP_zvabs(&complexBufferA, 1, ba, 1, UInt(halfLength))
+            
+            // scaling unit
+            var scale: Float = 2.0
+            vDSP_vsdiv(ba, 1, &scale, ba, 1, UInt(halfLength))
+        }
         
         return output
     }

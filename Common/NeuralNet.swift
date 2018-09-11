@@ -282,10 +282,11 @@ class NeuralNet
     }
     
     func test(_ val: Float) {
-        var inp = [Float](repeating: val, count: inputs)
-        withUnsafePointer(to: &inp[0]) {
-            DLog("\($0.pointee)")
-            let out = self.apply($0)
+        let inp = [Float](repeating: val, count: inputs)
+        inp.withUnsafeBufferPointer() {
+            guard let ba = $0.baseAddress else { return }
+            DLog("\(ba.pointee)")
+            let out = self.apply(ba)
             print("\(out)")
         }
     }
