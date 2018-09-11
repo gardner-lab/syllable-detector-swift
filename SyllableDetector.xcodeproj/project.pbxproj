@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		D8285D1A1CABFBBA00AD5AF8 /* Time.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8285D191CABFBBA00AD5AF8 /* Time.swift */; };
 		D82E7F7B1C10B629004759F7 /* ViewControllerSimulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D82E7F7A1C10B629004759F7 /* ViewControllerSimulator.swift */; };
+		D840F1E02148602D00316D5A /* Moderator.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D840F1DD21485FD900316D5A /* Moderator.framework */; };
 		D84B698A1D4AC5D8008B5853 /* Processor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D84B69891D4AC5D8008B5853 /* Processor.swift */; };
 		D8625C7D1BE14922000922D8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C7C1BE14922000922D8 /* AppDelegate.swift */; };
 		D8625C7F1BE14922000922D8 /* ViewControllerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8625C7E1BE14922000922D8 /* ViewControllerProcessor.swift */; };
@@ -44,14 +45,25 @@
 		D8E2DB731D00CBE200FC6AE2 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8E2DB721D00CBE200FC6AE2 /* AudioToolbox.framework */; };
 		D8E2DB741D00CBF700FC6AE2 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8E2DB701D00CBC100FC6AE2 /* AVFoundation.framework */; };
 		D8E2DB751D00CBFC00FC6AE2 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8E2DB6C1D00CBA200FC6AE2 /* Accelerate.framework */; };
-		D8E2DB7C1D00CE5300FC6AE2 /* CommandLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E2DB791D00CE5300FC6AE2 /* CommandLine.swift */; };
-		D8E2DB7D1D00CE5300FC6AE2 /* Option.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E2DB7A1D00CE5300FC6AE2 /* Option.swift */; };
-		D8E2DB7E1D00CE5300FC6AE2 /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E2DB7B1D00CE5300FC6AE2 /* StringExtensions.swift */; };
 		D8E2DB801D00D66F00FC6AE2 /* OutputStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E2DB7F1D00D66F00FC6AE2 /* OutputStream.swift */; };
 		D8E2DB821D00D68D00FC6AE2 /* TrackDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E2DB811D00D68D00FC6AE2 /* TrackDetector.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		D840F1DC21485FD900316D5A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D840F1D721485FD900316D5A /* Moderator.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = OBJ_15;
+			remoteInfo = Moderator;
+		};
+		D840F1DE21485FD900316D5A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D840F1D721485FD900316D5A /* Moderator.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = OBJ_16;
+			remoteInfo = ModeratorTests;
+		};
 		D8A9C0F31D4A54A200CE3F2C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D8A9C0EE1D4A54A200CE3F2C /* ORSSerialPort.xcodeproj */;
@@ -101,6 +113,7 @@
 /* Begin PBXFileReference section */
 		D8285D191CABFBBA00AD5AF8 /* Time.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Time.swift; path = SyllableDetector/Time.swift; sourceTree = "<group>"; };
 		D82E7F7A1C10B629004759F7 /* ViewControllerSimulator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewControllerSimulator.swift; sourceTree = "<group>"; };
+		D840F1D721485FD900316D5A /* Moderator.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Moderator.xcodeproj; path = Frameworks/Moderator/Moderator.xcodeproj; sourceTree = "<group>"; };
 		D84B69891D4AC5D8008B5853 /* Processor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Processor.swift; sourceTree = "<group>"; };
 		D8625C791BE14922000922D8 /* SyllableDetector.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SyllableDetector.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D8625C7C1BE14922000922D8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -130,9 +143,6 @@
 		D8E2DB6E1D00CBAF00FC6AE2 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		D8E2DB701D00CBC100FC6AE2 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		D8E2DB721D00CBE200FC6AE2 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
-		D8E2DB791D00CE5300FC6AE2 /* CommandLine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandLine.swift; sourceTree = "<group>"; };
-		D8E2DB7A1D00CE5300FC6AE2 /* Option.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Option.swift; sourceTree = "<group>"; };
-		D8E2DB7B1D00CE5300FC6AE2 /* StringExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
 		D8E2DB7F1D00D66F00FC6AE2 /* OutputStream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OutputStream.swift; sourceTree = "<group>"; };
 		D8E2DB811D00D68D00FC6AE2 /* TrackDetector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackDetector.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -154,6 +164,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D840F1E02148602D00316D5A /* Moderator.framework in Frameworks */,
 				D8E2DB751D00CBFC00FC6AE2 /* Accelerate.framework in Frameworks */,
 				D8E2DB741D00CBF700FC6AE2 /* AVFoundation.framework in Frameworks */,
 			);
@@ -162,6 +173,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D840F1D821485FD900316D5A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D840F1DD21485FD900316D5A /* Moderator.framework */,
+				D840F1DF21485FD900316D5A /* ModeratorTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		D8625C701BE14922000922D8 = {
 			isa = PBXGroup;
 			children = (
@@ -250,7 +270,7 @@
 		D8E2DB611D00CB2900FC6AE2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				D8E2DB781D00CE3600FC6AE2 /* CommandLine */,
+				D840F1D721485FD900316D5A /* Moderator.xcodeproj */,
 				D8A9C0EE1D4A54A200CE3F2C /* ORSSerialPort.xcodeproj */,
 				D8E2DB721D00CBE200FC6AE2 /* AudioToolbox.framework */,
 				D8E2DB701D00CBC100FC6AE2 /* AVFoundation.framework */,
@@ -258,17 +278,6 @@
 				D8E2DB6C1D00CBA200FC6AE2 /* Accelerate.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		D8E2DB781D00CE3600FC6AE2 /* CommandLine */ = {
-			isa = PBXGroup;
-			children = (
-				D8E2DB791D00CE5300FC6AE2 /* CommandLine.swift */,
-				D8E2DB7A1D00CE5300FC6AE2 /* Option.swift */,
-				D8E2DB7B1D00CE5300FC6AE2 /* StringExtensions.swift */,
-			);
-			name = CommandLine;
-			path = Frameworks/CommandLine/CommandLineKit;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -344,6 +353,10 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
+					ProductGroup = D840F1D821485FD900316D5A /* Products */;
+					ProjectRef = D840F1D721485FD900316D5A /* Moderator.xcodeproj */;
+				},
+				{
 					ProductGroup = D8A9C0EF1D4A54A200CE3F2C /* Products */;
 					ProjectRef = D8A9C0EE1D4A54A200CE3F2C /* ORSSerialPort.xcodeproj */;
 				},
@@ -357,6 +370,20 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		D840F1DD21485FD900316D5A /* Moderator.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Moderator.framework;
+			remoteRef = D840F1DC21485FD900316D5A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D840F1DF21485FD900316D5A /* ModeratorTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = ModeratorTests.xctest;
+			remoteRef = D840F1DE21485FD900316D5A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		D8A9C0F41D4A54A200CE3F2C /* ORSSerial.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
@@ -415,15 +442,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D8E2DB7E1D00CE5300FC6AE2 /* StringExtensions.swift in Sources */,
 				D8E2DB5B1D00C8A700FC6AE2 /* Common.swift in Sources */,
 				D8E2DB5C1D00C8AA00FC6AE2 /* NeuralNet.swift in Sources */,
 				D8E2DB821D00D68D00FC6AE2 /* TrackDetector.swift in Sources */,
 				D8E2DB5E1D00C90700FC6AE2 /* SyllableDetectorConfig.swift in Sources */,
-				D8E2DB7D1D00CE5300FC6AE2 /* Option.swift in Sources */,
 				D8E2DB601D00C90D00FC6AE2 /* StreamReader.swift in Sources */,
 				D8E2DB5F1D00C90A00FC6AE2 /* SyllableDetector.swift in Sources */,
-				D8E2DB7C1D00CE5300FC6AE2 /* CommandLine.swift in Sources */,
 				D8E2DB5A1D00C8A200FC6AE2 /* TPCircularBuffer.c in Sources */,
 				D8E2DB591D00C89D00FC6AE2 /* CircularShortTimeFourierTransform.swift in Sources */,
 				D8E2DB541D00C74500FC6AE2 /* main.swift in Sources */,
